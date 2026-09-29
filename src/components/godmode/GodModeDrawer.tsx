@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { Currency, TransactionCategory } from '@/types';
@@ -28,6 +28,18 @@ export const GodModeDrawer: React.FC = () => {
     USD: accounts.USD.balance.toString(),
     GBP: accounts.GBP.balance.toString(),
   });
+
+  // Re-sync balances whenever GodMode drawer opens or accounts change
+  useEffect(() => {
+    if (isGodModeOpen) {
+      setBalances({
+        RON: accounts.RON.balance.toString(),
+        EUR: accounts.EUR.balance.toString(),
+        USD: accounts.USD.balance.toString(),
+        GBP: accounts.GBP.balance.toString(),
+      });
+    }
+  }, [isGodModeOpen, accounts]);
 
   const [customTitle, setCustomTitle] = useState('');
   const [customAmount, setCustomAmount] = useState('');

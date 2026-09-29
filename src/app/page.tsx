@@ -129,6 +129,7 @@ export default function App() {
       {/* Global Bottom Sheets & Modals */}
       <AccountsDrawer />
       <AddMoneyModal />
+      <ContactListModal />
       <ExchangeModal />
       <TransactionDetailSheet />
       <GodModeDrawer />

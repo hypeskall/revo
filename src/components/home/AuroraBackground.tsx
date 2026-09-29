@@ -9,73 +9,80 @@ interface AuroraBackgroundProps {
 
 export const AuroraBackground: React.FC<AuroraBackgroundProps> = ({ colorVariant = 'cyan' }) => {
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
-      {/* Base deep navy/black background */}
-      <div className="absolute inset-0 bg-[#06090e]" />
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none bg-black">
+      {/* 1. Base deep pitch-black background */}
+      <div className="absolute inset-0 bg-[#000000]" />
 
-      {/* Dynamic Animated Volumetric Aurora Glow (Breathing mesh effect) */}
+      {/* 2. Ambient diffuse color cloud filling top half (breathing effect) */}
       <motion.div
         animate={{
-          scale: [1, 1.08, 1],
-          opacity: [0.75, 0.95, 0.75],
-          y: [0, -6, 0],
+          scale: [1, 1.06, 1],
+          opacity: [0.65, 0.85, 0.65],
         }}
         transition={{
-          duration: 6,
+          duration: 7,
           repeat: Infinity,
           ease: 'easeInOut',
         }}
-        className="absolute top-0 left-0 right-0 h-[490px] w-full"
+        className="absolute top-0 left-[-20%] right-[-20%] h-[380px] pointer-events-none"
         style={{
           background:
             colorVariant === 'purple'
-              ? 'radial-gradient(ellipse 130% 65% at 50% 18%, rgba(138, 43, 226, 0.55) 0%, rgba(0, 82, 255, 0.35) 45%, rgba(6, 9, 14, 0) 80%)'
+              ? 'radial-gradient(ellipse 90% 70% at 50% 35%, rgba(138, 43, 226, 0.45) 0%, rgba(0, 82, 255, 0.25) 50%, transparent 80%)'
               : colorVariant === 'blue'
-              ? 'radial-gradient(ellipse 130% 65% at 50% 18%, rgba(0, 100, 255, 0.6) 0%, rgba(0, 50, 200, 0.35) 45%, rgba(6, 9, 14, 0) 80%)'
-              : 'radial-gradient(ellipse 130% 65% at 50% 18%, rgba(0, 210, 255, 0.52) 0%, rgba(0, 110, 255, 0.32) 45%, rgba(6, 9, 14, 0) 80%)',
+              ? 'radial-gradient(ellipse 90% 70% at 50% 35%, rgba(0, 100, 255, 0.5) 0%, rgba(0, 50, 200, 0.25) 50%, transparent 80%)'
+              : 'radial-gradient(ellipse 90% 70% at 50% 35%, rgba(0, 210, 255, 0.45) 0%, rgba(0, 110, 255, 0.25) 50%, transparent 80%)',
           mixBlendMode: 'screen',
         }}
       />
 
-      {/* Secondary slow color-shifting glow cloud (shifting between cyan #00d2ff, royal blue #0052ff and purple) */}
-      <motion.div
-        animate={{
-          scale: [1.05, 0.98, 1.05],
-          rotate: [-2, 2, -2],
-          opacity: [0.4, 0.65, 0.4],
-        }}
-        transition={{
-          duration: 9,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-        className="absolute top-4 left-[-10%] w-[120%] h-[360px] rounded-full blur-[70px]"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, rgba(0, 210, 255, 0.4) 0%, rgba(0, 82, 255, 0.35) 40%, rgba(120, 40, 240, 0.2) 70%, transparent 85%)',
-          mixBlendMode: 'screen',
-        }}
-      />
+      {/* 3. SIGNATURE REVOLUT 10 NEON ARC (Matching user reference template screenshot) */}
+      {/* Sitting directly behind the 4 quick action buttons at top-[280px] */}
+      <div className="absolute top-[245px] left-1/2 -translate-x-1/2 w-[520px] h-[160px] pointer-events-none">
+        {/* Soft volumetric wide bloom */}
+        <motion.div
+          animate={{
+            opacity: [0.75, 0.95, 0.75],
+            scale: [1, 1.04, 1],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute inset-0 rounded-[100%] blur-[35px]"
+          style={{
+            background:
+              colorVariant === 'purple'
+                ? 'radial-gradient(ellipse at center, rgba(160, 50, 255, 0.75) 0%, rgba(0, 90, 255, 0.45) 50%, transparent 75%)'
+                : colorVariant === 'blue'
+                ? 'radial-gradient(ellipse at center, rgba(0, 140, 255, 0.8) 0%, rgba(0, 60, 220, 0.5) 50%, transparent 75%)'
+                : 'radial-gradient(ellipse at center, rgba(0, 235, 255, 0.85) 0%, rgba(0, 120, 255, 0.55) 45%, rgba(0, 255, 200, 0.3) 65%, transparent 78%)',
+            mixBlendMode: 'screen',
+          }}
+        />
 
-      {/* Signature Revolut 10 Lens Flare / Neon Arc Horizon (matching 'Вогники' reference) */}
-      <motion.div
-        animate={{
-          opacity: [0.8, 1, 0.8],
-          filter: ['blur(16px)', 'blur(20px)', 'blur(16px)'],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-        className="absolute top-[165px] left-1/2 -translate-x-1/2 w-[520px] h-[165px] rounded-[100%] bg-gradient-to-t from-transparent via-cyan-400/40 to-white/70 blur-[18px]"
-      />
+        {/* Curved luminous crescent neon arc */}
+        <motion.div
+          animate={{
+            opacity: [0.85, 1, 0.85],
+            filter: ['blur(14px)', 'blur(18px)', 'blur(14px)'],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="absolute top-[35px] left-1/2 -translate-x-1/2 w-[460px] h-[90px] rounded-[100%] bg-gradient-to-r from-[#00f0d0] via-white to-[#0052ff] blur-[15px] opacity-95"
+          style={{ mixBlendMode: 'screen' }}
+        />
 
-      {/* Crisp radiant white-hot focal beam */}
-      <div className="absolute top-[172px] left-1/2 -translate-x-1/2 w-[460px] h-[3px] rounded-full bg-gradient-to-r from-transparent via-white to-transparent blur-[1px] opacity-95 shadow-[0_0_18px_#00d2ff]" />
+        {/* Sharp radiant white-hot focal horizon beam */}
+        <div className="absolute top-[48px] left-1/2 -translate-x-1/2 w-[420px] h-[3px] rounded-full bg-gradient-to-r from-transparent via-white to-transparent blur-[1px] opacity-100 shadow-[0_0_24px_#00d2ff,0_0_45px_#00f0d0]" />
+      </div>
 
-      {/* Bottom fade into darkness */}
-      <div className="absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-[#06090e] via-[#06090e]/80 to-transparent" />
+      {/* 4. Lower viewport fade into pure dark black */}
+      <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black via-black/85 to-transparent pointer-events-none" />
     </div>
   );
 };

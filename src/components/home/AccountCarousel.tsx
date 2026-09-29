@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Landmark, Sparkles, Wallet, PiggyBank, ShieldCheck } from 'lucide-react';
+import { Landmark, Sparkles, Wallet, PiggyBank } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { useRevolutStore } from '@/store/useRevolutStore';
+import { Currency } from '@/types';
 
 interface AccountCarouselProps {
   onOpenAccounts: () => void;
@@ -14,38 +16,88 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
   onOpenAccounts,
   onColorChange,
 }) => {
+  const { accounts, activeCurrency, setActiveCurrency, rates } = useRevolutStore();
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Helper to dynamically format balances into { main, cents }
+  const formatBalanceParts = (amount: number, symbol: string) => {
+    const formatted = new Intl.NumberFormat('ro-RO', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+    const parts = formatted.split(',');
+    return {
+      main: parts[0],
+      cents: `,${parts[1]} ${symbol}`,
+    };
+  };
+
+  const ronParts = formatBalanceParts(accounts.RON?.balance ?? 0, 'lei');
+  const eurParts = formatBalanceParts(accounts.EUR?.balance ?? 0, '€');
+  const usdParts = formatBalanceParts(accounts.USD?.balance ?? 0, '$');
+  const gbpParts = formatBalanceParts(accounts.GBP?.balance ?? 0, '£');
+
+  const allAccountsTotal =
+    (accounts.RON?.balance ?? 0) +
+    (accounts.EUR?.balance ?? 0) * (rates['EUR_RON'] || 4.9765) +
+    (accounts.USD?.balance ?? 0) * (rates['USD_RON'] || 4.582) +
+    (accounts.GBP?.balance ?? 0) * (rates['GBP_RON'] || 5.891);
+  const allParts = formatBalanceParts(allAccountsTotal, 'lei');
 
   const slides = [
     {
       id: 'ron',
+      currency: 'RON' as Currency,
       tag: 'Personal · RON',
-      main: '1.878',
-      cents: ',56 lei',
+      main: ronParts.main,
+      cents: ronParts.cents,
       sub: 'RO50 REVO 0000 1697 1825 8222',
       icon: Landmark,
       color: 'cyan' as const,
     },
     {
       id: 'eur',
+      currency: 'EUR' as Currency,
       tag: 'Personal · EUR',
-      main: '0',
-      cents: ',00 €',
+      main: eurParts.main,
+      cents: eurParts.cents,
       sub: 'LT82 REVO 0000 3250 0123 4567',
       icon: Landmark,
       color: 'blue' as const,
     },
     {
+      id: 'usd',
+      currency: 'USD' as Currency,
+      tag: 'Personal · USD',
+      main: usdParts.main,
+      cents: usdParts.cents,
+      sub: 'US44 REVO 0000 7819 4521 9901',
+      icon: Landmark,
+      color: 'blue' as const,
+    },
+    {
+      id: 'gbp',
+      currency: 'GBP' as Currency,
+      tag: 'Personal · GBP',
+      main: gbpParts.main,
+      cents: gbpParts.cents,
+      sub: 'GB98 REVO 0000 1192 8841 0001',
+      icon: Landmark,
+      color: 'cyan' as const,
+    },
+    {
       id: 'all',
+      currency: 'RON' as Currency,
       tag: 'All accounts · 4 accounts',
-      main: '1.878',
-      cents: ',56 lei',
+      main: allParts.main,
+      cents: allParts.cents,
       sub: 'Combined multi-currency balance',
       icon: Wallet,
       color: 'cyan' as const,
     },
     {
       id: 'savings',
+      currency: 'RON' as Currency,
       tag: 'Savings & Vaults',
       main: '4,25%',
       cents: ' p.a.',
@@ -55,6 +107,7 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
     },
     {
       id: 'loan',
+      currency: 'RON' as Currency,
       tag: 'Personal Loan',
       main: '200.000',
       cents: ' lei',
@@ -64,22 +117,33 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
     },
   ];
 
+  // Sync active slide if currency changes outside (e.g. AccountsDrawer)
+  useEffect(() => {
+    const idx = slides.findIndex((s) => s.id === activeCurrency.toLowerCase());
+    if (idx !== -1 && idx !== activeIndex) {
+      setActiveIndex(idx);
+    }
+  }, [activeCurrency]);
+
   const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
     const threshold = 40;
+    let nextIdx = activeIndex;
     if (info.offset.x < -threshold && activeIndex < slides.length - 1) {
-      const next = activeIndex + 1;
-      setActiveIndex(next);
-      sound.playKeypadClick();
-      if (onColorChange) onColorChange(slides[next].color);
+      nextIdx = activeIndex + 1;
     } else if (info.offset.x > threshold && activeIndex > 0) {
-      const prev = activeIndex - 1;
-      setActiveIndex(prev);
+      nextIdx = activeIndex - 1;
+    }
+    if (nextIdx !== activeIndex) {
+      setActiveIndex(nextIdx);
       sound.playKeypadClick();
-      if (onColorChange) onColorChange(slides[prev].color);
+      if (onColorChange) onColorChange(slides[nextIdx].color);
+      if (['ron', 'eur', 'usd', 'gbp'].includes(slides[nextIdx].id)) {
+        setActiveCurrency(slides[nextIdx].currency);
+      }
     }
   };
 
-  const currentSlide = slides[activeIndex];
+  const currentSlide = slides[activeIndex] || slides[0];
 
   return (
     <div className="w-full flex flex-col items-center justify-center text-center mt-5 select-none overflow-hidden">
@@ -158,6 +222,9 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
               setActiveIndex(idx);
               sound.playKeypadClick();
               if (onColorChange) onColorChange(s.color);
+              if (['ron', 'eur', 'usd', 'gbp'].includes(s.id)) {
+                setActiveCurrency(s.currency);
+              }
             }}
             className={`transition-all duration-200 ${
               activeIndex === idx

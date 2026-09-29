@@ -7,6 +7,8 @@ import { Currency } from '@/types';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { sound } from '@/utils/audio';
 
+import { AppleLogo } from '@/components/ui/AppleLogo';
+
 interface ApplePaySheetProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,12 +16,6 @@ interface ApplePaySheetProps {
   currency: Currency;
   onSuccess: () => void;
 }
-
-const AppleLogo = ({ className = 'w-4 h-4 fill-current' }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 170 170">
-    <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.6-7.85-11.75-14.42-6.52-10.43-11.53-21.78-15.03-34.05-3.5-12.27-5.25-23.77-5.25-34.5 0-14.56 3.73-26.69 11.19-36.39 7.46-9.7 16.92-14.67 28.37-14.92 5.09 0 10.58 1.34 16.48 4.02 5.9 2.68 9.77 4.07 11.61 4.17 1.54 0 5.48-1.42 11.83-4.26 6.35-2.84 11.7-4.14 16.05-3.9 12.04.64 21.64 5.38 28.79 14.22-10.55 6.42-15.67 15.42-15.36 27 .3 10.37 4.34 18.9 12.13 25.59 5.01 4.35 10.66 7.23 16.96 8.65-2.61 7.64-5.83 15.17-9.66 22.58zM119.22 33.64c0-7.23 2.64-13.91 7.92-20.03 5.28-6.12 11.72-9.88 19.32-11.28.3 1.13.45 2.21.45 3.24 0 7.23-2.73 14.07-8.19 20.52-5.46 6.45-12.04 10.15-19.74 11.1-.3-.9-.45-2.09-.45-3.55z" />
-  </svg>
-);
 
 export const ApplePaySheet: React.FC<ApplePaySheetProps> = ({
   isOpen,
@@ -92,7 +88,7 @@ export const ApplePaySheet: React.FC<ApplePaySheetProps> = ({
               </button>
 
               <div className="flex items-center gap-1.5 text-white font-bold tracking-tight text-lg">
-                <AppleLogo className="w-4 h-4 fill-white" />
+                <AppleLogo variant="white" className="w-4 h-4" />
                 <span>Pay</span>
               </div>
 

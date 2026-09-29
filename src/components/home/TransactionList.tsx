@@ -7,6 +7,7 @@ import { Transaction } from '@/types';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { sound } from '@/utils/audio';
 import { ArrowRight } from 'lucide-react';
+import { AppleLogo } from '@/components/ui/AppleLogo';
 
 const listVariants = {
   hidden: { opacity: 0 },
@@ -69,22 +70,23 @@ export const TransactionList: React.FC = () => {
       );
     }
 
+    const isApple = tx.brand === 'Apple' || tx.title.toLowerCase().includes('apple');
+
     // Clean vector SVGs from simpleicons
     const iconSlugMap: Record<string, string> = {
-      Apple: 'apple',
       Netflix: 'netflix',
       Uber: 'uber',
       Steam: 'steam',
       Lidl: 'lidl',
     };
 
-    const slug =
-      iconSlugMap[tx.brand] ||
-      (tx.title.toLowerCase().includes('apple') ? 'apple' : null);
+    const slug = iconSlugMap[tx.brand];
 
     return (
       <div className="w-11 h-11 rounded-full bg-white/10 border border-white/5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-        {slug ? (
+        {isApple ? (
+          <AppleLogo variant="white" className="w-5 h-5" />
+        ) : slug ? (
           <img
             src={`https://cdn.simpleicons.org/${slug}/FFFFFF`}
             alt={tx.title}

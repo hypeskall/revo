@@ -42,7 +42,12 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChan
 
   return (
     // 7. Floating "Liquid Glass" iOS Tab Dock (Crucial)
-    <div className="fixed bottom-4 left-4 right-4 max-w-[400px] mx-auto h-[62px] rounded-full bg-white/[0.12] backdrop-blur-2xl border border-white/15 shadow-[0_15px_40px_rgba(0,0,0,0.8)] flex items-center justify-around px-2 z-50 select-none">
+    <div
+      style={{
+        bottom: 'calc(max(0.65rem, env(safe-area-inset-bottom, 0.65rem)) + 0.2rem)',
+      }}
+      className="absolute left-3 right-3 max-w-[404px] mx-auto h-[62px] rounded-full bg-white/[0.14] backdrop-blur-2xl border border-white/20 shadow-[0_15px_40px_rgba(0,0,0,0.85)] flex items-center justify-around px-2 z-40 select-none"
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const Icon = tab.icon;

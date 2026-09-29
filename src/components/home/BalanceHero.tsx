@@ -176,11 +176,11 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
             return (
               <div key={action.label} className="flex flex-col items-center">
                 <motion.button
-                  whileTap={{ scale: 0.94 }}
+                  whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   type="button"
                   onClick={action.onClick}
-                  className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white shadow-lg hover:bg-white/15 transition-colors"
+                  className="w-14 h-14 rounded-full bg-white/[0.18] backdrop-blur-2xl border border-white/30 flex items-center justify-center text-white shadow-[0_8px_25px_rgba(0,180,255,0.22)] hover:bg-white/[0.24] transition-all"
                 >
                   <Icon className="w-6 h-6 stroke-[2.2]" />
                 </motion.button>
