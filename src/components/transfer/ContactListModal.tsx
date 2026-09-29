@@ -146,7 +146,12 @@ export const ContactListModal: React.FC<ContactListModalProps> = ({ isTabMode = 
       } bg-[#070b0e] text-white flex flex-col justify-between overflow-hidden select-none`}
     >
       {/* Top Header matching Screenshot #2 */}
-      <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-2.5">
+      <div
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+        }}
+        className="px-4 pb-2 flex items-center justify-between gap-2.5"
+      >
         {isTabMode ? (
           // In tab mode: Avatar with unread dot matching Screenshot #2
           <div className="relative shrink-0">

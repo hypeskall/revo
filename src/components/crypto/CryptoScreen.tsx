@@ -46,7 +46,12 @@ export const CryptoScreen: React.FC = () => {
   ];
 
   return (
-    <div className="w-full h-full flex flex-col pt-3 px-4 pb-28 overflow-y-auto no-scrollbar relative select-none">
+    <div
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+      }}
+      className="w-full h-full flex flex-col px-4 pb-28 overflow-y-auto no-scrollbar relative select-none"
+    >
       {/* Aurora glow matching theme */}
       <div
         className="absolute top-0 left-0 right-0 h-[400px] pointer-events-none"

@@ -95,7 +95,12 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
       <div className="absolute inset-0 pointer-events-none opacity-40 bg-[radial-gradient(ellipse_at_center,_rgba(0,50,180,0.35)_0%,_rgba(0,0,0,0.9)_70%)]" />
 
       {/* Top Header matching Screenshot #5 */}
-      <div className="relative z-10 px-4 pt-3 pb-2 flex items-center justify-between border-b border-white/[0.04] bg-black/60 backdrop-blur-md">
+      <div
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)',
+        }}
+        className="relative z-10 px-4 pb-2 flex items-center justify-between border-b border-white/[0.04] bg-black/60 backdrop-blur-md"
+      >
         <button
           onClick={() => {
             sound.playKeypadClick();
@@ -204,17 +209,23 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
       </div>
 
       {/* Floating Bottom Send Button (Screenshot #5) */}
-      <div className="relative z-10 px-5 pb-6 pt-2 bg-gradient-to-t from-black via-black/90 to-transparent">
-        <button
+      <div
+        style={{
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
+        }}
+        className="relative z-10 px-5 pt-2 bg-gradient-to-t from-black via-black/90 to-transparent"
+      >
+        <motion.button
+          whileTap={{ scale: 0.97 }}
           onClick={() => {
             sound.playKeypadClick();
             setIsKeypadOpen(true);
           }}
-          className="w-full py-3.5 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 shadow-2xl hover:bg-neutral-100 active:scale-[0.98] transition"
+          className="w-full py-3.5 rounded-full bg-white text-black font-semibold text-base flex items-center justify-center gap-2 shadow-2xl hover:bg-neutral-100 transition"
         >
           <ArrowRight className="w-4 h-4 stroke-[2.5]" />
           <span>Send</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Transfer Amount Keypad Drawer */}
@@ -233,7 +244,10 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="relative w-full bg-[#14171A] rounded-t-[32px] border-t border-white/[0.08] p-5 pb-6 flex flex-col"
+              style={{
+                paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)',
+              }}
+              className="relative w-full bg-[#14171A] rounded-t-[32px] border-t border-white/[0.08] p-5 flex flex-col"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-2">
@@ -251,14 +265,47 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
                 </button>
               </div>
 
-              {/* Amount Display */}
+              {/* Fancy Rolling Amount Display */}
               <div className="flex flex-col items-center justify-center py-4">
-                <div className="flex items-center text-[44px] font-bold text-white tracking-tight">
-                  <span>{transferAmountStr}</span>
-                  <span className="text-[34px] text-neutral-300 ml-1.5">
+                <motion.div
+                  key={transferAmountStr.length}
+                  animate={{ scale: [0.97, 1.02, 1] }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  className="flex items-center justify-center overflow-hidden h-[60px]"
+                >
+                  <div className="flex items-center justify-center">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {transferAmountStr.split('').map((char, idx) => (
+                        <motion.span
+                          key={`${idx}-${char}`}
+                          initial={{ opacity: 0, y: 18, scale: 0.7, filter: 'blur(4px)' }}
+                          animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                          exit={{ opacity: 0, y: -18, scale: 0.7, filter: 'blur(4px)' }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 550,
+                            damping: 28,
+                            mass: 0.35,
+                          }}
+                          className="text-[44px] font-bold text-white tracking-tight leading-none inline-block select-none font-sans"
+                        >
+                          {char}
+                        </motion.span>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Cyan Glowing Cursor */}
+                  <motion.div
+                    animate={{ opacity: [1, 0.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.85, ease: 'easeInOut' }}
+                    className="w-[3px] h-9 bg-cyan-400 mx-1.5 rounded-full shadow-[0_0_10px_#00d2ff]"
+                  />
+
+                  <motion.span layout className="text-[34px] font-semibold text-neutral-300 ml-1 select-none">
                     {activeCurrency === 'RON' ? 'lei' : activeCurrency}
-                  </span>
-                </div>
+                  </motion.span>
+                </motion.div>
 
                 {/* Validation error badge */}
                 {transferError && (
@@ -270,7 +317,8 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
               </div>
 
               {/* Send Action Button */}
-              <button
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 onClick={handleSend}
                 disabled={isProcessing}
                 className="w-full py-3.5 mb-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-base flex items-center justify-center gap-2 shadow-lg active:scale-95 transition"
@@ -285,7 +333,7 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
                     <span>Send {transferAmountStr} {activeCurrency === 'RON' ? 'lei' : activeCurrency}</span>
                   </>
                 )}
-              </button>
+              </motion.button>
 
               {/* Keypad */}
               <Keypad

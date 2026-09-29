@@ -273,7 +273,12 @@ export const AccountsDrawer: React.FC = () => {
             </div>
 
             {/* Bottom floating "+ Add new" pill matching screenshot #1 */}
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10">
+            <div
+              style={{
+                bottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
+              }}
+              className="absolute left-1/2 -translate-x-1/2 z-10"
+            >
               <button
                 onClick={() => {
                   sound.playKeypadClick();

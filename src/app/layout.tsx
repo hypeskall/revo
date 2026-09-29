@@ -1,5 +1,19 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-revolut',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Revolut',
@@ -14,8 +28,12 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/icon-192.png',
-    apple: '/icon-192.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/apple-touch-icon.png',
   },
 };
 
@@ -34,8 +52,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-black text-white antialiased overflow-hidden select-none">
+    <html lang="en" className={`dark ${inter.variable} ${plusJakarta.variable}`}>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
+      <body className="bg-black text-white antialiased overflow-hidden select-none font-sans">
         {children}
       </body>
     </html>

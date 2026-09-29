@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { TrendingUp, ArrowLeftRight, Bitcoin, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TrendingUp, ArrowLeftRight, Bitcoin } from 'lucide-react';
 import { sound } from '@/utils/audio';
 
 export type TabId = 'home' | 'invest' | 'transfer' | 'cards' | 'hub';
@@ -9,6 +10,7 @@ export type TabId = 'home' | 'invest' | 'transfer' | 'cards' | 'hub';
 interface BottomTabBarProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  hidden?: boolean;
 }
 
 // Iconic Revolut 'R' vector glyph matching Revolut 10
@@ -26,7 +28,11 @@ const RevPointsLogo: React.FC<{ className?: string }> = ({ className = 'w-5 h-5'
   </svg>
 );
 
-export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChange }) => {
+export const BottomTabBar: React.FC<BottomTabBarProps> = ({
+  activeTab,
+  onTabChange,
+  hidden = false,
+}) => {
   const tabs = [
     { id: 'home' as TabId, label: 'Home', isR: true },
     { id: 'invest' as TabId, label: 'Invest', icon: TrendingUp },
@@ -41,8 +47,15 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChan
   };
 
   return (
-    // 7. Floating "Liquid Glass" iOS Tab Dock (Crucial)
-    <div
+    // Floating Liquid Glass iOS Tab Dock with Motion.dev spring hide/show
+    <motion.div
+      initial={false}
+      animate={{
+        y: hidden ? 100 : 0,
+        opacity: hidden ? 0 : 1,
+        pointerEvents: hidden ? 'none' : 'auto',
+      }}
+      transition={{ type: 'spring', stiffness: 450, damping: 32 }}
       style={{
         bottom: 'calc(max(0.65rem, env(safe-area-inset-bottom, 0.65rem)) + 0.2rem)',
       }}
@@ -57,13 +70,18 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChan
             key={tab.id}
             type="button"
             onClick={() => handleSelect(tab.id)}
-            className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 relative ${
-              isActive
-                ? 'bg-white/15 px-3.5 py-1.5 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]'
-                : 'px-2 py-1 opacity-70 hover:opacity-100'
-            }`}
+            className="flex flex-col items-center justify-center transition-all duration-150 active:scale-90 relative px-3.5 py-1.5 rounded-full"
           >
-            <div className="relative flex items-center justify-center h-5">
+            {/* Smooth gliding active pill animation from motion.dev */}
+            {isActive && (
+              <motion.div
+                layoutId="activeTabPill"
+                className="absolute inset-0 bg-white/20 rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+              />
+            )}
+
+            <div className="relative z-10 flex items-center justify-center h-5">
               {tab.isR ? (
                 <RevolutRLogo
                   className={`w-5 h-5 transition-colors ${
@@ -91,7 +109,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChan
             </div>
 
             <span
-              className={`text-[10px] mt-0.5 tracking-tight font-medium ${
+              className={`relative z-10 text-[10px] mt-0.5 tracking-tight font-medium ${
                 isActive ? 'text-white font-semibold' : 'text-white/70'
               }`}
             >
@@ -100,6 +118,6 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChan
           </button>
         );
       })}
-    </div>
+    </motion.div>
   );
 };

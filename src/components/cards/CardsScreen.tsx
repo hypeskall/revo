@@ -58,7 +58,12 @@ export const CardsScreen: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between px-5 pt-3 pb-24 overflow-y-auto no-scrollbar">
+    <div
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+      }}
+      className="w-full h-full flex flex-col justify-between px-5 pb-24 overflow-y-auto no-scrollbar"
+    >
       {/* Top Header */}
       <div>
         <div className="flex items-center justify-between pb-3">

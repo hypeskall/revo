@@ -56,7 +56,10 @@ export const TransactionDetailSheet: React.FC = () => {
               setSelectedTransactionDetail(null);
             }
           }}
-          className="relative w-full max-h-[85vh] bg-[#14171A] rounded-t-[32px] border-t border-white/[0.08] p-5 pb-8 flex flex-col overflow-hidden"
+          style={{
+            paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)',
+          }}
+          className="relative w-full max-h-[85vh] bg-[#14171A] rounded-t-[32px] border-t border-white/[0.08] p-5 flex flex-col overflow-hidden"
         >
           {/* Grab handle */}
           <div className="w-full flex justify-center pb-2">

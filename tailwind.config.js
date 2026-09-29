@@ -29,13 +29,15 @@ module.exports = {
       },
       fontFamily: {
         sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
+          'var(--font-revolut)',
+          'var(--font-inter)',
+          '-apple-system',
+          'BlinkMacSystemFont',
           '"SF Pro Display"',
           '"SF Pro Text"',
           '"Helvetica Neue"',
-          "Arial",
-          "sans-serif",
+          'Arial',
+          'sans-serif',
         ],
       },
       boxShadow: {

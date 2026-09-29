@@ -105,7 +105,12 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
   ];
 
   return (
-    <div className="relative z-10 w-full flex flex-col pt-3 px-4">
+    <div
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+      }}
+      className="relative z-10 w-full flex flex-col px-4"
+    >
       {/* 1. Top Header Bar (Screenshot #4) */}
       <div className="flex items-center justify-between gap-2.5 h-12">
         {/* Left: Avatar with glowing red notification dot */}

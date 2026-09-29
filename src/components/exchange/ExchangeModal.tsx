@@ -105,7 +105,12 @@ export const ExchangeModal: React.FC = () => {
   return (
     <div className="absolute inset-0 z-[65] bg-black text-white flex flex-col justify-between overflow-hidden">
       {/* Header */}
-      <div className="px-5 pt-3 pb-3 flex items-center justify-between border-b border-white/[0.04]">
+      <div
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+        }}
+        className="px-5 pb-3 flex items-center justify-between border-b border-white/[0.04]"
+      >
         <button
           onClick={() => {
             sound.playKeypadClick();
@@ -261,7 +266,12 @@ export const ExchangeModal: React.FC = () => {
       </div>
 
       {/* Bottom Confirm Action */}
-      <div className="px-5 pb-6 pt-2 bg-gradient-to-t from-black via-black/90 to-transparent">
+      <div
+        style={{
+          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
+        }}
+        className="px-5 pt-2 bg-gradient-to-t from-black via-black/90 to-transparent"
+      >
         {isSuccess ? (
           <div className="w-full py-4 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold text-base flex items-center justify-center gap-2 border border-emerald-500/30">
             <CheckCircle2 className="w-5 h-5" />

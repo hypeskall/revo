@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { Keypad } from '@/components/ui/Keypad';
 import { ApplePaySheet } from '@/components/add-money/ApplePaySheet';
 import { sound } from '@/utils/audio';
-
-import { AppleLogo } from '@/components/ui/AppleLogo';
+import { ApplePayLogo } from '@/components/ui/AppleLogo';
 
 export const AddMoneyModal: React.FC = () => {
   const {
@@ -63,34 +63,80 @@ export const AddMoneyModal: React.FC = () => {
   };
 
   return (
-    // Strictly constrained inside the 430px root container
+    // Strictly constrained inside root container with safe-area support
     <div className="absolute inset-0 z-50 bg-black text-white flex flex-col justify-between overflow-hidden">
-      {/* Top Header */}
-      <div className="px-5 pt-4 pb-2 flex items-center justify-between">
-        <button
+      {/* Top Header with Dynamic iPhone Safe Area */}
+      <div
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)',
+        }}
+        className="px-5 pb-2 flex items-center justify-between"
+      >
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => {
             sound.playKeypadClick();
             setAddMoneyOpen(false);
           }}
-          className="w-10 h-10 rounded-full bg-[#181A1D] hover:bg-[#22252A] active:scale-90 flex items-center justify-center text-white transition border border-white/[0.05]"
+          className="w-10 h-10 rounded-full bg-[#181A1D] hover:bg-[#22252A] flex items-center justify-center text-white transition border border-white/[0.08] shadow-sm"
         >
           <ArrowLeft className="w-5 h-5" />
-        </button>
+        </motion.button>
 
         <div className="text-center">
-          <h2 className="text-base font-semibold text-white">Add money</h2>
+          <h2 className="text-base font-semibold text-white tracking-tight">Add money</h2>
           <div className="text-xs text-neutral-400">Balance: {formattedBalance}</div>
         </div>
 
         <div className="w-10" />
       </div>
 
-      {/* Main Amount Display */}
+      {/* Main Fancy Animated Amount Display (Motion.dev rolling ticker) */}
       <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <div className="flex items-center justify-center font-bold text-white tracking-tight my-2">
-          <span className="text-[54px] font-bold leading-none">{inputStr}</span>
-          <span className="w-[3px] h-12 bg-blue-500 mx-1.5 animate-pulse rounded-full" />
-          <span className="text-[44px] font-bold text-white/90 ml-1">
+        <motion.div
+          key={inputStr.length}
+          animate={{ scale: [0.97, 1.02, 1] }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+          className="flex items-center justify-center my-3 overflow-hidden h-[76px]"
+        >
+          {/* Rolling character animation */}
+          <div className="flex items-center justify-center">
+            <AnimatePresence mode="popLayout" initial={false}>
+              {inputStr.split('').map((char, idx) => (
+                <motion.span
+                  key={`${idx}-${char}`}
+                  initial={{ opacity: 0, y: 22, scale: 0.7, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: -22, scale: 0.7, filter: 'blur(4px)' }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 550,
+                    damping: 28,
+                    mass: 0.35,
+                  }}
+                  className="text-[58px] font-extrabold text-white tracking-tight leading-none inline-block font-sans select-none"
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* Glowing Luminous Electric Cyan Blinking Cursor */}
+          <motion.div
+            animate={{
+              opacity: [1, 0.25, 1],
+              scaleY: [1, 0.92, 1],
+            }}
+            transition={{ repeat: Infinity, duration: 0.85, ease: 'easeInOut' }}
+            className="w-[3.5px] h-12 bg-cyan-400 mx-2 rounded-full shadow-[0_0_14px_#00d2ff]"
+          />
+
+          {/* Currency Indicator with Spring Layout */}
+          <motion.span
+            layout
+            className="text-[44px] font-bold text-white/90 ml-0.5 tracking-tight select-none"
+          >
             {activeCurrency === 'RON'
               ? 'lei'
               : activeCurrency === 'EUR'
@@ -98,54 +144,48 @@ export const AddMoneyModal: React.FC = () => {
               : activeCurrency === 'USD'
               ? '$'
               : '£'}
-          </span>
-        </div>
+          </motion.span>
+        </motion.div>
 
         {/* Clean Apple Pay · RON dropdown pill */}
-        <button
+        <motion.button
+          whileTap={{ scale: 0.94 }}
           type="button"
           onClick={() => sound.playKeypadClick()}
-          className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#191C1F] hover:bg-[#22262B] text-xs font-medium text-white border border-white/[0.06] active:scale-95 transition"
+          className="mt-2 flex items-center gap-2 px-4 py-2 rounded-full bg-[#191C1F] hover:bg-[#22262B] text-xs font-medium text-white border border-white/[0.08] shadow-sm transition"
         >
-          <div className="flex items-center gap-1">
-            <AppleLogo variant="white" className="w-3.5 h-3.5" />
-            <span className="font-semibold text-white">Pay</span>
-          </div>
-          <span className="text-neutral-300">· {activeCurrency}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
-        </button>
+          <ApplePayLogo variant="white" className="h-4" />
+          <span className="text-neutral-300 font-medium">· {activeCurrency}</span>
+          <ChevronDown className="w-3.5 h-3.5 text-neutral-400 ml-0.5" />
+        </motion.button>
 
         {/* Subtitle arrival note */}
-        <p className="text-xs text-neutral-400 mt-6 font-normal">
+        <p className="text-xs text-neutral-400 mt-5 font-normal tracking-tight">
           Arriving · Usually instantly
         </p>
 
-        {/* Primary Apple Pay Button */}
-        <button
+        {/* Primary Official Apple Pay Button */}
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
           onClick={() => {
             if (numericAmount <= 0) return;
             sound.playKeypadClick();
             setIsApplePayOpen(true);
           }}
           disabled={numericAmount <= 0}
-          className={`w-full max-w-[340px] mt-4 py-3.5 rounded-full font-semibold text-base flex items-center justify-center gap-1.5 shadow-xl transition-all duration-150 active:scale-[0.98] ${
+          className={`w-full max-w-[340px] mt-4 py-3.5 rounded-full font-semibold text-base flex items-center justify-center gap-1.5 shadow-xl transition-colors ${
             numericAmount > 0
-              ? 'bg-white text-black hover:bg-neutral-100 cursor-pointer'
+              ? 'bg-white text-black hover:bg-neutral-100 cursor-pointer shadow-[0_10px_30px_rgba(255,255,255,0.15)]'
               : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
           }`}
         >
-          <AppleLogo variant="black" className="w-4 h-4" />
-          <span className="tracking-tight text-base font-bold">Pay</span>
-        </button>
+          <ApplePayLogo variant="black" className="h-6" />
+        </motion.button>
       </div>
 
-      {/* Clean Keypad (strictly numbers 1-9, comma, 0, delete icon) */}
-      <div className="pb-4">
-        <Keypad
-          onDigit={handleDigit}
-          onDelete={handleDelete}
-        />
-      </div>
+      {/* Tactile Motion Keypad */}
+      <Keypad onDigit={handleDigit} onDelete={handleDelete} />
 
       {/* Apple Pay Confirmation Bottom Sheet */}
       <ApplePaySheet

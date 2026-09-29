@@ -7,7 +7,7 @@ import { Currency } from '@/types';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { sound } from '@/utils/audio';
 
-import { AppleLogo } from '@/components/ui/AppleLogo';
+import { AppleLogo, ApplePayLogo } from '@/components/ui/AppleLogo';
 
 interface ApplePaySheetProps {
   isOpen: boolean;
@@ -68,7 +68,10 @@ export const ApplePaySheet: React.FC<ApplePaySheetProps> = ({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-            className="relative w-full bg-[#18191B] rounded-t-[36px] border-t border-white/[0.1] px-5 pt-3 pb-8 flex flex-col shadow-2xl overflow-hidden"
+            style={{
+              paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)',
+            }}
+            className="relative w-full bg-[#18191B] rounded-t-[36px] border-t border-white/[0.1] px-5 pt-3 flex flex-col shadow-2xl overflow-hidden"
           >
             {/* Grab handle */}
             <div className="w-full flex justify-center pb-2">
@@ -87,9 +90,8 @@ export const ApplePaySheet: React.FC<ApplePaySheetProps> = ({
                 <X className="w-4 h-4" />
               </button>
 
-              <div className="flex items-center gap-1.5 text-white font-bold tracking-tight text-lg">
-                <AppleLogo variant="white" className="w-4 h-4" />
-                <span>Pay</span>
+              <div className="flex items-center gap-1.5 text-white font-bold tracking-tight">
+                <ApplePayLogo variant="white" className="h-5" />
               </div>
 
               <div className="w-8" />

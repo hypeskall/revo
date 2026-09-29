@@ -14,7 +14,12 @@ export const HubScreen: React.FC = () => {
   ];
 
   return (
-    <div className="w-full h-full flex flex-col px-5 pt-3 pb-24 overflow-y-auto no-scrollbar">
+    <div
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+      }}
+      className="w-full h-full flex flex-col px-5 pb-24 overflow-y-auto no-scrollbar"
+    >
       <div className="flex items-center justify-between pb-3">
         <h1 className="text-2xl font-bold text-white tracking-tight">RevPoints & Hub</h1>
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold">

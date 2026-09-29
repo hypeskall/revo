@@ -17,11 +17,29 @@ import { InvestScreen } from '@/components/invest/InvestScreen';
 import { CryptoScreen } from '@/components/crypto/CryptoScreen';
 import { HubScreen } from '@/components/hub/HubScreen';
 import { GodModeDrawer } from '@/components/godmode/GodModeDrawer';
+import { useRevolutStore } from '@/store/useRevolutStore';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [mounted, setMounted] = useState(false);
   const [auroraColor, setAuroraColor] = useState<'cyan' | 'blue' | 'purple'>('cyan');
+
+  const {
+    selectedContactForTransfer,
+    isAddMoneyOpen,
+    isExchangeOpen,
+    isTransferOpen,
+    isGodModeOpen,
+    selectedTransactionDetail,
+  } = useRevolutStore();
+
+  const isModalActive =
+    !!selectedContactForTransfer ||
+    isAddMoneyOpen ||
+    isExchangeOpen ||
+    isTransferOpen ||
+    isGodModeOpen ||
+    !!selectedTransactionDetail;
 
   useEffect(() => {
     setMounted(true);
@@ -122,9 +140,9 @@ export default function App() {
       </main>
 
       {/* 1. PERSISTENT FLOATING LIQUID GLASS DOCK:
-          Never unmounts or disappears across any tab!
+          Hides smoothly when in a chat or full-screen modal
       */}
-      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} hidden={isModalActive} />
 
       {/* Global Bottom Sheets & Modals */}
       <AccountsDrawer />
