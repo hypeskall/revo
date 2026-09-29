@@ -19,7 +19,9 @@ export type TransactionCategory =
   | 'Top-up'
   | 'Exchange'
   | 'Restaurants'
-  | 'General';
+  | 'General'
+  | 'Shopping'
+  | 'Verification';
 
 export type BrandName =
   | 'Lidl'
@@ -30,7 +32,9 @@ export type BrandName =
   | 'Starbucks'
   | 'McDonalds'
   | 'Revolut'
-  | 'Contact';
+  | 'Contact'
+  | 'Explee'
+  | string;
 
 export interface Transaction {
   id: string;
@@ -43,7 +47,7 @@ export interface Transaction {
   category: TransactionCategory;
   brand: BrandName;
   isIncoming: boolean;
-  status: 'completed' | 'pending';
+  status: 'completed' | 'pending' | 'reverted';
   contactId?: string;
   contactName?: string;
   note?: string;
@@ -66,7 +70,8 @@ export interface Contact {
   phone: string;
   iban: string;
   initials: string;
-  avatarColor: string;
+  avatarColor?: string;
+  avatarUrl?: string;
   badge?: string;
   transfers: ContactTransfer[];
 }

@@ -4,6 +4,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Snowflake, Check, ShieldCheck } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { RevolutLogo } from '@/components/ui/RevolutLogo';
 
 interface WalletDrawerProps {
   isOpen: boolean;
@@ -143,9 +144,11 @@ export const WalletDrawer: React.FC<WalletDrawerProps> = ({ isOpen, onClose, onA
                         className={`w-14 h-9 rounded-lg ${card.color} flex flex-col justify-between p-1.5 shadow-md relative overflow-hidden shrink-0`}
                       >
                         <div className="flex justify-between items-start">
-                          <span className="text-[8px] font-bold tracking-tight">
-                            {card.logo === 'R' ? 'R' : card.logo}
-                          </span>
+                          {card.logo === 'R' ? (
+                            <RevolutLogo variant={card.color.includes('text-black') ? 'black' : 'white'} className="w-2.5 h-2.5" />
+                          ) : (
+                            <span className="text-[8px] font-bold tracking-tight">{card.logo}</span>
+                          )}
                         </div>
                         {card.isFrozen ? (
                           <div className="absolute inset-0 bg-cyan-950/60 backdrop-blur-[1px] flex items-center justify-center">

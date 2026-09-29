@@ -4,6 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, ArrowLeftRight, Bitcoin } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { RevolutLogo } from '@/components/ui/RevolutLogo';
 
 export type TabId = 'home' | 'invest' | 'transfer' | 'cards' | 'hub';
 
@@ -12,13 +13,6 @@ interface BottomTabBarProps {
   onTabChange: (tab: TabId) => void;
   hidden?: boolean;
 }
-
-// Iconic Revolut 'R' vector glyph matching Revolut 10
-const RevolutRLogo: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M5.5 3h6.8c3.4 0 5.7 2.1 5.7 5.2 0 2.2-1.2 4-3.1 4.8l3.9 7.5h-4.3l-3.3-6.6H9.2v6.6H5.5V3zm3.7 7.5h3c1.4 0 2.3-.8 2.3-2.1s-.9-2.1-2.3-2.1h-3v4.2z" />
-  </svg>
-);
 
 // RevPoints Hexagon Vector Glyph matching Revolut 10
 const RevPointsLogo: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
@@ -83,21 +77,22 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 
             <div className="relative z-10 flex items-center justify-center h-5">
               {tab.isR ? (
-                <RevolutRLogo
-                  className={`w-5 h-5 transition-colors ${
-                    isActive ? 'text-white' : 'text-white/80'
+                <RevolutLogo
+                  variant="white"
+                  className={`w-4 h-4 transition-opacity ${
+                    isActive ? 'opacity-100' : 'opacity-70'
                   }`}
                 />
               ) : tab.isRevPoints ? (
                 <RevPointsLogo
                   className={`w-5 h-5 transition-colors ${
-                    isActive ? 'text-white' : 'text-white/80'
+                    isActive ? 'text-white' : 'text-white/70'
                   }`}
                 />
               ) : Icon ? (
                 <Icon
                   className={`w-5 h-5 transition-colors ${
-                    isActive ? 'text-white stroke-[2.4]' : 'text-white/80 stroke-[1.8]'
+                    isActive ? 'text-white stroke-[2.4]' : 'text-white/70 stroke-[1.8]'
                   }`}
                 />
               ) : null}

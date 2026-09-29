@@ -9,10 +9,9 @@ import {
   CreditCard,
   Landmark,
   Plus,
-  Shuffle,
+  ArrowLeftRight,
   MoreHorizontal,
   X,
-  Users,
 } from 'lucide-react';
 import { sound } from '@/utils/audio';
 import { WalletDrawer } from '@/components/cards/WalletDrawer';
@@ -68,7 +67,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
     }
   };
 
-  // Quick Action Buttons (4-Grid matching Screenshot #4) with whileTap={{ scale: 0.94 }}
+  // 4 Quick Action Buttons matching Screenshot #1
   const quickActions = [
     {
       label: 'Add money',
@@ -80,7 +79,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
     },
     {
       label: 'Move',
-      icon: Shuffle,
+      icon: ArrowLeftRight,
       onClick: () => {
         sound.playKeypadClick();
         setTransferOpen(true);
@@ -111,9 +110,9 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
       }}
       className="relative z-10 w-full flex flex-col px-4"
     >
-      {/* 1. Top Header Bar (Screenshot #4) */}
+      {/* 1. Top Header Bar (Screenshot #1) */}
       <div className="flex items-center justify-between gap-2.5 h-12">
-        {/* Left: Avatar with glowing red notification dot */}
+        {/* Left: Avatar with glowing red unread notification dot */}
         <div className="relative shrink-0">
           <motion.button
             whileTap={{ scale: 0.94 }}
@@ -125,9 +124,17 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
             className="w-10 h-10 rounded-full overflow-hidden border border-white/20 relative flex items-center justify-center bg-gradient-to-tr from-amber-700 via-stone-800 to-amber-400 shadow-sm"
             title="Profile (Triple-tap for God Mode)"
           >
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=96&h=96&fit=crop&crop=faces"
+              alt="Profile"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
             <span className="text-white font-bold text-sm">M</span>
           </motion.button>
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF3B30] rounded-full border-2 border-[#06090e] shadow-[0_0_8px_#FF3B30]" />
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF3B30] rounded-full border-2 border-[#020510] shadow-[0_0_8px_#FF3B30]" />
         </div>
 
         {/* Center: Frosted glass Search pill */}
@@ -185,9 +192,9 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   type="button"
                   onClick={action.onClick}
-                  className="w-14 h-14 rounded-full bg-white/[0.18] backdrop-blur-2xl border border-white/30 flex items-center justify-center text-white shadow-[0_8px_25px_rgba(0,180,255,0.22)] hover:bg-white/[0.24] transition-all"
+                  className="w-14 h-14 rounded-full bg-white/[0.12] backdrop-blur-2xl border border-white/15 flex items-center justify-center text-white shadow-lg hover:bg-white/[0.18] transition-all"
                 >
-                  <Icon className="w-6 h-6 stroke-[2.2]" />
+                  <Icon className="w-6 h-6 stroke-[2]" />
                 </motion.button>
                 <span className="text-[12px] text-white/80 font-medium text-center mt-2 tracking-tight">
                   {action.label}
@@ -198,7 +205,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
         </div>
       </div>
 
-      {/* 4. Promo Banner Card (Screenshot #4) with whileTap={{ scale: 0.98 }} */}
+      {/* 4. Promo Banner Card (Screenshot #1: Turn RevPoints into discounts) */}
       {showPromo && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -221,26 +228,30 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
             </button>
 
             {/* Promo text */}
-            <div className="pr-3 max-w-[230px]">
+            <div className="pr-3 max-w-[210px]">
               <h3 className="text-[15px] font-bold text-white tracking-tight leading-snug">
-                Settle up without the stress
+                Turn RevPoints into discounts
               </h3>
               <p className="text-xs text-white/60 mt-1 leading-normal">
-                Get paid back in a tap for one-off or ongoing expenses
+                Redeem your points as discounts with Revolut Pay. T&Cs apply
               </p>
             </div>
 
-            {/* 3D Smartphone Render Graphic */}
-            <div className="relative w-16 h-20 shrink-0 flex items-center justify-center">
-              <div className="w-14 h-20 rounded-2xl bg-gradient-to-tr from-neutral-800 to-neutral-700 border-2 border-neutral-600 shadow-2xl flex flex-col items-center justify-center p-1 relative transform rotate-6">
-                <div className="w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-700 flex items-center justify-center shadow-inner">
-                  <Users className="w-4 h-4 text-white/90" />
+            {/* 3D Glass Cards Graphic for Revolut Pay */}
+            <div className="relative w-24 h-16 shrink-0 flex items-center justify-center">
+              {/* Back tilted translucent card */}
+              <div className="absolute w-20 h-13 rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/20 transform rotate-12 translate-x-2 translate-y-1 shadow-lg" />
+              {/* Front glass card with Revolut Pay pill */}
+              <div className="relative z-10 w-22 h-12 rounded-xl bg-[#091026]/90 backdrop-blur-xl border border-white/25 shadow-2xl flex items-center justify-center px-2 py-1 transform -rotate-6">
+                <div className="flex items-center gap-1">
+                  <span className="text-[11px] font-bold text-white tracking-tight">Revolut</span>
+                  <span className="text-[11px] font-medium text-white/70">Pay</span>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* 3 Pagination dots below promo card */}
+          {/* 3 Pagination dots below promo card matching Screenshot #1 */}
           <div className="flex items-center justify-center gap-1.5 mt-2.5">
             <span className="w-1.5 h-1.5 rounded-full bg-white" />
             <span className="w-1.5 h-1.5 rounded-full bg-white/30" />

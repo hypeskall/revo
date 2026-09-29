@@ -1,265 +1,506 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
-import { Transaction } from '@/types';
-import { formatCurrencyAmount } from '@/utils/formatters';
+import {
+  ShoppingBag,
+  RotateCcw,
+  ChevronRight,
+  Coins,
+  ShieldAlert,
+  PiggyBank,
+  TrendingUp,
+  Bitcoin,
+  Link2,
+  Plus,
+} from 'lucide-react';
 import { sound } from '@/utils/audio';
-import { ArrowRight } from 'lucide-react';
-import { AppleLogo } from '@/components/ui/AppleLogo';
-
-const listVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 14 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      stiffness: 400,
-      damping: 28,
-    },
-  },
-};
+import { RevolutLogo } from '@/components/ui/RevolutLogo';
+import { WalletDrawer } from '@/components/cards/WalletDrawer';
 
 export const TransactionList: React.FC = () => {
-  const { transactions, setSelectedTransactionDetail } = useRevolutStore();
+  const {
+    accounts,
+    setSelectedTransactionDetail,
+    setAccountsDrawerOpen,
+    createNewCard,
+  } = useRevolutStore();
 
-  const getMerchantIcon = (tx: Transaction) => {
-    if (tx.brand === 'Contact') {
-      const isAndrei = tx.title.includes('Andrei');
-      return (
-        <div className="relative shrink-0">
-          {isAndrei ? (
-            <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10 shadow-sm bg-neutral-800 flex items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=96&h=96&fit=crop&crop=faces"
-                alt="Andrei Durla"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-11 h-11 rounded-full overflow-hidden border border-white/10 shadow-sm bg-amber-600 flex items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=96&h=96&fit=crop&crop=faces"
-                alt="Rareș Roman"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+  const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [activeCardSlide, setActiveCardSlide] = useState(0);
 
-          {/* Status Badge on bottom right corner: arrow or R logo */}
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white text-black flex items-center justify-center shadow-md">
-            {isAndrei ? (
-              <span className="text-[9px] font-black leading-none">R</span>
-            ) : (
-              <ArrowRight className="w-2.5 h-2.5 stroke-[3]" />
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    const isApple = tx.brand === 'Apple' || tx.title.toLowerCase().includes('apple');
-
-    // Clean vector SVGs from simpleicons
-    const iconSlugMap: Record<string, string> = {
-      Netflix: 'netflix',
-      Uber: 'uber',
-      Steam: 'steam',
-      Lidl: 'lidl',
-    };
-
-    const slug = iconSlugMap[tx.brand];
-
-    return (
-      <div className="w-11 h-11 rounded-full bg-white/10 border border-white/5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
-        {isApple ? (
-          <AppleLogo variant="white" className="w-5 h-5" />
-        ) : slug ? (
-          <img
-            src={`https://cdn.simpleicons.org/${slug}/FFFFFF`}
-            alt={tx.title}
-            className="w-5 h-5 object-contain"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-        ) : tx.amount > 0 ? (
-          <div className="w-5 h-5 rounded-full bg-[#00E676]/20 text-[#00E676] flex items-center justify-center text-xs font-bold">
-            ↓
-          </div>
-        ) : (
-          <span className="text-white text-xs font-bold">{tx.title[0]}</span>
-        )}
-      </div>
-    );
-  };
+  const ronBalance = accounts.RON?.balance ?? 1871.07;
+  const formattedRon = new Intl.NumberFormat('ro-RO', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(ronBalance);
 
   return (
-    // 6. Bottom Glass Card Sheet with Staggered Entrance
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="w-full bg-[#090d12]/95 backdrop-blur-2xl rounded-t-[32px] border-t border-white/10 p-5 mt-4 min-h-[500px] pb-32"
-    >
-      {/* Sheet Handle */}
-      <div className="w-full flex justify-center -mt-1 pb-3">
-        <div className="w-10 h-1 bg-white/20 rounded-full" />
-      </div>
-
-      <div className="flex items-center justify-between text-xs font-semibold text-neutral-400 pb-2">
-        <span className="text-sm font-bold text-white">Transactions</span>
-        <button
-          onClick={() => sound.playKeypadClick()}
-          className="text-cyan-400 hover:text-cyan-300 transition text-xs font-medium"
-        >
-          See all
-        </button>
-      </div>
-
-      {/* Flat List Layout with Staggered Fade-Slide Animation */}
+    <div className="w-full mt-3 px-4 pb-32 select-none">
+      {/* 1. Curved Glass Bottom Card for Recent Transactions (Screenshot #1) */}
       <motion.div
-        variants={listVariants}
-        initial="hidden"
-        animate="show"
-        className="divide-y divide-white/[0.04]"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+        className="w-full bg-[#0a1228]/80 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 shadow-xl"
       >
-        {/* Contact Row 1: Rareș Roman (Screenshot #4) */}
-        <motion.div
-          variants={itemVariants}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            sound.playKeypadClick();
-            if (transactions[0]) setSelectedTransactionDetail(transactions[0]);
-          }}
-          className="py-3.5 flex items-center justify-between hover:bg-white/[0.02] active:bg-white/[0.04] transition cursor-pointer"
-        >
-          <div className="flex items-center gap-3.5 min-w-0">
-            {getMerchantIcon({
-              id: 'c-rares',
-              title: 'Rareș Roman',
-              subtitle: 'Today, 15:15 · Sent from Revolut',
-              amount: -1,
-              currency: 'RON',
-              date: 'Today',
-              timestamp: '15:15',
-              category: 'Transfers',
-              brand: 'Contact',
-              isIncoming: false,
-              status: 'completed',
-              rawDate: Date.now(),
-            })}
-            <div className="min-w-0">
-              <div className="text-[15px] font-semibold text-white tracking-tight truncate">
-                Rareș Roman
-              </div>
-              <div className="text-xs text-white/50 truncate mt-0.5">
-                Today, 15:15 · Sent from Revolut
-              </div>
-            </div>
-          </div>
-          <div className="text-right shrink-0 pl-3">
-            <span className="text-[15px] font-semibold text-white tracking-tight">
-              -1 lei
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Contact Row 2: Andrei Durla (Screenshot #4) */}
-        <motion.div
-          variants={itemVariants}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            sound.playKeypadClick();
-            if (transactions[1]) setSelectedTransactionDetail(transactions[1]);
-          }}
-          className="py-3.5 flex items-center justify-between hover:bg-white/[0.02] active:bg-white/[0.04] transition cursor-pointer"
-        >
-          <div className="flex items-center gap-3.5 min-w-0">
-            {getMerchantIcon({
-              id: 'c-andrei-d',
-              title: 'Andrei Durla',
-              subtitle: 'Today, 10:21 · Sent from Revolut',
-              amount: -46,
-              currency: 'RON',
-              date: 'Today',
-              timestamp: '10:21',
-              category: 'Transfers',
-              brand: 'Contact',
-              isIncoming: false,
-              status: 'completed',
-              rawDate: Date.now(),
-            })}
-            <div className="min-w-0">
-              <div className="text-[15px] font-semibold text-white tracking-tight truncate">
-                Andrei Durla
-              </div>
-              <div className="text-xs text-white/50 truncate mt-0.5">
-                Today, 10:21 · Sent from Revolut
-              </div>
-            </div>
-          </div>
-          <div className="text-right shrink-0 pl-3">
-            <span className="text-[15px] font-semibold text-white tracking-tight">
-              -46 lei
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Dynamic & Merchant Transactions */}
-        {transactions.map((tx) => {
-          if (tx.title === 'Rareș Roman' && tx.amount === -1) return null;
-
-          const isPositive = tx.amount > 0;
-          return (
-            <motion.div
-              key={tx.id}
-              variants={itemVariants}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                sound.playKeypadClick();
-                setSelectedTransactionDetail(tx);
-              }}
-              className="py-3.5 flex items-center justify-between hover:bg-white/[0.02] active:bg-white/[0.04] transition cursor-pointer"
-            >
-              <div className="flex items-center gap-3.5 min-w-0">
-                {getMerchantIcon(tx)}
-                <div className="min-w-0">
-                  <div className="text-[15px] font-semibold text-white tracking-tight truncate">
-                    {tx.title}
-                  </div>
-                  <div className="text-xs text-white/50 truncate mt-0.5">
-                    {tx.date}, {tx.timestamp} · {tx.subtitle}
-                  </div>
+        <div className="space-y-3.5">
+          {/* Transaction 1: Explee Ltd / Reverted (Screenshot #1) */}
+          <motion.div
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              sound.playKeypadClick();
+              setSelectedTransactionDetail({
+                id: 'tx-explee-reverted',
+                title: 'Explee Ltd',
+                subtitle: 'Reverted',
+                amount: 4.68,
+                currency: 'RON',
+                date: 'Today',
+                timestamp: '17:56',
+                category: 'Shopping',
+                brand: 'Explee',
+                isIncoming: true,
+                status: 'reverted',
+                rawDate: Date.now(),
+              });
+            }}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5">
+              {/* Pink shopping bag icon with Revert circular badge on bottom right */}
+              <div className="relative shrink-0">
+                <div className="w-11 h-11 rounded-full bg-[#FF4081] flex items-center justify-center text-white shadow-sm">
+                  <ShoppingBag className="w-5 h-5 stroke-[2]" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white text-black flex items-center justify-center shadow-md">
+                  <RotateCcw className="w-2.5 h-2.5 stroke-[3]" />
                 </div>
               </div>
 
-              <div className="text-right shrink-0 pl-3">
-                <div
-                  className={`text-[15px] font-semibold tracking-tight ${
-                    isPositive ? 'text-[#00E676]' : 'text-white'
-                  }`}
-                >
-                  {isPositive ? '+ ' : ''}
-                  {formatCurrencyAmount(tx.amount, tx.currency)}
-                </div>
+              <div>
+                <h4 className="text-[15px] font-semibold text-white tracking-tight">
+                  Explee Ltd
+                </h4>
+                <p className="text-xs text-white/50 mt-0.5">Today, 17:56 · Reverted</p>
               </div>
-            </motion.div>
-          );
-        })}
+            </div>
+
+            <div className="text-right">
+              <span className="text-[15px] font-semibold text-white tracking-tight">
+                4,68 lei
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Divider */}
+          <div className="h-[1px] bg-white/[0.05] w-full" />
+
+          {/* Transaction 2: Explee Ltd / Card verification (Screenshot #1) */}
+          <motion.div
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              sound.playKeypadClick();
+              setSelectedTransactionDetail({
+                id: 'tx-explee-verify',
+                title: 'Explee Ltd',
+                subtitle: 'Card verification',
+                amount: 0,
+                currency: 'RON',
+                date: 'Today',
+                timestamp: '17:55',
+                category: 'Verification',
+                brand: 'Explee',
+                isIncoming: false,
+                status: 'completed',
+                rawDate: Date.now() - 60000,
+              });
+            }}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-full bg-[#FF4081] flex items-center justify-center text-white shadow-sm shrink-0">
+                <ShoppingBag className="w-5 h-5 stroke-[2]" />
+              </div>
+
+              <div>
+                <h4 className="text-[15px] font-semibold text-white tracking-tight">
+                  Explee Ltd
+                </h4>
+                <p className="text-xs text-white/50 mt-0.5">Today, 17:55 · Card verification</p>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <span className="text-xs text-white/40">Verified</span>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
-    </motion.div>
+
+      {/* 2. Sub-account Maria Card (Screenshot #3: Square sub-account card) */}
+      <div className="mt-4 flex gap-3 overflow-x-auto no-scrollbar py-1">
+        <motion.div
+          whileTap={{ scale: 0.96 }}
+          className="w-[155px] h-[165px] shrink-0 rounded-3xl bg-white/[0.06] backdrop-blur-xl border border-white/10 p-3.5 flex flex-col items-center justify-between shadow-xl cursor-pointer"
+        >
+          {/* Avatar with name pill overlay */}
+          <div className="relative mt-1">
+            <div className="w-13 h-13 rounded-full overflow-hidden border border-white/20 shadow-md">
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=96&h=96&fit=crop&crop=faces"
+                alt="Maria"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-[#1b2649] border border-white/20 text-[10px] font-semibold text-white shadow-sm">
+              Maria
+            </div>
+          </div>
+
+          {/* Amount */}
+          <div className="text-center mt-2">
+            <span className="text-[16px] font-bold text-white tracking-tight">1,28 lei</span>
+          </div>
+
+          {/* Circular + button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              sound.playKeypadClick();
+            }}
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white border border-white/10 shadow-sm transition"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+          </motion.button>
+        </motion.div>
+      </div>
+
+      {/* 3. Cards Carousel ("Cards >" - Screenshot #3) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-4 w-full rounded-3xl bg-white/[0.06] backdrop-blur-xl border border-white/10 p-4 shadow-xl"
+      >
+        {/* Header */}
+        <div
+          onClick={() => {
+            sound.playKeypadClick();
+            setIsWalletOpen(true);
+          }}
+          className="flex items-center gap-1 cursor-pointer group mb-3.5"
+        >
+          <span className="text-sm font-bold text-white tracking-tight group-hover:text-white/80 transition">
+            Cards
+          </span>
+          <ChevronRight className="w-4 h-4 text-white/50 group-hover:translate-x-0.5 transition" />
+        </div>
+
+        {/* 3 Mini Cards Horizontal Row */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {/* Card 1: Online Shop... (··0177) - Blood Drip */}
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              sound.playKeypadClick();
+              setIsWalletOpen(true);
+            }}
+            className="flex flex-col items-center cursor-pointer"
+          >
+            <div className="w-full h-15 rounded-xl bg-gradient-to-br from-[#1a0505] via-[#2d0000] to-black p-1.5 border border-red-900/40 relative overflow-hidden shadow-md flex flex-col justify-between">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-red-600/40 via-red-950/20 to-transparent pointer-events-none" />
+              <div className="flex justify-end">
+                <RevolutLogo className="w-3 h-3" />
+              </div>
+              <div className="flex justify-end">
+                <span className="text-[8px] font-black italic tracking-wider text-white">
+                  VISA
+                </span>
+              </div>
+            </div>
+            <div className="text-center mt-1.5">
+              <div className="text-[11px] font-semibold text-white tracking-tight truncate max-w-[85px]">
+                Online Shop...
+              </div>
+              <div className="text-[10px] text-white/50 font-mono">··0177</div>
+            </div>
+          </motion.div>
+
+          {/* Card 2: Shirt Sash (··9349) - Light Blue Sash */}
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              sound.playKeypadClick();
+              setIsWalletOpen(true);
+            }}
+            className="flex flex-col items-center cursor-pointer"
+          >
+            <div className="w-full h-15 rounded-xl bg-gradient-to-br from-[#4a7c9f] via-[#294c69] to-[#122434] p-1.5 border border-cyan-400/30 relative overflow-hidden shadow-md flex flex-col justify-between">
+              {/* Sash diagonal line */}
+              <div className="absolute top-0 right-3 w-3 h-20 bg-white/20 transform rotate-45 pointer-events-none" />
+              <div className="flex items-center justify-between">
+                <div className="w-3.5 h-3.5 rounded-full border border-white/40 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-red-600/80" />
+                </div>
+                <RevolutLogo className="w-3 h-3" />
+              </div>
+              <div className="flex justify-end">
+                <span className="text-[8px] font-black italic tracking-wider text-white">
+                  VISA
+                </span>
+              </div>
+            </div>
+            <div className="text-center mt-1.5">
+              <div className="text-[11px] font-semibold text-white tracking-tight truncate max-w-[85px]">
+                Shirt Sash
+              </div>
+              <div className="text-[10px] text-white/50 font-mono">··9349</div>
+            </div>
+          </motion.div>
+
+          {/* Card 3: Surge (··0345) - Dark Neon Glow */}
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              sound.playKeypadClick();
+              setIsWalletOpen(true);
+            }}
+            className="flex flex-col items-center cursor-pointer"
+          >
+            <div className="w-full h-15 rounded-xl bg-gradient-to-br from-[#05112a] via-[#091d44] to-[#020714] p-1.5 border border-blue-500/30 relative overflow-hidden shadow-md flex flex-col justify-between">
+              <div className="absolute top-1 -left-2 w-8 h-8 rounded-full bg-cyan-400/30 blur-sm pointer-events-none" />
+              <div className="flex justify-end">
+                <RevolutLogo className="w-3 h-3" />
+              </div>
+              <div className="flex justify-end items-center gap-0.5">
+                <div className="w-2 h-2 rounded-full bg-red-500 opacity-90" />
+                <div className="w-2 h-2 rounded-full bg-amber-400 opacity-90 -ml-1" />
+              </div>
+            </div>
+            <div className="text-center mt-1.5">
+              <div className="text-[11px] font-semibold text-white tracking-tight truncate max-w-[85px]">
+                Surge
+              </div>
+              <div className="text-[10px] text-white/50 font-mono">··0345</div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* 3 Pagination dots */}
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-white" />
+          <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+          <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+        </div>
+      </motion.div>
+
+      {/* 4. Total Wealth Card ("Total wealth >" - Screenshot #2 & #3) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-4 w-full rounded-3xl bg-white/[0.06] backdrop-blur-xl border border-white/10 p-5 shadow-xl"
+      >
+        {/* Header */}
+        <div
+          onClick={() => {
+            sound.playKeypadClick();
+            setAccountsDrawerOpen(true);
+          }}
+          className="cursor-pointer group"
+        >
+          <div className="flex items-center gap-1 text-white/60 text-xs font-medium">
+            <span>Total wealth</span>
+            <ChevronRight className="w-3.5 h-3.5 text-white/50 group-hover:translate-x-0.5 transition" />
+          </div>
+
+          <div className="mt-1 flex items-baseline gap-2">
+            <span className="text-[28px] font-extrabold text-white tracking-tight">
+              {formattedRon} lei
+            </span>
+          </div>
+
+          <div className="text-xs text-[#00E676] font-medium mt-0.5 flex items-center gap-1">
+            <span>▲ 3,14 lei</span>
+            <span className="text-white/40">· Past month</span>
+          </div>
+        </div>
+
+        {/* Wealth List Items (Screenshot #2) */}
+        <div className="mt-5 space-y-4">
+          {/* Row 1: Cash */}
+          <div
+            onClick={() => {
+              sound.playKeypadClick();
+              setAccountsDrawerOpen(true);
+            }}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-[#0075eb] flex items-center justify-center text-white shadow-sm shrink-0">
+                <Coins className="w-5 h-5 stroke-[2]" />
+              </div>
+              <span className="text-[15px] font-semibold text-white tracking-tight">Cash</span>
+            </div>
+            <div className="text-right">
+              <div className="text-[15px] font-semibold text-white tracking-tight">
+                {formattedRon} lei
+              </div>
+              <div className="text-[11px] text-[#00E676] font-medium">▲ 3,14 lei</div>
+            </div>
+          </div>
+
+          {/* Row 2: Savings & Funds */}
+          <div
+            onClick={() => sound.playKeypadClick()}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 pr-2">
+              <div className="w-10 h-10 rounded-full bg-[#FF6D00] flex items-center justify-center text-white shadow-sm shrink-0">
+                <PiggyBank className="w-5 h-5 stroke-[2]" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-semibold text-white tracking-tight">
+                  Savings & Funds
+                </div>
+                <div className="text-xs text-white/50 truncate">
+                  Earn up to 4,25% p.a. with savings or invest in low-risk funds
+                </div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/40 shrink-0" />
+          </div>
+
+          {/* Row 3: Loan */}
+          <div
+            onClick={() => sound.playKeypadClick()}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 pr-2">
+              <div className="w-10 h-10 rounded-full bg-[#C6FF00] text-black flex items-center justify-center shadow-sm shrink-0 font-bold">
+                <ShieldAlert className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-semibold text-white tracking-tight">Loan</div>
+                <div className="text-xs text-white/50 truncate">
+                  Get a low-rate loan up to 200.000 lei
+                </div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/40 shrink-0" />
+          </div>
+
+          {/* Row 4: Invest */}
+          <div
+            onClick={() => sound.playKeypadClick()}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 pr-2">
+              <div className="w-10 h-10 rounded-full bg-[#00B0FF] flex items-center justify-center text-white shadow-sm shrink-0">
+                <TrendingUp className="w-5 h-5 stroke-[2]" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-semibold text-white tracking-tight">Invest</div>
+                <div className="text-xs text-white/50 truncate">Invest for as little as 1 lei</div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/40 shrink-0" />
+          </div>
+
+          {/* Row 5: Crypto */}
+          <div
+            onClick={() => sound.playKeypadClick()}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-[#9C27B0] flex items-center justify-center text-white shadow-sm shrink-0">
+                <Bitcoin className="w-5 h-5 stroke-[2]" />
+              </div>
+              <span className="text-[15px] font-semibold text-white tracking-tight">Crypto</span>
+            </div>
+            <span className="text-[15px] font-semibold text-white tracking-tight">0 lei</span>
+          </div>
+
+          {/* Row 6: Linked */}
+          <div
+            onClick={() => sound.playKeypadClick()}
+            className="flex items-center justify-between cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0 pr-2">
+              <div className="w-10 h-10 rounded-full bg-[#00E5FF] text-black flex items-center justify-center shadow-sm shrink-0">
+                <Link2 className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-semibold text-white tracking-tight">Linked</div>
+                <div className="text-xs text-white/50 truncate">Link external accounts</div>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/40 shrink-0" />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* 5. Spent This Month Card (Screenshot #2) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-4 w-full rounded-3xl bg-white/[0.06] backdrop-blur-xl border border-white/10 p-5 shadow-xl relative overflow-hidden"
+      >
+        <div className="flex items-center justify-between text-xs text-white/60">
+          <span className="font-medium">Spent this month</span>
+          <span className="font-mono text-white/50">3,99k lei</span>
+        </div>
+
+        <div className="mt-1 flex items-baseline gap-2">
+          <span className="text-[28px] font-extrabold text-white tracking-tight">
+            3.840 lei
+          </span>
+          <span className="text-xs text-[#00E676] font-medium flex items-center">
+            ▼ 409 lei
+          </span>
+        </div>
+
+        {/* Smooth Area Curve Chart */}
+        <div className="mt-4 w-full h-24 relative overflow-hidden">
+          <svg
+            className="w-full h-full overflow-visible"
+            viewBox="0 0 320 80"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#00E676" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#00E676" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            {/* Area fill */}
+            <path
+              d="M0,75 Q40,68 80,62 T160,45 T240,25 T320,10 L320,80 L0,80 Z"
+              fill="url(#chartGradient)"
+            />
+            {/* Line glow */}
+            <path
+              d="M0,75 Q40,68 80,62 T160,45 T240,25 T320,10"
+              fill="none"
+              stroke="#00E676"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      </motion.div>
+
+      {/* Wallet Cards Sheet */}
+      <WalletDrawer
+        isOpen={isWalletOpen}
+        onClose={() => setIsWalletOpen(false)}
+        onAddNew={() => createNewCard('virtual')}
+      />
+    </div>
   );
 };

@@ -17,12 +17,13 @@ import { InvestScreen } from '@/components/invest/InvestScreen';
 import { CryptoScreen } from '@/components/crypto/CryptoScreen';
 import { HubScreen } from '@/components/hub/HubScreen';
 import { GodModeDrawer } from '@/components/godmode/GodModeDrawer';
+import { RevolutLogo } from '@/components/ui/RevolutLogo';
 import { useRevolutStore } from '@/store/useRevolutStore';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [mounted, setMounted] = useState(false);
-  const [auroraColor, setAuroraColor] = useState<'cyan' | 'blue' | 'purple'>('cyan');
+  const [auroraColor, setAuroraColor] = useState<'cyan' | 'blue' | 'purple'>('blue');
 
   const {
     selectedContactForTransfer,
@@ -51,9 +52,9 @@ export default function App() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen w-full bg-[#06090e] flex flex-col items-center justify-center select-none">
-        <div className="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white text-3xl font-black shadow-[0_0_50px_rgba(0,117,235,0.5)] animate-pulse">
-          R
+      <div className="min-h-screen w-full bg-[#020510] flex flex-col items-center justify-center select-none">
+        <div className="w-16 h-16 rounded-3xl bg-blue-600 flex items-center justify-center text-white shadow-[0_0_50px_rgba(0,117,235,0.6)] animate-pulse">
+          <RevolutLogo variant="white" className="w-9 h-9" />
         </div>
       </div>
     );

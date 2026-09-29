@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Landmark, Sparkles, Wallet, PiggyBank } from 'lucide-react';
+import { Landmark, Wallet, PiggyBank, Sparkles } from 'lucide-react';
 import { sound } from '@/utils/audio';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { Currency } from '@/types';
@@ -32,13 +32,13 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
     };
   };
 
-  const ronParts = formatBalanceParts(accounts.RON?.balance ?? 0, 'lei');
+  const ronParts = formatBalanceParts(accounts.RON?.balance ?? 1871.07, 'lei');
   const eurParts = formatBalanceParts(accounts.EUR?.balance ?? 0, '€');
   const usdParts = formatBalanceParts(accounts.USD?.balance ?? 0, '$');
   const gbpParts = formatBalanceParts(accounts.GBP?.balance ?? 0, '£');
 
   const allAccountsTotal =
-    (accounts.RON?.balance ?? 0) +
+    (accounts.RON?.balance ?? 1871.07) +
     (accounts.EUR?.balance ?? 0) * (rates['EUR_RON'] || 4.9765) +
     (accounts.USD?.balance ?? 0) * (rates['USD_RON'] || 4.582) +
     (accounts.GBP?.balance ?? 0) * (rates['GBP_RON'] || 5.891);
@@ -53,7 +53,7 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
       cents: ronParts.cents,
       sub: 'RO50 REVO 0000 1697 1825 8222',
       icon: Landmark,
-      color: 'cyan' as const,
+      color: 'blue' as const,
     },
     {
       id: 'eur',
@@ -83,7 +83,7 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
       cents: gbpParts.cents,
       sub: 'GB98 REVO 0000 1192 8841 0001',
       icon: Landmark,
-      color: 'cyan' as const,
+      color: 'blue' as const,
     },
     {
       id: 'all',
@@ -158,18 +158,18 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide.id}
-            initial={{ opacity: 0, scale: 0.94 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.94 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
             className="flex flex-col items-center"
           >
-            {/* Subtitle tag */}
-            <div className="text-xs text-white/70 font-medium tracking-wide">
+            {/* Subtitle tag: Personal · RON */}
+            <div className="text-[13px] text-white/70 font-medium tracking-wide">
               {currentSlide.tag}
             </div>
 
-            {/* Large Bold Hero Balance */}
+            {/* Large Bold Hero Balance matching Screenshot #1 */}
             <div
               onClick={() => {
                 sound.playKeypadClick();
@@ -177,24 +177,24 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
               }}
               className="cursor-pointer group flex items-baseline justify-center mt-1 active:opacity-85 transition"
             >
-              <span className="text-[44px] font-bold text-white tracking-tight leading-none">
+              <span className="text-[46px] font-extrabold text-white tracking-tight leading-none">
                 {currentSlide.main}
               </span>
-              <span className="text-[34px] font-semibold text-white/95 tracking-tight ml-0.5">
+              <span className="text-[34px] font-bold text-white tracking-tight ml-0.5">
                 {currentSlide.cents}
               </span>
             </div>
 
-            {/* IBAN / Description Pill in cyan tint */}
-            <div className="mt-1 flex items-center justify-center gap-1.5 text-cyan-200/80 text-[11px] font-mono tracking-tight">
-              <currentSlide.icon className="w-3 h-3 text-cyan-300 shrink-0" />
+            {/* IBAN Pill matching Screenshot #1: bank icon + white/90 IBAN */}
+            <div className="mt-1.5 flex items-center justify-center gap-1.5 text-white/80 text-[12px] font-mono tracking-tight">
+              <currentSlide.icon className="w-3.5 h-3.5 text-white/70 shrink-0" />
               <span className="truncate max-w-[280px]">{currentSlide.sub}</span>
             </div>
           </motion.div>
         </AnimatePresence>
       </motion.div>
 
-      {/* "Accounts" Pill with Notification Badge (5) */}
+      {/* "Accounts" Pill with Notification Badge (5) matching Screenshot #1 */}
       <div className="relative mt-4">
         <motion.button
           whileTap={{ scale: 0.94 }}
@@ -202,7 +202,7 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
             sound.playKeypadClick();
             onOpenAccounts();
           }}
-          className="relative px-5 py-2 rounded-full bg-[#1b3b57]/60 hover:bg-[#204566]/70 backdrop-blur-xl border border-cyan-400/30 text-xs font-semibold text-white shadow-lg transition"
+          className="relative px-5 py-1.5 rounded-full bg-[#1b2649]/80 hover:bg-[#253464] backdrop-blur-xl border border-white/15 text-[13px] font-semibold text-white shadow-lg transition"
         >
           Accounts
           {/* Notification badge 5 */}
@@ -210,29 +210,6 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
             5
           </span>
         </motion.button>
-      </div>
-
-      {/* Dynamic Pagination Dots */}
-      <div className="flex items-center gap-1.5 mt-3">
-        {slides.map((s, idx) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => {
-              setActiveIndex(idx);
-              sound.playKeypadClick();
-              if (onColorChange) onColorChange(s.color);
-              if (['ron', 'eur', 'usd', 'gbp'].includes(s.id)) {
-                setActiveCurrency(s.currency);
-              }
-            }}
-            className={`transition-all duration-200 ${
-              activeIndex === idx
-                ? 'w-4 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                : 'w-1.5 h-1.5 rounded-full bg-white/30 hover:bg-white/50'
-            }`}
-          />
-        ))}
       </div>
     </div>
   );

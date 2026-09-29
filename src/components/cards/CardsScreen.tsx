@@ -6,6 +6,7 @@ import { useRevolutStore } from '@/store/useRevolutStore';
 import { BankCard, CardTheme } from '@/types';
 import { Snowflake, Eye, EyeOff, Plus, Copy, Check, ShieldCheck, Wifi, Sparkles, X } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { RevolutLogo } from '@/components/ui/RevolutLogo';
 
 export const CardsScreen: React.FC = () => {
   const { cards, toggleFreezeCard, createNewCard } = useRevolutStore();
@@ -131,6 +132,7 @@ export const CardsScreen: React.FC = () => {
               {/* Card Top Row: Revolut logo & Contactless & Chip */}
               <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-2">
+                  <RevolutLogo variant="white" className="w-5 h-5" />
                   <span className="text-base font-bold text-white tracking-wider">Revolut</span>
                   <span className="text-[10px] text-neutral-300 uppercase tracking-widest bg-white/10 px-1.5 py-0.5 rounded font-medium">
                     {activeCard.type}
