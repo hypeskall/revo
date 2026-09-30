@@ -6,6 +6,9 @@ import { useRevolutStore } from '@/store/useRevolutStore';
 import {
   ShoppingBag,
   RotateCcw,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Smartphone,
   ChevronRight,
   Coins,
   ShieldAlert,
@@ -18,10 +21,12 @@ import {
 import { sound } from '@/utils/audio';
 import { RevolutLogo } from '@/components/ui/RevolutLogo';
 import { WalletDrawer } from '@/components/cards/WalletDrawer';
+import { formatCurrencyAmount } from '@/utils/formatters';
 
 export const TransactionList: React.FC = () => {
   const {
     accounts,
+    transactions,
     setSelectedTransactionDetail,
     setAccountsDrawerOpen,
     createNewCard,
@@ -36,9 +41,32 @@ export const TransactionList: React.FC = () => {
     maximumFractionDigits: 0,
   }).format(ronBalance);
 
+  const recentTransactions = [...transactions]
+    .sort((a, b) => b.rawDate - a.rawDate)
+    .slice(0, 4);
+
+  const getTransactionVisual = (brand: string, isIncoming: boolean) => {
+    if (brand === 'Explee') {
+      return { Icon: ShoppingBag, className: 'bg-[#ff3b7f] text-white' };
+    }
+    if (brand === 'Contact') {
+      return {
+        Icon: isIncoming ? ArrowDownLeft : ArrowUpRight,
+        className: 'bg-[#5b5ce2] text-white',
+      };
+    }
+    if (brand === 'Apple') {
+      return { Icon: Smartphone, className: 'bg-white text-black' };
+    }
+    if (brand === 'Revolut') {
+      return { Icon: Coins, className: 'bg-[#0b72ff] text-white' };
+    }
+    return { Icon: ShoppingBag, className: 'bg-white/10 text-white' };
+  };
+
   return (
     <div className="w-full mt-3 px-4 pb-32 select-none">
-      {/* 1. Curved Glass Bottom Card for Recent Transactions (Screenshot #1) */}
+      {/* Live activity: every simulated top-up, transfer and exchange appears here. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -46,96 +74,61 @@ export const TransactionList: React.FC = () => {
         className="w-full bg-[#0a1228]/80 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 shadow-xl"
       >
         <div className="space-y-3.5">
-          {/* Transaction 1: Explee Ltd / Reverted (Screenshot #1) */}
-          <motion.div
-            whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              sound.playKeypadClick();
-              setSelectedTransactionDetail({
-                id: 'tx-explee-reverted',
-                title: 'Explee Ltd',
-                subtitle: 'Reverted',
-                amount: 4.68,
-                currency: 'RON',
-                date: 'Today',
-                timestamp: '17:56',
-                category: 'Shopping',
-                brand: 'Explee',
-                isIncoming: true,
-                status: 'reverted',
-                rawDate: Date.now(),
-              });
-            }}
-            className="flex items-center justify-between cursor-pointer group"
-          >
-            <div className="flex items-center gap-3.5">
-              {/* Pink shopping bag icon with Revert circular badge on bottom right */}
-              <div className="relative shrink-0">
-                <div className="w-11 h-11 rounded-full bg-[#FF4081] flex items-center justify-center text-white shadow-sm">
-                  <ShoppingBag className="w-5 h-5 stroke-[2]" />
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white text-black flex items-center justify-center shadow-md">
-                  <RotateCcw className="w-2.5 h-2.5 stroke-[3]" />
-                </div>
-              </div>
+          <div className="flex items-center justify-between px-0.5">
+            <span className="text-xs font-semibold text-white/55">Recent activity</span>
+            <span className="text-[11px] text-white/35">Sandbox</span>
+          </div>
 
-              <div>
-                <h4 className="text-[15px] font-semibold text-white tracking-tight">
-                  Explee Ltd
-                </h4>
-                <p className="text-xs text-white/50 mt-0.5">Today, 17:56 · Reverted</p>
-              </div>
-            </div>
+          {recentTransactions.map((transaction, index) => {
+            const visual = getTransactionVisual(transaction.brand, transaction.isIncoming);
+            const Icon = visual.Icon;
+            const isVerification = transaction.category === 'Verification';
 
-            <div className="text-right">
-              <span className="text-[15px] font-semibold text-white tracking-tight">
-                4,68 lei
-              </span>
-            </div>
-          </motion.div>
+            return (
+              <React.Fragment key={transaction.id}>
+                {index > 0 && <div className="h-px bg-white/[0.05] w-full" />}
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    sound.playKeypadClick();
+                    setSelectedTransactionDetail(transaction);
+                  }}
+                  className="w-full flex items-center justify-between text-left"
+                >
+                  <div className="flex min-w-0 items-center gap-3.5">
+                    <div className="relative shrink-0">
+                      <div className={`w-11 h-11 rounded-full flex items-center justify-center shadow-sm ${visual.className}`}>
+                        <Icon className="w-5 h-5 stroke-[2]" />
+                      </div>
+                      {transaction.status === 'reverted' && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white text-black flex items-center justify-center shadow-md">
+                          <RotateCcw className="w-2.5 h-2.5 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
 
-          {/* Divider */}
-          <div className="h-[1px] bg-white/[0.05] w-full" />
+                    <div className="min-w-0">
+                      <h4 className="truncate text-[15px] font-semibold text-white tracking-tight">
+                        {transaction.title}
+                      </h4>
+                      <p className="truncate text-xs text-white/50 mt-0.5">
+                        {transaction.date}, {transaction.timestamp} · {transaction.status === 'reverted' ? 'Reverted' : transaction.subtitle}
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Transaction 2: Explee Ltd / Card verification (Screenshot #1) */}
-          <motion.div
-            whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              sound.playKeypadClick();
-              setSelectedTransactionDetail({
-                id: 'tx-explee-verify',
-                title: 'Explee Ltd',
-                subtitle: 'Card verification',
-                amount: 0,
-                currency: 'RON',
-                date: 'Today',
-                timestamp: '17:55',
-                category: 'Verification',
-                brand: 'Explee',
-                isIncoming: false,
-                status: 'completed',
-                rawDate: Date.now() - 60000,
-              });
-            }}
-            className="flex items-center justify-between cursor-pointer group"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-full bg-[#FF4081] flex items-center justify-center text-white shadow-sm shrink-0">
-                <ShoppingBag className="w-5 h-5 stroke-[2]" />
-              </div>
-
-              <div>
-                <h4 className="text-[15px] font-semibold text-white tracking-tight">
-                  Explee Ltd
-                </h4>
-                <p className="text-xs text-white/50 mt-0.5">Today, 17:55 · Card verification</p>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <span className="text-xs text-white/40">Verified</span>
-            </div>
-          </motion.div>
+                  <div className="pl-3 text-right shrink-0">
+                    <span className={`text-[15px] font-semibold tracking-tight ${transaction.isIncoming ? 'text-white' : 'text-white'}`}>
+                      {isVerification
+                        ? 'Verified'
+                        : formatCurrencyAmount(transaction.amount, transaction.currency, { includeSign: true })}
+                    </span>
+                  </div>
+                </motion.button>
+              </React.Fragment>
+            );
+          })}
         </div>
       </motion.div>
 

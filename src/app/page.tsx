@@ -32,6 +32,7 @@ export default function App() {
     isTransferOpen,
     isGodModeOpen,
     selectedTransactionDetail,
+    homeTool,
   } = useRevolutStore();
 
   const isModalActive =
@@ -40,7 +41,8 @@ export default function App() {
     isExchangeOpen ||
     isTransferOpen ||
     isGodModeOpen ||
-    !!selectedTransactionDetail;
+    !!selectedTransactionDetail ||
+    !!homeTool;
 
   useEffect(() => {
     setMounted(true);

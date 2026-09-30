@@ -16,6 +16,7 @@ import {
 import { sound } from '@/utils/audio';
 import { WalletDrawer } from '@/components/cards/WalletDrawer';
 import { AccountCarousel } from './AccountCarousel';
+import { HomeToolsSheet } from './HomeToolsSheet';
 
 interface BalanceHeroProps {
   onColorChange?: (color: 'cyan' | 'blue' | 'purple') => void;
@@ -26,9 +27,10 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
     setAccountsDrawerOpen,
     setAddMoneyOpen,
     setTransferOpen,
-    setExchangeOpen,
     setGodModeOpen,
     createNewCard,
+    homeTool,
+    setHomeTool,
   } = useRevolutStore();
 
   const [isWalletOpen, setIsWalletOpen] = useState(false);
@@ -90,7 +92,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
       icon: Landmark,
       onClick: () => {
         sound.playKeypadClick();
-        setAccountsDrawerOpen(true);
+        setHomeTool('details');
       },
     },
     {
@@ -98,7 +100,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
       icon: MoreHorizontal,
       onClick: () => {
         sound.playKeypadClick();
-        setExchangeOpen(true);
+        setHomeTool('more');
       },
     },
   ];
@@ -108,7 +110,7 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
       style={{
         paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
       }}
-      className="relative z-10 w-full flex flex-col px-4"
+      className="w-full flex flex-col px-4"
     >
       {/* 1. Top Header Bar (Screenshot #1) */}
       <div className="flex items-center justify-between gap-2.5 h-12">
@@ -139,21 +141,28 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
 
         {/* Center: Frosted glass Search pill */}
         <div className="flex-1 max-w-[210px]">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-full px-3.5 py-1.5 flex items-center gap-2 text-white/70 shadow-sm">
+          <button
+            type="button"
+            aria-label="Search"
+            onClick={() => {
+              sound.playKeypadClick();
+              setHomeTool('search');
+            }}
+            className="w-full bg-white/10 backdrop-blur-xl border border-white/10 rounded-full px-3.5 py-1.5 flex items-center gap-2 text-white/70 shadow-sm"
+          >
             <Search className="w-3.5 h-3.5 text-white/70" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="bg-transparent text-xs text-white placeholder-white/60 focus:outline-none w-full"
-            />
-          </div>
+            <span className="text-xs text-white/60">Search</span>
+          </button>
         </div>
 
         {/* Right: Two circular frosted buttons (BarChart & CreditCard) */}
         <div className="flex items-center gap-2 shrink-0">
           <motion.button
             whileTap={{ scale: 0.94 }}
-            onClick={() => sound.playKeypadClick()}
+            onClick={() => {
+              sound.playKeypadClick();
+              setHomeTool('analytics');
+            }}
             className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white transition"
             title="Analytics"
           >
@@ -265,6 +274,13 @@ export const BalanceHero: React.FC<BalanceHeroProps> = ({ onColorChange }) => {
         isOpen={isWalletOpen}
         onClose={() => setIsWalletOpen(false)}
         onAddNew={() => createNewCard('virtual')}
+      />
+
+      <HomeToolsSheet
+        tool={homeTool}
+        onClose={() => setHomeTool(null)}
+        onOpenWallet={() => setIsWalletOpen(true)}
+        onSelectTool={setHomeTool}
       />
     </div>
   );

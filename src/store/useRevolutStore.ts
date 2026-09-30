@@ -37,6 +37,7 @@ interface RevolutState {
   isExchangeOpen: boolean;
   isGodModeOpen: boolean;
   selectedTransactionDetail: Transaction | null;
+  homeTool: 'search' | 'analytics' | 'details' | 'more' | null;
 
   // Actions
   setActiveCurrency: (currency: Currency) => void;
@@ -47,6 +48,7 @@ interface RevolutState {
   setExchangeOpen: (open: boolean) => void;
   setGodModeOpen: (open: boolean) => void;
   setSelectedTransactionDetail: (tx: Transaction | null) => void;
+  setHomeTool: (tool: 'search' | 'analytics' | 'details' | 'more' | null) => void;
   setFrameMode: (mode: 'iphone' | 'fullscreen') => void;
   setSoundEnabled: (enabled: boolean) => void;
   
@@ -183,6 +185,34 @@ const DEFAULT_CONTACTS: Contact[] = [
 ];
 
 const DEFAULT_TRANSACTIONS: Transaction[] = [
+  {
+    id: 'tx-explee-reverted',
+    title: 'Explee Ltd',
+    subtitle: 'Reverted card payment',
+    amount: 4.68,
+    currency: 'RON',
+    date: 'Today',
+    timestamp: '17:56',
+    category: 'Shopping',
+    brand: 'Explee',
+    isIncoming: true,
+    status: 'reverted',
+    rawDate: Date.now() - 3600000 * 0.05,
+  },
+  {
+    id: 'tx-explee-verify',
+    title: 'Explee Ltd',
+    subtitle: 'Card verification',
+    amount: 0,
+    currency: 'RON',
+    date: 'Today',
+    timestamp: '17:55',
+    category: 'Verification',
+    brand: 'Explee',
+    isIncoming: false,
+    status: 'completed',
+    rawDate: Date.now() - 3600000 * 0.08,
+  },
   {
     id: 'tx-1',
     title: 'Rareș Roman',
@@ -379,6 +409,7 @@ export const useRevolutStore = create<RevolutState>()(
       isExchangeOpen: false,
       isGodModeOpen: false,
       selectedTransactionDetail: null,
+      homeTool: null,
 
       setActiveCurrency: (currency: Currency) => {
         set({ activeCurrency: currency });
@@ -391,6 +422,7 @@ export const useRevolutStore = create<RevolutState>()(
       setExchangeOpen: (open: boolean) => set({ isExchangeOpen: open }),
       setGodModeOpen: (open: boolean) => set({ isGodModeOpen: open }),
       setSelectedTransactionDetail: (tx: Transaction | null) => set({ selectedTransactionDetail: tx }),
+      setHomeTool: (homeTool) => set({ homeTool }),
       setFrameMode: (mode: 'iphone' | 'fullscreen') => set({ frameMode: mode }),
       setSoundEnabled: (enabled: boolean) => set({ soundEnabled: enabled }),
 
@@ -648,7 +680,7 @@ export const useRevolutStore = create<RevolutState>()(
       },
     }),
     {
-      name: 'revolut_simulator_storage_v1',
+      name: 'revolut_simulator_storage_v2',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         accounts: state.accounts,

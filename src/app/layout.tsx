@@ -16,8 +16,8 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Revolut',
-  description: '1:1 Revolut Interactive Mobile Simulator',
+  title: 'Revolut Sandbox',
+  description: 'Interactive Revolut-style sandbox with fictional balances and transactions',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

@@ -13,6 +13,12 @@ An interactive, pixel-perfect mobile simulator of the Revolut 10 app built as a 
 - **Dual-Currency Exchange Converter**: Live pegged conversion between RON, EUR, USD, and GBP.
 - **Digital Cards & Wallet**: Flip, unmask, and freeze debit cards (including the Red Drip virtual card).
 - **Hidden God Mode**: Triple-tap or hold the profile avatar to override wallet balances, inject custom transactions, or reset data.
+- **Live sandbox activity**: Simulated top-ups, transfers, and exchanges update balances and immediately appear in the Home activity feed.
+- **Home tools**: Search people and payments, inspect spending analytics, copy fictional account details, and open Exchange, Cards, Statements, or Accounts from the More sheet.
+
+## Sandbox behavior
+
+All balances, cards, account details, payments, and investments are fictional and stored only in the browser. The interface carries a persistent `SANDBOX` marker and does not connect to Revolut, a bank, Apple Pay, or any payment network.
 
 ## Getting Started
 
