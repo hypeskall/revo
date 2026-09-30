@@ -18,8 +18,7 @@ export function formatCurrencyAmount(
   const minimumFractionDigits = (hasFractions || showDecimalsIfZero) ? 2 : 0;
   const maximumFractionDigits = 2;
 
-  // Format with Romanian / European locale (dot for thousands, comma for decimals)
-  const formattedNumber = new Intl.NumberFormat('ro-RO', {
+  const formattedNumber = new Intl.NumberFormat('en-GB', {
     minimumFractionDigits,
     maximumFractionDigits,
   }).format(absAmount);
@@ -32,7 +31,7 @@ export function formatCurrencyAmount(
   }
 
   if (useFormalCode) {
-    // e.g. "610,00 RON" or "25,00 EUR"
+    // e.g. "610.00 RON" or "25.00 EUR"
     return `${signPrefix}${formattedNumber} ${currency}`;
   }
 

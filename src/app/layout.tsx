@@ -22,17 +22,17 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Revolut',
+    title: 'Revolut Sandbox',
   },
   formatDetection: {
     telephone: false,
   },
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/revolut-official-favicon.png', sizes: '32x32', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    shortcut: '/favicon.svg',
+    shortcut: '/revolut-official-favicon.png',
     apple: '/apple-touch-icon.png',
   },
 };
@@ -54,7 +54,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${inter.variable} ${plusJakarta.variable}`}>
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="bg-black text-white antialiased overflow-hidden select-none font-sans">

@@ -1,7 +1,7 @@
 {
-  "name": "Revolut Simulator",
-  "short_name": "Revolut",
-  "description": "1:1 Revolut iOS Mobile Simulator PWA",
+  "name": "Revolut Sandbox",
+  "short_name": "Revolut Sandbox",
+  "description": "Interactive demo with fictional balances and transactions",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

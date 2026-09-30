@@ -18,6 +18,7 @@ import {
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { sound } from '@/utils/audio';
+import { Currency, Transaction } from '@/types';
 
 export type HomeTool = 'search' | 'analytics' | 'details' | 'more';
 
@@ -26,6 +27,8 @@ interface HomeToolsSheetProps {
   onClose: () => void;
   onOpenWallet: () => void;
   onSelectTool: (tool: HomeTool) => void;
+  additionalTransactions?: Transaction[];
+  currency?: Currency;
 }
 
 const categoryColors: Record<string, string> = {
@@ -43,19 +46,24 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
   onClose,
   onOpenWallet,
   onSelectTool,
+  additionalTransactions,
+  currency,
 }) => {
   const {
     accounts,
-    activeCurrency,
-    transactions,
+    activeCurrency: selectedCurrency,
+    transactions: storedTransactions,
     contacts,
     setExchangeOpen,
     setAccountsDrawerOpen,
     setSelectedTransactionDetail,
     setSelectedContactForTransfer,
+    billsBalance,
   } = useRevolutStore();
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+  const activeCurrency = currency || selectedCurrency;
+  const transactions = useMemo(() => [...storedTransactions, ...(additionalTransactions || [])], [storedTransactions, additionalTransactions]);
 
   const account = accounts[activeCurrency];
   const iban = 'RO50 REVO 0000 1697 1825 8222';
@@ -63,7 +71,8 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
   const spending = useMemo(() => {
     const totals = new Map<string, number>();
     transactions.forEach((transaction) => {
-      if (transaction.amount < 0) {
+      const isPocketTransfer = transaction.id.startsWith('bills-') && !additionalTransactions?.some(item => item.id === transaction.id);
+      if (transaction.amount < 0 && transaction.currency === activeCurrency && !isPocketTransfer) {
         totals.set(
           transaction.category,
           (totals.get(transaction.category) || 0) + Math.abs(transaction.amount)
@@ -71,19 +80,19 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
       }
     });
     return Array.from(totals.entries()).sort((a, b) => b[1] - a[1]);
-  }, [transactions]);
+  }, [transactions, activeCurrency, additionalTransactions]);
 
   const totalSpent = spending.reduce((sum, [, value]) => sum + value, 0);
 
   const searchResults = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase('ro-RO');
+    const normalized = query.trim().toLocaleLowerCase('en-GB');
     if (!normalized) return { transactions: transactions.slice(0, 5), contacts: contacts.slice(0, 4) };
     return {
       transactions: transactions.filter((item) =>
-        `${item.title} ${item.subtitle} ${item.category}`.toLocaleLowerCase('ro-RO').includes(normalized)
+        `${item.title} ${item.subtitle} ${item.category}`.toLocaleLowerCase('en-GB').includes(normalized)
       ),
       contacts: contacts.filter((item) =>
-        `${item.name} ${item.phone}`.toLocaleLowerCase('ro-RO').includes(normalized)
+        `${item.name} ${item.phone}`.toLocaleLowerCase('en-GB').includes(normalized)
       ),
     };
   }, [contacts, query, transactions]);
@@ -221,7 +230,7 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
                   <div className="mt-1 text-3xl font-bold tracking-tight">
                     {formatCurrencyAmount(totalSpent, activeCurrency)}
                   </div>
-                  <div className="mt-1 text-xs text-emerald-400">↓ 9.6% compared with last month</div>
+                    <div className="mt-1 text-xs text-white/50">{activeCurrency} transactions · Excludes pocket transfers</div>
                 </div>
 
                 <div className="mt-5 space-y-4">
@@ -291,7 +300,12 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
                 {[
                   { label: 'Exchange', detail: 'Convert currencies', Icon: ArrowLeftRight, action: () => setExchangeOpen(true) },
                   { label: 'Cards', detail: 'Manage your cards', Icon: CreditCard, action: onOpenWallet },
-                  { label: 'Statements', detail: 'View activity', Icon: FileText, action: () => setSelectedTransactionDetail(transactions[0]) },
+                  { label: 'Statements', detail: 'Download demo activity', Icon: FileText, action: () => {
+                    const cell = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
+                    const rows = [['Date', 'Time', 'Description', 'Amount', 'Currency'], ...transactions.map(tx => [tx.date, tx.timestamp, tx.title, tx.amount, tx.currency])];
+                    const url = URL.createObjectURL(new Blob(['Sandbox statement — fictional transactions\r\n' + rows.map(row => row.map(cell).join(',')).join('\r\n')], {type: 'text/csv;charset=utf-8'}));
+                    const link = document.createElement('a'); link.href = url; link.download = 'sandbox-statement.csv'; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  } },
                   { label: 'Add account', detail: 'Currencies & pockets', Icon: Plus, action: () => setAccountsDrawerOpen(true) },
                   { label: 'Analytics', detail: 'Spending overview', Icon: BarChart3, action: () => onSelectTool('analytics') },
                   { label: 'Details', detail: 'Account information', Icon: Landmark, action: () => onSelectTool('details') },
@@ -321,7 +335,7 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
 
             {tool !== 'search' && tool !== 'more' && account && (
               <div className="mt-5 text-center text-[11px] text-white/30">
-                Available balance {formatCurrencyAmount(account.balance, activeCurrency)}
+                Available balance {formatCurrencyAmount(additionalTransactions ? billsBalance : account.balance, activeCurrency)}
               </div>
             )}
           </motion.section>

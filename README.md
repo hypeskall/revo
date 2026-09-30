@@ -1,8 +1,11 @@
-# Revo - 1:1 Revolut 10 Mobile Simulator PWA
+# Revo — Revolut-style Sandbox PWA
 
-An interactive, pixel-perfect mobile simulator of the Revolut 10 app built as a standalone Progressive Web App (PWA) using Next.js (App Router), Tailwind CSS, Framer Motion, and Lucide React.
+An interactive mobile sandbox built with Next.js, Tailwind CSS, Framer Motion, and Lucide React. The default Bills pocket follows the supplied dashboard screenshot with English labels, a purple-to-black background, and proportional sizing. This is a simulation, not a verified replica of every screen in the current Revolut app.
 
 ## Features
+
+- **Bills pocket**: Starts at €100.67. Add money from the EUR account and withdraw it back, with balance validation, saved activity, and a reset option. Accounts switches between the pocket and personal currency accounts.
+- **Official favicon and installation icons**: Retrieved from Revolut's public asset server. Asset sources and typography limitations are documented in [docs/home-reference.md](docs/home-reference.md).
 
 - **Revolut 10 Atmosphere**: Deep navy `#06090e` canvas with an animated volumetric cyan/blue aurora glow and lens flare horizon arc.
 - **Horizontal Account Carousel**: Swipeable Framer Motion multi-currency cards (Personal RON, Personal EUR, All accounts, Savings, Loans) with spring physics and responsive pagination dots.
@@ -10,7 +13,7 @@ An interactive, pixel-perfect mobile simulator of the Revolut 10 app built as a 
 - **Curved Glass Transaction Feed**: Flat list with authentic contact avatars, outgoing/incoming badges, and vector brand logos (SimpleIcons).
 - **Interactive Add Money & Apple Pay Simulator**: Numeric keypad with blinking currency cursor and Apple Pay bottom sheet authorization chime.
 - **Transfers & Chat History**: Interactive contact chat threads (e.g. Rareș Roman) with real-time transfer bubbles and spring checkmark animations.
-- **Dual-Currency Exchange Converter**: Live pegged conversion between RON, EUR, USD, and GBP.
+- **Dual-Currency Exchange Converter**: Simulated conversion between RON, EUR, USD, and GBP using fixed demo rates.
 - **Digital Cards & Wallet**: Flip, unmask, and freeze debit cards (including the Red Drip virtual card).
 - **Hidden God Mode**: Triple-tap or hold the profile avatar to override wallet balances, inject custom transactions, or reset data.
 - **Live sandbox activity**: Simulated top-ups, transfers, and exchanges update balances and immediately appear in the Home activity feed.

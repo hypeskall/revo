@@ -9,6 +9,10 @@ import {
 } from '@/types';
 
 interface RevolutState {
+  homeAccount: 'bills' | 'personal';
+  setHomeAccount: (account: 'bills' | 'personal') => void;
+  billsBalance: number;
+  moveBillsMoney: (amount: number, withdraw: boolean) => string | null;
   // Accounts & Balances
   accounts: Record<Currency, Account>;
   activeCurrency: Currency;
@@ -393,6 +397,23 @@ const DEFAULT_RATES: Record<string, number> = {
 export const useRevolutStore = create<RevolutState>()(
   persist(
     (set, get) => ({
+      homeAccount: 'bills',
+      setHomeAccount: (homeAccount) => set({ homeAccount }),
+      billsBalance: 100.67,
+      moveBillsMoney: (amount, withdraw) => {
+        const state = get();
+        if (!Number.isFinite(amount) || amount <= 0) return 'Enter a valid amount.';
+        const value = Math.round(amount * 100) / 100;
+        if (value <= 0) return 'Minimum amount is €0.01.';
+        if (value > (withdraw ? state.billsBalance : state.accounts.EUR.balance)) return 'Not enough money in this account.';
+        const now = new Date();
+        set({
+          billsBalance: Math.round((state.billsBalance + (withdraw ? -value : value)) * 100) / 100,
+          accounts: { ...state.accounts, EUR: { ...state.accounts.EUR, balance: Math.round((state.accounts.EUR.balance + (withdraw ? value : -value)) * 100) / 100 } },
+          transactions: [{ id: `bills-${crypto.randomUUID()}`, title: withdraw ? 'Withdrawn from Bills' : 'Added to Bills', subtitle: 'Pocket transfer · Sandbox', amount: withdraw ? -value : value, currency: 'EUR', date: 'Today', timestamp: now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}), category: 'Transfers', brand: 'Revolut', isIncoming: !withdraw, status: 'completed', rawDate: now.getTime() }, ...state.transactions],
+        });
+        return null;
+      },
       accounts: DEFAULT_ACCOUNTS,
       activeCurrency: 'RON',
       transactions: DEFAULT_TRANSACTIONS,
@@ -670,6 +691,8 @@ export const useRevolutStore = create<RevolutState>()(
 
       resetToDefaults: () => {
         set({
+          billsBalance: 100.67,
+          homeAccount: 'bills',
           accounts: DEFAULT_ACCOUNTS,
           activeCurrency: 'RON',
           transactions: DEFAULT_TRANSACTIONS,
@@ -683,6 +706,8 @@ export const useRevolutStore = create<RevolutState>()(
       name: 'revolut_simulator_storage_v2',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        homeAccount: state.homeAccount,
+        billsBalance: state.billsBalance,
         accounts: state.accounts,
         activeCurrency: state.activeCurrency,
         transactions: state.transactions,

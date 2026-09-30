@@ -12,13 +12,13 @@ import { AddMoneyModal } from '@/components/add-money/AddMoneyModal';
 import { ContactListModal } from '@/components/transfer/ContactListModal';
 import { ExchangeModal } from '@/components/exchange/ExchangeModal';
 import { TransactionDetailSheet } from '@/components/home/TransactionDetailSheet';
-import { CardsScreen } from '@/components/cards/CardsScreen';
 import { InvestScreen } from '@/components/invest/InvestScreen';
 import { CryptoScreen } from '@/components/crypto/CryptoScreen';
 import { HubScreen } from '@/components/hub/HubScreen';
 import { GodModeDrawer } from '@/components/godmode/GodModeDrawer';
 import { RevolutLogo } from '@/components/ui/RevolutLogo';
 import { useRevolutStore } from '@/store/useRevolutStore';
+import { BillsHome } from '@/components/home/BillsHome';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -33,6 +33,7 @@ export default function App() {
     isGodModeOpen,
     selectedTransactionDetail,
     homeTool,
+    homeAccount,
   } = useRevolutStore();
 
   const isModalActive =
@@ -79,11 +80,7 @@ export default function App() {
               transition={{ duration: 0.15 }}
               className="flex-1 flex flex-col w-full h-full overflow-y-auto no-scrollbar relative"
             >
-              {/* Header, Carousel Balance Hero, 4-Grid & Promo Card */}
-              <BalanceHero onColorChange={(col) => setAuroraColor(col)} />
-
-              {/* Curved Glass Bottom Sheet for Transactions */}
-              <TransactionList />
+              {homeAccount === 'bills' ? <BillsHome onNavigate={handleTabChange} /> : <><BalanceHero onColorChange={setAuroraColor} /><TransactionList /></>}
             </motion.div>
           )}
 
@@ -145,7 +142,7 @@ export default function App() {
       {/* 1. PERSISTENT FLOATING LIQUID GLASS DOCK:
           Hides smoothly when in a chat or full-screen modal
       */}
-      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} hidden={isModalActive} />
+      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} hidden={isModalActive || (activeTab === 'home' && homeAccount === 'bills')} />
 
       {/* Global Bottom Sheets & Modals */}
       <AccountsDrawer />

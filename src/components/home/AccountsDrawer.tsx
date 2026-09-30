@@ -16,16 +16,20 @@ export const AccountsDrawer: React.FC = () => {
     activeCurrency,
     setActiveCurrency,
     setAddMoneyOpen,
+    homeAccount,
+    setHomeAccount,
+    billsBalance,
   } = useRevolutStore();
 
   const handleSelectCurrency = (currency: Currency) => {
     sound.playKeypadClick();
     setActiveCurrency(currency);
+    setHomeAccount('personal');
     setAccountsDrawerOpen(false);
   };
 
   // Compute total in RON
-  const totalAllRon = accounts.RON.balance + accounts.EUR.balance * 4.9765 + accounts.USD.balance * 4.582;
+  const totalAllRon = accounts.RON.balance + accounts.EUR.balance * 4.9765 + accounts.USD.balance * 4.582 + accounts.GBP.balance * 5.8910;
 
   return (
     <AnimatePresence>
@@ -79,6 +83,11 @@ export const AccountsDrawer: React.FC = () => {
 
             {/* Scrollable list */}
             <div className="flex-1 overflow-y-auto px-5 pb-24 pt-1 space-y-4 no-scrollbar">
+              <h2 className="text-xl font-bold text-white tracking-tight">Pockets</h2>
+              <button className="w-full bg-[#191C20] rounded-2xl p-4 flex items-center justify-between text-left" onClick={() => { setHomeAccount('bills'); setAccountsDrawerOpen(false); }}>
+                <span><span className="block text-[15px]">Bills</span><span className="text-xs text-neutral-400">EUR pocket</span></span>
+                <span className="flex items-center gap-2">{formatCurrencyAmount(billsBalance, 'EUR')}{homeAccount === 'bills' && <Check size={18} className="text-blue-400" />}</span>
+              </button>
               <h2 className="text-xl font-bold text-white tracking-tight">Personal</h2>
 
               {/* Accounts Card Block */}
@@ -106,7 +115,7 @@ export const AccountsDrawer: React.FC = () => {
                     <span className="text-[15px] font-medium text-white">
                       {formatCurrencyAmount(accounts.EUR.balance, 'EUR')}
                     </span>
-                    {activeCurrency === 'EUR' && (
+                    {homeAccount === 'personal' && activeCurrency === 'EUR' && (
                       <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>
@@ -132,7 +141,7 @@ export const AccountsDrawer: React.FC = () => {
                     <span className="text-[15px] font-medium text-white">
                       {formatCurrencyAmount(accounts.RON.balance, 'RON')}
                     </span>
-                    {activeCurrency === 'RON' && (
+                    {homeAccount === 'personal' && activeCurrency === 'RON' && (
                       <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>
@@ -158,7 +167,7 @@ export const AccountsDrawer: React.FC = () => {
                     <span className="text-[15px] font-medium text-white">
                       {formatCurrencyAmount(accounts.USD.balance, 'USD')}
                     </span>
-                    {activeCurrency === 'USD' && (
+                    {homeAccount === 'personal' && activeCurrency === 'USD' && (
                       <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>
@@ -184,7 +193,7 @@ export const AccountsDrawer: React.FC = () => {
                     <span className="text-[15px] font-medium text-white">
                       {formatCurrencyAmount(accounts.GBP.balance, 'GBP')}
                     </span>
-                    {activeCurrency === 'GBP' && (
+                    {homeAccount === 'personal' && activeCurrency === 'GBP' && (
                       <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
                         <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>

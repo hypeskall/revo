@@ -17,18 +17,18 @@ export const AccountCarousel: React.FC<AccountCarouselProps> = ({
   onColorChange,
 }) => {
   const { accounts, activeCurrency, setActiveCurrency, rates } = useRevolutStore();
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => ['RON', 'EUR', 'USD', 'GBP'].indexOf(activeCurrency));
 
   // Helper to dynamically format balances into { main, cents }
   const formatBalanceParts = (amount: number, symbol: string) => {
-    const formatted = new Intl.NumberFormat('ro-RO', {
+    const formatted = new Intl.NumberFormat('en-GB', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
-    const parts = formatted.split(',');
+    const parts = formatted.split('.');
     return {
       main: parts[0],
-      cents: `,${parts[1]} ${symbol}`,
+      cents: `.${parts[1]} ${symbol}`,
     };
   };
 

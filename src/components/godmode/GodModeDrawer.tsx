@@ -155,6 +155,7 @@ export const GodModeDrawer: React.FC = () => {
                 sound.playKeypadClick();
                 setGodModeOpen(false);
               }}
+              aria-label="Close simulator controls"
               className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition"
             >
               <X className="w-4 h-4" />
