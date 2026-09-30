@@ -3,8 +3,10 @@
 import React from 'react';
 import { Search, BarChart2, Globe, Coins, Percent, Lightbulb } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { useRevolutStore } from '@/store/useRevolutStore';
 
 export const InvestScreen: React.FC = () => {
+  const {setUiPanel,setHomeTool}=useRevolutStore();
   return (
     <div
       style={{
@@ -47,13 +49,15 @@ export const InvestScreen: React.FC = () => {
         {/* Right: BarChart & Globe icons */}
         <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => sound.playKeypadClick()}
+            aria-label="Investment analytics"
+            onClick={() => setHomeTool('analytics')}
             className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white active:scale-95 transition"
           >
             <BarChart2 className="w-4 h-4" />
           </button>
           <button
-            onClick={() => sound.playKeypadClick()}
+            aria-label="Investment markets"
+            onClick={() => setUiPanel('invest')}
             className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white active:scale-95 transition"
           >
             <Globe className="w-4 h-4" />
@@ -70,7 +74,7 @@ export const InvestScreen: React.FC = () => {
 
         {/* Big pill: "Start investing" */}
         <button
-          onClick={() => sound.playSuccessSound()}
+          onClick={() => setUiPanel('invest')}
           className="mt-8 w-full max-w-[340px] py-4 rounded-full bg-white/15 hover:bg-white/20 backdrop-blur-2xl border border-white/20 text-white font-semibold text-sm active:scale-95 transition shadow-lg"
         >
           Start investing

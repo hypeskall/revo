@@ -59,6 +59,7 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
     setSelectedTransactionDetail,
     setSelectedContactForTransfer,
     billsBalance,
+    setUiPanel,
   } = useRevolutStore();
   const [query, setQuery] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
@@ -157,6 +158,7 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
                 <label className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
                   <Search className="h-4 w-4 text-white/55" />
                   <input
+                    aria-label="Search people and payments"
                     autoFocus
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}

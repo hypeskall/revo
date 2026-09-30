@@ -1,200 +1,42 @@
 'use client';
-
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, ChevronDown, Delete, X } from 'lucide-react';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { formatCurrencyAmount } from '@/utils/formatters';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
-import { Keypad } from '@/components/ui/Keypad';
-import { ApplePaySheet } from '@/components/add-money/ApplePaySheet';
-import { sound } from '@/utils/audio';
 import { ApplePayLogo } from '@/components/ui/AppleLogo';
+import { ApplePaySheet } from './ApplePaySheet';
 
-export const AddMoneyModal: React.FC = () => {
-  const {
-    isAddMoneyOpen,
-    setAddMoneyOpen,
-    accounts,
-    activeCurrency,
-    addMoney,
-  } = useRevolutStore();
-
-  const [inputStr, setInputStr] = useState('610');
-  const [isApplePayOpen, setIsApplePayOpen] = useState(false);
-
-  if (!isAddMoneyOpen) return null;
-
-  const currentAccount = accounts[activeCurrency];
-  const formattedBalance = formatCurrencyAmount(
-    currentAccount ? currentAccount.balance : 0,
-    activeCurrency
-  );
-
-  const handleDigit = (digit: string) => {
-    if (digit === ',') {
-      if (!inputStr.includes(',')) {
-        setInputStr(inputStr + ',');
-      }
-      return;
-    }
-    if (inputStr === '0') {
-      setInputStr(digit);
-    } else {
-      if (inputStr.length < 8) {
-        setInputStr(inputStr + digit);
-      }
-    }
+export function AddMoneyModal() {
+  const state=useRevolutStore();
+  const [input,setInput]=useState('610');
+  const [appleOpen,setAppleOpen]=useState(false);
+  const [methodsOpen,setMethodsOpen]=useState(false);
+  const [method,setMethod]=useState('Apple Pay');
+  const [operator,setOperator]=useState<string|null>(null);
+  const [operand,setOperand]=useState<number|null>(null);
+  const [replace,setReplace]=useState(false);
+  const [error,setError]=useState('');
+  const amount=Number(input.replace(',','.'));
+  const digit=(value:string)=>{setError('');if(value==='.'){if(!input.includes('.'))setInput(input+'.');return;}if(replace||input==='0'){setInput(value);setReplace(false);}else if(input.length<12&&(!input.includes('.')||input.split('.')[1].length<2))setInput(input+value);};
+  const calculate=(next:string)=>{
+    let result=amount;
+    if(operator&&operand!==null){result=operator==='+'?operand+amount:operator==='−'?operand-amount:operator==='×'?operand*amount:operand/amount;}
+    if(!Number.isFinite(result)||result<0||result>999999999){setError('Enter a valid amount');return;}
+    setInput(String(Math.round(result*100)/100));setOperand(next==='='?null:result);setOperator(next==='='?null:next);setReplace(true);
   };
-
-  const handleDelete = () => {
-    if (inputStr.length <= 1) {
-      setInputStr('0');
-    } else {
-      setInputStr(inputStr.slice(0, -1));
-    }
-  };
-
-  const numericAmount = parseFloat(inputStr.replace(',', '.')) || 0;
-
-  const handleApplePaySuccess = () => {
-    setIsApplePayOpen(false);
-    addMoney(numericAmount, activeCurrency, 'Apple Pay');
-    setAddMoneyOpen(false);
-  };
-
-  return (
-    // Strictly constrained inside root container with safe-area support
-    <div className="absolute inset-0 z-50 bg-black text-white flex flex-col justify-between overflow-hidden">
-      {/* Top Header with Dynamic iPhone Safe Area */}
-      <div
-        style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)',
-        }}
-        className="px-5 pb-2 flex items-center justify-between"
-      >
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => {
-            sound.playKeypadClick();
-            setAddMoneyOpen(false);
-          }}
-          className="w-10 h-10 rounded-full bg-[#181A1D] hover:bg-[#22252A] flex items-center justify-center text-white transition border border-white/[0.08] shadow-sm"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </motion.button>
-
-        <div className="text-center">
-          <h2 className="text-base font-semibold text-white tracking-tight">Add money</h2>
-          <div className="text-xs text-neutral-400">Balance: {formattedBalance}</div>
-        </div>
-
-        <div className="w-10" />
-      </div>
-
-      {/* Main Fancy Animated Amount Display (Motion.dev rolling ticker) */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
-        <motion.div
-          key={inputStr.length}
-          animate={{ scale: [0.97, 1.02, 1] }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-          className="flex items-center justify-center my-3 overflow-hidden h-[76px]"
-        >
-          {/* Rolling character animation */}
-          <div className="flex items-center justify-center">
-            <AnimatePresence mode="popLayout" initial={false}>
-              {inputStr.split('').map((char, idx) => (
-                <motion.span
-                  key={`${idx}-${char}`}
-                  initial={{ opacity: 0, y: 22, scale: 0.7, filter: 'blur(4px)' }}
-                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -22, scale: 0.7, filter: 'blur(4px)' }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 550,
-                    damping: 28,
-                    mass: 0.35,
-                  }}
-                  className="text-[58px] font-extrabold text-white tracking-tight leading-none inline-block font-sans select-none"
-                >
-                  {char}
-                </motion.span>
-              ))}
-            </AnimatePresence>
-          </div>
-
-          {/* Glowing Luminous Electric Cyan Blinking Cursor */}
-          <motion.div
-            animate={{
-              opacity: [1, 0.25, 1],
-              scaleY: [1, 0.92, 1],
-            }}
-            transition={{ repeat: Infinity, duration: 0.85, ease: 'easeInOut' }}
-            className="w-[3.5px] h-12 bg-cyan-400 mx-2 rounded-full shadow-[0_0_14px_#00d2ff]"
-          />
-
-          {/* Currency Indicator with Spring Layout */}
-          <motion.span
-            layout
-            className="text-[44px] font-bold text-white/90 ml-0.5 tracking-tight select-none"
-          >
-            {activeCurrency === 'RON'
-              ? 'lei'
-              : activeCurrency === 'EUR'
-              ? '€'
-              : activeCurrency === 'USD'
-              ? '$'
-              : '£'}
-          </motion.span>
-        </motion.div>
-
-        {/* Clean Apple Pay · RON dropdown pill */}
-        <motion.button
-          whileTap={{ scale: 0.94 }}
-          type="button"
-          onClick={() => sound.playKeypadClick()}
-          className="mt-2 flex items-center gap-2 px-4 py-2 rounded-full bg-[#191C1F] hover:bg-[#22262B] text-xs font-medium text-white border border-white/[0.08] shadow-sm transition"
-        >
-          <ApplePayLogo variant="white" className="h-4" />
-          <span className="text-neutral-300 font-medium">· {activeCurrency}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-neutral-400 ml-0.5" />
-        </motion.button>
-
-        {/* Subtitle arrival note */}
-        <p className="text-xs text-neutral-400 mt-5 font-normal tracking-tight">
-          Arriving · Usually instantly
-        </p>
-
-        {/* Primary Official Apple Pay Button */}
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-          onClick={() => {
-            if (numericAmount <= 0) return;
-            sound.playKeypadClick();
-            setIsApplePayOpen(true);
-          }}
-          disabled={numericAmount <= 0}
-          className={`w-full max-w-[340px] mt-4 py-3.5 rounded-full font-semibold text-base flex items-center justify-center gap-1.5 shadow-xl transition-colors ${
-            numericAmount > 0
-              ? 'bg-white text-black hover:bg-neutral-100 cursor-pointer shadow-[0_10px_30px_rgba(255,255,255,0.15)]'
-              : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
-          }`}
-        >
-          <ApplePayLogo variant="black" className="h-6" />
-        </motion.button>
-      </div>
-
-      {/* Tactile Motion Keypad */}
-      <Keypad onDigit={handleDigit} onDelete={handleDelete} />
-
-      {/* Apple Pay Confirmation Bottom Sheet */}
-      <ApplePaySheet
-        isOpen={isApplePayOpen}
-        onClose={() => setIsApplePayOpen(false)}
-        amount={numericAmount}
-        currency={activeCurrency}
-        onSuccess={handleApplePaySuccess}
-      />
-    </div>
-  );
-};
+  useEffect(()=>{if(state.isAddMoneyOpen){setAppleOpen(false);setMethodsOpen(false);setError('');}},[state.isAddMoneyOpen]);
+  useEffect(()=>{
+    if(!state.isAddMoneyOpen||appleOpen||methodsOpen)return;
+    const handle=(event:KeyboardEvent)=>{if(/^[0-9]$/.test(event.key)){event.preventDefault();digit(event.key);}else if(event.key==='.'||event.key===','){event.preventDefault();digit('.');}else if(event.key==='Backspace'){event.preventDefault();setInput(value=>value.length>1?value.slice(0,-1):'0');}else if(event.key==='Escape')state.setAddMoneyOpen(false);};
+    window.addEventListener('keydown',handle);return()=>window.removeEventListener('keydown',handle);
+  });
+  if(!state.isAddMoneyOpen)return null;
+  return <section role="dialog" aria-modal="true" aria-label="Add money" className="reference-add-money">
+    <header><button className="reference-back" aria-label="Close add money" onClick={()=>state.setAddMoneyOpen(false)}><ArrowLeft/></button><div><h1>Add money</h1><p>Balance: {formatCurrencyAmount(state.accounts[state.activeCurrency].balance,state.activeCurrency)}</p></div><span/></header>
+    <div className="reference-topup-main"><div className="reference-topup-amount"><span>{input}</span><motion.i animate={{opacity:[1,0,1]}} transition={{repeat:Infinity,duration:1}}/><span>{state.accounts[state.activeCurrency].symbol}</span></div><button className="reference-method" onClick={()=>setMethodsOpen(true)}>{method==='Apple Pay'&&<ApplePayLogo variant="white"/>}<span>{method} · {state.activeCurrency}</span><ChevronDown/></button><div className="reference-arrival"><p>{error||<>Arriving <span>· Usually instantly</span></>}</p><button className="reference-pay" aria-label={method==='Apple Pay'?'Pay with Apple Pay':'Add money with card'} disabled={!Number.isFinite(amount)||amount<=0} onClick={()=>setAppleOpen(true)}>{method==='Apple Pay'?<ApplePayLogo variant="black"/>:'Add money'}</button></div></div>
+    <div className="reference-keypad"><div className="reference-operators">{['+','−','×','÷','='].map(op=><button key={op} aria-label={`Calculate ${op}`} onClick={()=>calculate(op)} className={operator===op?'active':''}>{op}</button>)}</div><div className="reference-digits">{['1','2','3','4','5','6','7','8','9','.','0','delete'].map(value=><motion.button whileTap={{scale:.9}} aria-label={value==='delete'?'Delete digit':value==='.'?'Decimal point':value} key={value} onClick={()=>value==='delete'?setInput(input.length>1?input.slice(0,-1):'0'):digit(value)}>{value==='delete'?<Delete/>:value}</motion.button>)}</div></div>
+    {methodsOpen&&<div className="absolute inset-0 z-[70] bg-black/70 flex items-end"><section role="dialog" aria-label="Payment method" className="w-full rounded-t-3xl bg-[#202023] p-6"><button aria-label="Close payment methods" className="float-right" onClick={()=>setMethodsOpen(false)}><X/></button><h2 className="text-xl mb-6">Add money with</h2>{['Apple Pay','Debit card'].map(option=><button className="block w-full p-4 rounded-xl bg-white/10 mb-3 text-left" key={option} onClick={()=>{setMethod(option);setMethodsOpen(false);}}>{option}</button>)}</section></div>}
+    <ApplePaySheet isOpen={appleOpen} onClose={()=>setAppleOpen(false)} amount={amount} currency={state.activeCurrency} onSuccess={()=>{setAppleOpen(false);state.addMoney(amount,state.activeCurrency,method);state.setAddMoneyOpen(false);}}/>
+  </section>;
+}

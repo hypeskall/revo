@@ -1,12 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import { MobileFrame } from '@/components/frame/MobileFrame';
 import { BottomTabBar, TabId } from '@/components/navigation/BottomTabBar';
 import { AuroraBackground } from '@/components/home/AuroraBackground';
-import { BalanceHero } from '@/components/home/BalanceHero';
-import { TransactionList } from '@/components/home/TransactionList';
 import { AccountsDrawer } from '@/components/home/AccountsDrawer';
 import { AddMoneyModal } from '@/components/add-money/AddMoneyModal';
 import { ContactListModal } from '@/components/transfer/ContactListModal';
@@ -19,11 +17,14 @@ import { GodModeDrawer } from '@/components/godmode/GodModeDrawer';
 import { RevolutLogo } from '@/components/ui/RevolutLogo';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { BillsHome } from '@/components/home/BillsHome';
+import { PersonalHome } from '@/components/home/PersonalHome';
+import { HomeToolsSheet } from '@/components/home/HomeToolsSheet';
+import { ReferenceWallet } from '@/components/cards/ReferenceWallet';
+import { PresentationPanels, NotificationToast } from '@/components/home/PresentationPanels';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [mounted, setMounted] = useState(false);
-  const [auroraColor, setAuroraColor] = useState<'cyan' | 'blue' | 'purple'>('blue');
 
   const {
     selectedContactForTransfer,
@@ -34,6 +35,11 @@ export default function App() {
     selectedTransactionDetail,
     homeTool,
     homeAccount,
+    uiPanel,
+    walletOpen,
+    isAccountsDrawerOpen,
+    setHomeTool,
+    setWalletOpen,
   } = useRevolutStore();
 
   const isModalActive =
@@ -43,7 +49,7 @@ export default function App() {
     isTransferOpen ||
     isGodModeOpen ||
     !!selectedTransactionDetail ||
-    !!homeTool;
+    !!homeTool || !!uiPanel || walletOpen || isAccountsDrawerOpen;
 
   useEffect(() => {
     setMounted(true);
@@ -64,9 +70,9 @@ export default function App() {
   }
 
   return (
-    <MobileFrame>
+    <MotionConfig reducedMotion="user"><MobileFrame>
       {/* Dynamic Animated Aurora Glow (Active in background) */}
-      <AuroraBackground colorVariant={auroraColor} />
+      <AuroraBackground colorVariant="blue" />
 
       {/* Screen Views with Butter-Smooth Cross-Fade (Duration: 0.15s) */}
       <main className="flex-1 flex flex-col w-full h-full relative overflow-hidden z-10">
@@ -80,7 +86,7 @@ export default function App() {
               transition={{ duration: 0.15 }}
               className="flex-1 flex flex-col w-full h-full overflow-y-auto no-scrollbar relative"
             >
-              {homeAccount === 'bills' ? <BillsHome onNavigate={handleTabChange} /> : <><BalanceHero onColorChange={setAuroraColor} /><TransactionList /></>}
+              {homeAccount === 'bills' ? <BillsHome onNavigate={handleTabChange} /> : <PersonalHome />}
             </motion.div>
           )}
 
@@ -142,15 +148,19 @@ export default function App() {
       {/* 1. PERSISTENT FLOATING LIQUID GLASS DOCK:
           Hides smoothly when in a chat or full-screen modal
       */}
-      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} hidden={isModalActive || (activeTab === 'home' && homeAccount === 'bills')} />
+      <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} hidden={isModalActive} />
 
       {/* Global Bottom Sheets & Modals */}
       <AccountsDrawer />
-      <AddMoneyModal />
-      <ContactListModal />
+      {isAddMoneyOpen && <AddMoneyModal />}
+      {(activeTab !== 'transfer' || isTransferOpen) && <ContactListModal />}
       <ExchangeModal />
       <TransactionDetailSheet />
       <GodModeDrawer />
-    </MobileFrame>
+      {!(activeTab === 'home' && homeAccount === 'bills') && <HomeToolsSheet tool={homeTool} onClose={()=>setHomeTool(null)} onSelectTool={setHomeTool} onOpenWallet={()=>setWalletOpen(true)} />}
+      <ReferenceWallet/>
+      <PresentationPanels/>
+      <NotificationToast/>
+    </MobileFrame></MotionConfig>
   );
 }

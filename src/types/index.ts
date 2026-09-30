@@ -65,6 +65,7 @@ export interface ContactTransfer {
 }
 
 export interface Contact {
+  unread?: number;
   id: string;
   name: string;
   phone: string;

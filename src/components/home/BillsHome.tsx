@@ -40,7 +40,7 @@ export function BillsHome({ onNavigate }: { onNavigate: (tab: TabId) => void }) 
   return <>
     <div className="bills-home no-scrollbar">
       <header className="bills-header">
-        <button aria-label="Sandbox profile" onClick={()=>state.setGodModeOpen(true)} className="bills-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=96&h=96&fit=crop&crop=faces" alt="Demo profile" /></button>
+        <button aria-label="Profile" onClick={()=>state.setUiPanel('profile')} className="bills-avatar"><img src="/profile.png" alt="Profile" /></button>
         <button aria-label="Search" className="bills-search" onClick={()=>state.setHomeTool('search')}><Search /></button>
         <button aria-label="Analytics" className="bills-header-icon" onClick={()=>state.setHomeTool('analytics')}><svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><rect x="3" y="19" width="6" height="10" rx="3"/><rect x="13" y="3" width="6" height="26" rx="3"/><rect x="23" y="11" width="6" height="18" rx="3"/></svg></button>
         <button aria-label="Cards" className="bills-header-icon" onClick={()=>open('cards')}><svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M5 6h22a3 3 0 0 1 3 3v2H2V9a3 3 0 0 1 3-3Zm-3 8h28v9a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3Zm5 6v3h11v-3Z" fillRule="evenodd"/></svg></button>
@@ -59,10 +59,6 @@ export function BillsHome({ onNavigate }: { onNavigate: (tab: TabId) => void }) 
           <span className="bills-transaction-amount">{tx.amount<0?'-':'+'}{euro(Math.abs(tx.amount))} €</span>
         </button>;
       })}</section>
-      <nav className="bills-navigation" aria-label="App navigation">
-        {[{ id: 'invest' as TabId, label: 'Invest', Icon: TrendingUp }, { id: 'transfer' as TabId, label: 'Payments', Icon: ArrowLeftRight }, { id: 'cards' as TabId, label: 'Crypto', Icon: Bitcoin }, { id: 'hub' as TabId, label: 'RevPoints', Icon: Sparkles }].map(({id,label,Icon}) => <button key={id} onClick={() => onNavigate(id)}><Icon size={20}/><span>{label}</span></button>)}
-      </nav>
-      <p className="bills-demo">Sandbox · Fictional money</p>
     </div>
     <HomeToolsSheet tool={state.homeTool} additionalTransactions={examples} currency="EUR" onClose={()=>state.setHomeTool(null)} onSelectTool={state.setHomeTool} onOpenWallet={()=>open('cards')}/>
     {panel === 'cards' && <section role="dialog" aria-modal="true" aria-label="Cards" className="absolute inset-0 z-[70] flex flex-col bg-black">

@@ -4,8 +4,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, ArrowUpRight, ArrowDownRight, Bitcoin, Sparkles, Plus, ArrowDownUp } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { useRevolutStore } from '@/store/useRevolutStore';
+import { formatCurrencyAmount } from '@/utils/formatters';
 
 export const CryptoScreen: React.FC = () => {
+  const {setUiPanel,demoHoldings}=useRevolutStore();
   const cryptos = [
     {
       name: 'Bitcoin',
@@ -74,7 +77,8 @@ export const CryptoScreen: React.FC = () => {
         </div>
 
         <button
-          onClick={() => sound.playKeypadClick()}
+          aria-label="Search crypto"
+          onClick={() => setUiPanel('crypto')}
           className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white"
         >
           <Search className="w-4 h-4" />
@@ -88,17 +92,17 @@ export const CryptoScreen: React.FC = () => {
         className="relative z-10 bg-[#0d141c]/80 backdrop-blur-xl rounded-3xl p-5 border border-white/10 shadow-2xl mt-5"
       >
         <div className="text-xs text-white/60 font-medium">Crypto Portfolio</div>
-        <div className="text-3xl font-bold text-white tracking-tight mt-1">2.418,20 lei</div>
+        <div className="text-3xl font-bold text-white tracking-tight mt-1">{formatCurrencyAmount(['BTC','ETH','SOL'].reduce((sum,ticker)=>sum+(demoHoldings[ticker]||0),0),'RON')}</div>
         <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold mt-1">
           <ArrowUpRight className="w-4 h-4" />
-          <span>+284,50 lei (+12.4%) All time</span>
+          <span>Demo holdings · Fixed values</span>
         </div>
 
         {/* Action pills */}
         <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-white/[0.06]">
           <motion.button
             whileTap={{ scale: 0.94 }}
-            onClick={() => sound.playSuccessSound()}
+            onClick={() => setUiPanel('crypto')}
             className="py-2.5 rounded-xl bg-white text-black font-semibold text-xs active:scale-95 transition flex items-center justify-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5 stroke-[3]" />
@@ -106,7 +110,7 @@ export const CryptoScreen: React.FC = () => {
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.94 }}
-            onClick={() => sound.playKeypadClick()}
+            onClick={() => setUiPanel('crypto')}
             className="py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs active:scale-95 transition flex items-center justify-center gap-1.5"
           >
             <ArrowDownUp className="w-3.5 h-3.5" />
@@ -127,7 +131,7 @@ export const CryptoScreen: React.FC = () => {
             <motion.div
               key={c.ticker}
               whileTap={{ scale: 0.98 }}
-              onClick={() => sound.playKeypadClick()}
+              onClick={() => setUiPanel('crypto')}
               className="py-3 px-1 flex items-center justify-between hover:bg-white/[0.02] active:bg-white/[0.04] transition cursor-pointer"
             >
               <div className="flex items-center gap-3.5">

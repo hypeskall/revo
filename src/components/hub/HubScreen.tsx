@@ -3,8 +3,10 @@
 import React from 'react';
 import { Sparkles, Plane, Shield, Gift, Wifi, Smartphone, Award, ChevronRight } from 'lucide-react';
 import { sound } from '@/utils/audio';
+import { useRevolutStore } from '@/store/useRevolutStore';
 
 export const HubScreen: React.FC = () => {
+  const {setUiPanel,revPoints}=useRevolutStore();
   const perks = [
     { title: 'RevPoints Rewards', desc: '1,420 points available to redeem', icon: Award, color: '#0075EB' },
     { title: 'Travel & Stays', desc: 'Up to 10% cashback on hotels', icon: Plane, color: '#10B981' },
@@ -24,7 +26,7 @@ export const HubScreen: React.FC = () => {
         <h1 className="text-2xl font-bold text-white tracking-tight">RevPoints & Hub</h1>
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold">
           <Award className="w-3.5 h-3.5" />
-          <span>1,420 pts</span>
+          <span>{revPoints.toLocaleString('en-GB')} pts</span>
         </div>
       </div>
 
@@ -39,7 +41,7 @@ export const HubScreen: React.FC = () => {
             Unlimited airport lounges, platinum card, and maximum RevPoints multiplier.
           </p>
           <button
-            onClick={() => sound.playKeypadClick()}
+            onClick={() => setUiPanel('plan')}
             className="mt-4 px-4 py-2 rounded-full bg-white text-black font-semibold text-xs active:scale-95 transition"
           >
             Upgrade Now
@@ -56,7 +58,7 @@ export const HubScreen: React.FC = () => {
             return (
               <div
                 key={p.title}
-                onClick={() => sound.playKeypadClick()}
+                onClick={() => setUiPanel('rewards')}
                 className="px-4 py-3.5 flex items-center justify-between hover:bg-white/[0.03] active:bg-white/[0.05] transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">

@@ -19,6 +19,7 @@ export const AccountsDrawer: React.FC = () => {
     homeAccount,
     setHomeAccount,
     billsBalance,
+    setUiPanel,
   } = useRevolutStore();
 
   const handleSelectCurrency = (currency: Currency) => {
@@ -232,7 +233,8 @@ export const AccountsDrawer: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => sound.playKeypadClick()}
+                  aria-label="Close accounts"
+                  onClick={() => {setAccountsDrawerOpen(false);setUiPanel('invest');}}
                   className="px-3.5 py-1.5 rounded-full bg-[#282E36] hover:bg-[#323943] text-xs font-semibold text-white shrink-0 active:scale-95 transition"
                 >
                   Discover
@@ -253,7 +255,7 @@ export const AccountsDrawer: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => sound.playKeypadClick()}
+                  onClick={() => {setAccountsDrawerOpen(false);setUiPanel('help');}}
                   className="px-3.5 py-1.5 rounded-full bg-[#282E36] hover:bg-[#323943] text-xs font-semibold text-white shrink-0 active:scale-95 transition"
                 >
                   Discover

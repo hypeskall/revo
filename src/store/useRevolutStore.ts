@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { presentationContacts, presentationTransactions, presentationCards } from '@/data/presentation';
 import {
   Account,
   BankCard,
@@ -9,6 +10,27 @@ import {
 } from '@/types';
 
 interface RevolutState {
+  uiPanel: 'profile' | 'notifications' | 'activity' | 'scheduled' | 'new-contact' | 'help' | 'invest' | 'crypto' | 'rewards' | 'plan' | null;
+  setUiPanel: (panel: RevolutState['uiPanel']) => void;
+  walletOpen: boolean;
+  setWalletOpen: (open: boolean) => void;
+  notifications: {id:string;title:string;message:string;read:boolean;timestamp:number}[];
+  notificationsEnabled: boolean;
+  setNotificationsEnabled: (enabled:boolean) => void;
+  notify: (title:string,message:string) => void;
+  markNotificationsRead: () => void;
+  markContactRead: (id:string) => void;
+  addContact: (name:string) => Contact;
+  scheduledPayments: {id:string;contactId:string;amount:number;date:string;status:'scheduled'|'completed'|'failed'}[];
+  schedulePayment: (contactId:string,amount:number,date:string) => string|null;
+  cancelScheduledPayment: (id:string) => void;
+  processScheduledPayments: () => void;
+  demoHoldings: Record<string,number>;
+  tradeDemo: (asset:string,amount:number,sell:boolean) => string|null;
+  revPoints: number;
+  redeemPoints: (points:number) => string|null;
+  selectedPlan: string;
+  selectPlan: (plan:string) => void;
   homeAccount: 'bills' | 'personal';
   setHomeAccount: (account: 'bills' | 'personal') => void;
   billsBalance: number;
@@ -76,7 +98,7 @@ const DEFAULT_ACCOUNTS: Record<Currency, Account> = {
     id: 'acc-ron',
     currency: 'RON',
     name: 'Romanian Leu',
-    balance: 1879.56,
+    balance: 1796.46,
     symbol: 'lei',
     flag: '🇷🇴',
     code: 'RON',
@@ -110,275 +132,6 @@ const DEFAULT_ACCOUNTS: Record<Currency, Account> = {
   },
 };
 
-const DEFAULT_CONTACTS: Contact[] = [
-  {
-    id: 'c-rares',
-    name: 'Rareș Roman',
-    phone: '+40 742 819 032',
-    iban: 'RO60 ROIN 4021 L1ZY TN7Q ETE6',
-    initials: 'RR',
-    avatarColor: '#F59E0B',
-    badge: 'S&P',
-    transfers: [
-      {
-        id: 'tr-1',
-        amount: 40,
-        currency: 'RON',
-        dateLabel: '27 Sep',
-        timeLabel: '21:40',
-        status: 'completed',
-        isSender: true,
-      },
-      {
-        id: 'tr-2',
-        amount: 94,
-        currency: 'RON',
-        dateLabel: 'Yesterday',
-        timeLabel: '08:18',
-        status: 'completed',
-        isSender: true,
-      },
-      {
-        id: 'tr-3',
-        amount: 1,
-        currency: 'RON',
-        dateLabel: 'Today',
-        timeLabel: '15:15',
-        status: 'completed',
-        isSender: true,
-      },
-    ],
-  },
-  {
-    id: 'c-maria',
-    name: 'Maria Popa',
-    phone: '+40 721 554 990',
-    iban: 'RO44 BTRL 9872 1092 8841 0001',
-    initials: 'MP',
-    avatarColor: '#EC4899',
-    transfers: [
-      {
-        id: 'tr-4',
-        amount: 85,
-        currency: 'RON',
-        dateLabel: '22 Sep',
-        timeLabel: '14:20',
-        status: 'completed',
-        isSender: false,
-      },
-    ],
-  },
-  {
-    id: 'c-elena',
-    name: 'Elena Popescu',
-    phone: '+40 733 912 341',
-    iban: 'RO12 BPOS 3321 0092 1144 0002',
-    initials: 'EP',
-    avatarColor: '#8B5CF6',
-    transfers: [],
-  },
-  {
-    id: 'c-andrei',
-    name: 'Andrei Ionescu',
-    phone: '+40 755 882 119',
-    iban: 'RO88 INGB 0000 9999 1234 5678',
-    initials: 'AI',
-    avatarColor: '#10B981',
-    transfers: [],
-  },
-];
-
-const DEFAULT_TRANSACTIONS: Transaction[] = [
-  {
-    id: 'tx-explee-reverted',
-    title: 'Explee Ltd',
-    subtitle: 'Reverted card payment',
-    amount: 4.68,
-    currency: 'RON',
-    date: 'Today',
-    timestamp: '17:56',
-    category: 'Shopping',
-    brand: 'Explee',
-    isIncoming: true,
-    status: 'reverted',
-    rawDate: Date.now() - 3600000 * 0.05,
-  },
-  {
-    id: 'tx-explee-verify',
-    title: 'Explee Ltd',
-    subtitle: 'Card verification',
-    amount: 0,
-    currency: 'RON',
-    date: 'Today',
-    timestamp: '17:55',
-    category: 'Verification',
-    brand: 'Explee',
-    isIncoming: false,
-    status: 'completed',
-    rawDate: Date.now() - 3600000 * 0.08,
-  },
-  {
-    id: 'tx-1',
-    title: 'Rareș Roman',
-    subtitle: 'Sent from Revolut',
-    amount: -1,
-    currency: 'RON',
-    date: 'Today',
-    timestamp: '15:15',
-    category: 'Transfers',
-    brand: 'Contact',
-    isIncoming: false,
-    status: 'completed',
-    contactId: 'c-rares',
-    contactName: 'Rareș Roman',
-    rawDate: Date.now() - 3600000 * 0.2,
-  },
-  {
-    id: 'tx-2',
-    title: 'Rareș Roman',
-    subtitle: 'Sent from Revolut',
-    amount: -94,
-    currency: 'RON',
-    date: 'Yesterday',
-    timestamp: '08:18',
-    category: 'Transfers',
-    brand: 'Contact',
-    isIncoming: false,
-    status: 'completed',
-    contactId: 'c-rares',
-    contactName: 'Rareș Roman',
-    rawDate: Date.now() - 3600000 * 24,
-  },
-  {
-    id: 'tx-3',
-    title: 'Apple Store',
-    subtitle: 'Services & Subscriptions',
-    amount: -389,
-    currency: 'RON',
-    date: 'Yesterday',
-    timestamp: '19:30',
-    category: 'Tech',
-    brand: 'Apple',
-    isIncoming: false,
-    status: 'completed',
-    rawDate: Date.now() - 3600000 * 30,
-  },
-  {
-    id: 'tx-4',
-    title: 'Rareș Roman',
-    subtitle: 'Sent from Revolut',
-    amount: -40,
-    currency: 'RON',
-    date: '27 Sep',
-    timestamp: '21:40',
-    category: 'Transfers',
-    brand: 'Contact',
-    isIncoming: false,
-    status: 'completed',
-    contactId: 'c-rares',
-    contactName: 'Rareș Roman',
-    rawDate: Date.now() - 3600000 * 48,
-  },
-  {
-    id: 'tx-5',
-    title: 'Lidl România',
-    subtitle: 'Groceries & supermarket',
-    amount: -142.5,
-    currency: 'RON',
-    date: '26 Sep',
-    timestamp: '17:15',
-    category: 'Groceries',
-    brand: 'Lidl',
-    isIncoming: false,
-    status: 'completed',
-    rawDate: Date.now() - 3600000 * 72,
-  },
-  {
-    id: 'tx-6',
-    title: 'Netflix',
-    subtitle: 'Monthly subscription',
-    amount: -59.99,
-    currency: 'RON',
-    date: '25 Sep',
-    timestamp: '12:00',
-    category: 'Entertainment',
-    brand: 'Netflix',
-    isIncoming: false,
-    status: 'completed',
-    rawDate: Date.now() - 3600000 * 96,
-  },
-  {
-    id: 'tx-7',
-    title: 'Uber',
-    subtitle: 'Rides & transit',
-    amount: -24.8,
-    currency: 'RON',
-    date: '24 Sep',
-    timestamp: '22:45',
-    category: 'Transport',
-    brand: 'Uber',
-    isIncoming: false,
-    status: 'completed',
-    rawDate: Date.now() - 3600000 * 120,
-  },
-  {
-    id: 'tx-8',
-    title: 'Salary Deposit',
-    subtitle: 'Monthly income transfer',
-    amount: 4500,
-    currency: 'RON',
-    date: '20 Sep',
-    timestamp: '09:00',
-    category: 'Top-up',
-    brand: 'Revolut',
-    isIncoming: true,
-    status: 'completed',
-    rawDate: Date.now() - 3600000 * 210,
-  },
-];
-
-const DEFAULT_CARDS: BankCard[] = [
-  {
-    id: 'card-blood',
-    type: 'virtual',
-    name: 'Virtual Blood Drip',
-    last4: '0177',
-    fullNumber: '4129 8831 0921 0177',
-    expiry: '09/28',
-    cvv: '382',
-    isFrozen: false,
-    scheme: 'visa',
-    theme: 'blood_drip',
-    status: 'active',
-  },
-  {
-    id: 'card-metal',
-    type: 'physical',
-    name: 'Revolut Metal',
-    last4: '4821',
-    fullNumber: '5218 9012 3456 4821',
-    expiry: '11/27',
-    cvv: '914',
-    isFrozen: false,
-    scheme: 'mastercard',
-    theme: 'platinum',
-    status: 'active',
-  },
-  {
-    id: 'card-disposable',
-    type: 'disposable',
-    name: 'Disposable Virtual',
-    last4: '9942',
-    fullNumber: '4929 1102 3341 9942',
-    expiry: '12/26',
-    cvv: '621',
-    isFrozen: false,
-    scheme: 'visa',
-    theme: 'neon_purple',
-    status: 'active',
-  },
-];
-
 const DEFAULT_RATES: Record<string, number> = {
   'EUR_RON': 4.9765,
   'RON_EUR': 1 / 4.9765,
@@ -397,7 +150,47 @@ const DEFAULT_RATES: Record<string, number> = {
 export const useRevolutStore = create<RevolutState>()(
   persist(
     (set, get) => ({
-      homeAccount: 'bills',
+      uiPanel: null,
+      scheduledPayments: [],
+      schedulePayment: (contactId,amount,date) => {
+        if(!get().contacts.some(contact=>contact.id===contactId)||!Number.isFinite(amount)||amount<=0||!Number.isFinite(Date.parse(date))||Date.parse(date)<=Date.now())return 'Choose a recipient, a positive amount and a future date.';
+        set(state=>({scheduledPayments:[...state.scheduledPayments,{id:crypto.randomUUID(),contactId,amount:Math.round(amount*100)/100,date,status:'scheduled'}]}));get().notify('Payment scheduled',`${amount.toFixed(2)} RON scheduled.`);return null;
+      },
+      cancelScheduledPayment: (id) => set(state=>({scheduledPayments:state.scheduledPayments.filter(item=>item.id!==id)})),
+      processScheduledPayments: () => {
+        for(const payment of get().scheduledPayments.filter(item=>item.status==='scheduled'&&Date.parse(item.date)<=Date.now())){
+          const result=get().sendTransfer(payment.contactId,payment.amount,'RON','Scheduled payment');
+          set(state=>({scheduledPayments:state.scheduledPayments.map(item=>item.id===payment.id?{...item,status:result.success?'completed':'failed'}:item)}));
+          if(!result.success)get().notify('Scheduled payment failed',result.error||'Transfer failed');
+        }
+      },
+      demoHoldings: {},
+      tradeDemo: (asset,amount,sell) => {
+        if(!Number.isFinite(amount)||amount<=0)return 'Enter a positive amount.';
+        const value=Math.round(amount*100)/100;
+        const state=get();const available=sell?(state.demoHoldings[asset]||0):state.accounts.RON.balance;
+        if(value>available)return sell?'Not enough in this holding.':'Insufficient RON balance.';
+        set({accounts:{...state.accounts,RON:{...state.accounts.RON,balance:Math.round((state.accounts.RON.balance+(sell?value:-value))*100)/100}},demoHoldings:{...state.demoHoldings,[asset]:Math.round(((state.demoHoldings[asset]||0)+(sell?-value:value))*100)/100}});
+        get().notify('Demo order completed',`${sell?'Sold':'Bought'} ${value.toFixed(2)} RON of ${asset}.`);return null;
+      },
+      revPoints: 1420,
+      redeemPoints: (points) => {if(!Number.isInteger(points)||points<=0||points>get().revPoints)return 'Not enough points.';set(state=>({revPoints:state.revPoints-points}));get().notify('Reward redeemed',`${points} points redeemed for a demo reward.`);return null;},
+      selectedPlan: 'Standard',
+      selectPlan: (selectedPlan) => {set({selectedPlan});get().notify('Plan changed',`${selectedPlan} selected for this prototype.`);},
+      setUiPanel: (uiPanel) => set({uiPanel}),
+      walletOpen: false,
+      setWalletOpen: (walletOpen) => set({walletOpen}),
+      notifications: [{id:'welcome',title:'Welcome',message:'Your presentation is ready. All payments are simulated.',read:true,timestamp:Date.now()}],
+      notificationsEnabled: true,
+      setNotificationsEnabled: (notificationsEnabled) => set({notificationsEnabled}),
+      notify: (title,message) => set(state=>({notifications:[{id:crypto.randomUUID(),title,message,read:false,timestamp:Date.now()},...state.notifications]})),
+      markNotificationsRead: () => set(state=>({notifications:state.notifications.map(item=>({...item,read:true}))})),
+      markContactRead: (id) => set(state=>({contacts:state.contacts.map(contact=>contact.id===id?{...contact,unread:0}:contact)})),
+      addContact: (name) => {
+        const contact:Contact={id:crypto.randomUUID(),name:name.trim(),initials:name.trim().split(/\s+/).map(part=>part[0]).slice(0,2).join('').toUpperCase(),phone:'',iban:'Demo contact account',avatarColor:'#8053ff',transfers:[]};
+        set(state=>({contacts:[contact,...state.contacts]}));return contact;
+      },
+      homeAccount: 'personal',
       setHomeAccount: (homeAccount) => set({ homeAccount }),
       billsBalance: 100.67,
       moveBillsMoney: (amount, withdraw) => {
@@ -416,9 +209,9 @@ export const useRevolutStore = create<RevolutState>()(
       },
       accounts: DEFAULT_ACCOUNTS,
       activeCurrency: 'RON',
-      transactions: DEFAULT_TRANSACTIONS,
-      contacts: DEFAULT_CONTACTS,
-      cards: DEFAULT_CARDS,
+      transactions: presentationTransactions,
+      contacts: presentationContacts,
+      cards: presentationCards,
       rates: DEFAULT_RATES,
       soundEnabled: true,
       frameMode: 'iphone',
@@ -450,14 +243,16 @@ export const useRevolutStore = create<RevolutState>()(
       addMoney: (amount: number, currency: Currency, method = 'Apple Pay') => {
         const state = get();
         const account = state.accounts[currency];
-        if (!account) return;
+        if (!account || !Number.isFinite(amount) || amount <= 0) return;
+        amount = Math.round(amount * 100) / 100;
+        if(amount <= 0)return;
 
         const newBalance = Math.round((account.balance + amount) * 100) / 100;
         const now = new Date();
         const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
         const newTx: Transaction = {
-          id: `tx-topup-${Date.now()}`,
+          id: `tx-topup-${crypto.randomUUID()}`,
           title: `Added via ${method}`,
           subtitle: 'Top-up · Arrived instantly',
           amount: amount,
@@ -481,12 +276,18 @@ export const useRevolutStore = create<RevolutState>()(
           },
           transactions: [newTx, ...state.transactions],
         });
+        get().notify('Money added', `${amount.toFixed(2)} ${currency} added via ${method}.`);
       },
 
       sendTransfer: (contactId: string, amount: number, currency: Currency, note?: string) => {
         const state = get();
         const account = state.accounts[currency];
         const contact = state.contacts.find((c) => c.id === contactId);
+
+        if (!Number.isFinite(amount) || amount <= 0) return {success:false,error:'Enter a valid amount'};
+        amount = Math.round(amount * 100) / 100;
+        if(amount<=0)return {success:false,error:'Minimum amount is 0.01'};
+        if (!contact) return {success:false,error:'Contact not found'};
 
         if (!account) {
           return { success: false, error: 'Account not found' };
@@ -500,7 +301,7 @@ export const useRevolutStore = create<RevolutState>()(
         const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
         const newTransfer = {
-          id: `ct-${Date.now()}`,
+          id: `ct-${crypto.randomUUID()}`,
           amount: amount,
           currency: currency,
           dateLabel: 'Today',
@@ -520,7 +321,7 @@ export const useRevolutStore = create<RevolutState>()(
         });
 
         const newTx: Transaction = {
-          id: `tx-transfer-${Date.now()}`,
+          id: `tx-transfer-${crypto.randomUUID()}`,
           title: contact ? contact.name : 'Transfer',
           subtitle: 'Sent from Revolut',
           amount: -amount,
@@ -549,6 +350,7 @@ export const useRevolutStore = create<RevolutState>()(
           transactions: [newTx, ...state.transactions],
         });
 
+        get().notify('Transfer completed', `${amount.toFixed(2)} ${currency} sent to ${contact.name}.`);
         return { success: true };
       },
 
@@ -556,6 +358,8 @@ export const useRevolutStore = create<RevolutState>()(
         const state = get();
         const fromAcc = state.accounts[fromCurr];
         const toAcc = state.accounts[toCurr];
+
+        if(fromCurr===toCurr||!Number.isFinite(fromAmount)||!Number.isFinite(toAmount)||fromAmount<=0||toAmount<=0)return {success:false,error:'Enter valid amounts in different currencies'};
 
         if (!fromAcc || !toAcc) {
           return { success: false, error: 'Invalid currency account' };
@@ -570,7 +374,7 @@ export const useRevolutStore = create<RevolutState>()(
         const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
         const newTx: Transaction = {
-          id: `tx-ex-${Date.now()}`,
+          id: `tx-ex-${crypto.randomUUID()}`,
           title: `Exchange to ${toCurr}`,
           subtitle: `Sold ${fromCurr} for ${toCurr}`,
           amount: -fromAmount,
@@ -598,6 +402,8 @@ export const useRevolutStore = create<RevolutState>()(
 
       toggleFreezeCard: (cardId: string) => {
         const state = get();
+        const selectedCard=state.cards.find(card=>card.id===cardId);
+        if(!selectedCard)return;
         set({
           cards: state.cards.map((card) => {
             if (card.id === cardId) {
@@ -611,21 +417,20 @@ export const useRevolutStore = create<RevolutState>()(
             return card;
           }),
         });
+        get().notify(selectedCard.isFrozen?'Card unfrozen':'Card frozen',`${selectedCard.name} ··${selectedCard.last4}`);
       },
 
       createNewCard: (type: 'virtual' | 'disposable') => {
         const state = get();
         const rand4 = Math.floor(1000 + Math.random() * 9000).toString();
-        const randMid1 = Math.floor(1000 + Math.random() * 9000).toString();
-        const randMid2 = Math.floor(1000 + Math.random() * 9000).toString();
         const randCvv = Math.floor(100 + Math.random() * 900).toString();
 
         const newCard: BankCard = {
-          id: `card-${Date.now()}`,
+          id: `card-${crypto.randomUUID()}`,
           type: type,
           name: type === 'disposable' ? 'Disposable Virtual' : 'Virtual Card',
           last4: rand4,
-          fullNumber: `4532 ${randMid1} ${randMid2} ${rand4}`,
+          fullNumber: `0000 0000 0000 ${rand4}`,
           expiry: '10/29',
           cvv: randCvv,
           isFrozen: false,
@@ -637,6 +442,7 @@ export const useRevolutStore = create<RevolutState>()(
         set({
           cards: [newCard, ...state.cards],
         });
+        get().notify('Card created',`Your ${type} card is ready.`);
       },
 
       overrideBalance: (currency: Currency, newBalance: number) => {
@@ -692,20 +498,36 @@ export const useRevolutStore = create<RevolutState>()(
       resetToDefaults: () => {
         set({
           billsBalance: 100.67,
-          homeAccount: 'bills',
+          homeAccount: 'personal',
           accounts: DEFAULT_ACCOUNTS,
           activeCurrency: 'RON',
-          transactions: DEFAULT_TRANSACTIONS,
-          contacts: DEFAULT_CONTACTS,
-          cards: DEFAULT_CARDS,
+          transactions: presentationTransactions,
+          contacts: presentationContacts,
+          cards: presentationCards,
+          notifications: [],
+          scheduledPayments: [],
+          demoHoldings: {},
+          revPoints: 1420,
+          selectedPlan: 'Standard',
           rates: DEFAULT_RATES,
         });
       },
     }),
     {
       name: 'revolut_simulator_storage_v2',
+      version: 3,
+      migrate: (persisted) => {
+        const old = persisted as Partial<RevolutState>;
+        return {...old,homeAccount:'personal',activeCurrency:'RON',accounts:{...DEFAULT_ACCOUNTS,...old.accounts,RON:{...DEFAULT_ACCOUNTS.RON}},transactions:[...(old.transactions || []).filter(tx=>/^tx-(topup|transfer|custom)-|^bills-/.test(tx.id)),...presentationTransactions],contacts:presentationContacts,cards:presentationCards};
+      },
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        notifications: state.notifications,
+        notificationsEnabled: state.notificationsEnabled,
+        scheduledPayments: state.scheduledPayments,
+        demoHoldings: state.demoHoldings,
+        revPoints: state.revPoints,
+        selectedPlan: state.selectedPlan,
         homeAccount: state.homeAccount,
         billsBalance: state.billsBalance,
         accounts: state.accounts,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { Contact, Currency } from '@/types';
@@ -27,6 +27,14 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSentAmount, setLastSentAmount] = useState(0);
+  const processingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (processingTimer.current) clearTimeout(processingTimer.current); }, []);
+  const cancelTransfer = () => {
+    if (processingTimer.current) clearTimeout(processingTimer.current);
+    processingTimer.current = null;
+    setIsProcessing(false);
+    setIsKeypadOpen(false);
+  };
 
   const currentAccount = accounts[activeCurrency];
   const currentBalance = currentAccount ? currentAccount.balance : 0;
@@ -58,6 +66,7 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
   };
 
   const handleSend = () => {
+    if (isProcessing) return;
     const num = parseFloat(transferAmountStr.replace(',', '.'));
     if (isNaN(num) || num <= 0) {
       setTransferError('Please enter a valid amount');
@@ -74,7 +83,8 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
     setIsProcessing(true);
 
     // 1.2s simulated processing time as requested
-    setTimeout(() => {
+    processingTimer.current = setTimeout(() => {
+      processingTimer.current = null;
       const res = sendTransfer(contact.id, num, activeCurrency, 'Sent from Revolut');
       setIsProcessing(false);
 
@@ -102,6 +112,7 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
         className="relative z-10 px-4 pb-2 flex items-center justify-between border-b border-white/[0.04] bg-black/60 backdrop-blur-md"
       >
         <button
+          aria-label="Back to payments"
           onClick={() => {
             sound.playKeypadClick();
             onBack();
@@ -138,76 +149,18 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
 
       {/* Chat Messages Activity Feed (Screenshot #5) */}
       <div className="relative z-10 flex-1 overflow-y-auto px-4 py-4 space-y-4 no-scrollbar flex flex-col justify-end">
-        {/* Date groups */}
-        <div className="text-center">
-          <span className="text-xs text-neutral-400 font-medium">27 Sep</span>
-        </div>
-
-        {/* First bubble: 40 lei */}
-        <div className="flex flex-col items-end">
-          <div className="w-[190px] bg-[#22252A] rounded-2xl p-3 border border-white/[0.05] shadow-lg">
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-neutral-300 font-medium mb-1.5">
-              <span>→</span> You sent
+        {liveContact.transfers.map((transfer,index) => <React.Fragment key={transfer.id}>
+          {(index===0||liveContact.transfers[index-1].dateLabel!==transfer.dateLabel)&&<div className="text-center"><span className="text-xs text-neutral-400">{transfer.dateLabel}</span></div>}
+          <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} className={`flex flex-col ${transfer.isSender?'items-end':'items-start'}`}>
+            <div className="w-[200px] bg-[#22252A] rounded-2xl p-3 border border-white/5">
+              <div className="text-[11px] text-neutral-400 mb-2">{transfer.isSender?'You sent':'You received'}</div>
+              <div className="text-[26px] font-semibold">{formatCurrencyAmount(transfer.amount,transfer.currency)}</div>
+              <div className="text-[11px] text-neutral-400 mt-2">{transfer.status==='completed'?'Completed':'Arriving'} · {transfer.timeLabel}</div>
             </div>
-            <div className="text-[26px] font-bold text-white tracking-tight leading-none">
-              40 lei
-            </div>
-            <div className="text-[11px] text-neutral-400 mt-2">Sent from Revolut</div>
-            <div className="text-[10px] text-neutral-500 text-right -mt-3.5">21:40</div>
-          </div>
-        </div>
-
-        {/* Date group: Yesterday */}
-        <div className="text-center pt-2">
-          <span className="text-xs text-neutral-400 font-medium">Yesterday</span>
-        </div>
-
-        {/* Second bubble: 94 lei */}
-        <div className="flex flex-col items-end">
-          <div className="w-[190px] bg-[#22252A] rounded-2xl p-3 border border-white/[0.05] shadow-lg">
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-neutral-300 font-medium mb-1.5">
-              <span>→</span> You sent
-            </div>
-            <div className="text-[26px] font-bold text-white tracking-tight leading-none">
-              94 lei
-            </div>
-            <div className="text-[11px] text-neutral-400 mt-2">Sent from Revolut</div>
-            <div className="text-[10px] text-neutral-500 text-right -mt-3.5">08:18</div>
-          </div>
-        </div>
-
-        {/* Date group: Today */}
-        <div className="text-center pt-2">
-          <span className="text-xs text-neutral-400 font-medium">Today</span>
-        </div>
-
-        {/* Live dynamic bubbles from store */}
-        {liveContact.transfers
-          .filter((t) => t.dateLabel === 'Today')
-          .map((transfer) => (
-            <motion.div
-              key={transfer.id}
-              initial={{ scale: 0.9, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              className="flex flex-col items-end"
-            >
-              <div className="w-[190px] bg-[#22252A] rounded-2xl p-3 border border-white/[0.05] shadow-lg">
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-neutral-300 font-medium mb-1.5">
-                  <Clock className="w-2.5 h-2.5 text-neutral-300" />
-                  <span>Arriving · Today</span>
-                </div>
-                <div className="text-[26px] font-bold text-white tracking-tight leading-none">
-                  {formatCurrencyAmount(transfer.amount, transfer.currency)}
-                </div>
-                <div className="text-[11px] text-neutral-400 mt-2">Sent from Revolut</div>
-                <div className="text-[10px] text-neutral-500 text-right -mt-3.5">
-                  {transfer.timeLabel}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          </motion.div>
+        </React.Fragment>)}
+        {!liveContact.transfers.length&&<p className="text-center text-white/40">No payments yet</p>}
       </div>
-
       {/* Floating Bottom Send Button (Screenshot #5) */}
       <div
         style={{
@@ -236,7 +189,7 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsKeypadOpen(false)}
+              onClick={cancelTransfer}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
             <motion.div
@@ -258,7 +211,8 @@ export const ContactChatScreen: React.FC<ContactChatScreenProps> = ({ contact, o
                   </div>
                 </div>
                 <button
-                  onClick={() => setIsKeypadOpen(false)}
+                  aria-label="Cancel transfer"
+                  onClick={cancelTransfer}
                   className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white"
                 >
                   <X className="w-4 h-4" />

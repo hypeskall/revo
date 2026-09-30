@@ -8,9 +8,9 @@ import { Snowflake, Eye, EyeOff, Plus, Copy, Check, ShieldCheck, Wifi, Sparkles,
 import { sound } from '@/utils/audio';
 import { RevolutLogo } from '@/components/ui/RevolutLogo';
 
-export const CardsScreen: React.FC = () => {
+export const CardsScreen: React.FC<{initialCardId?:string}> = ({initialCardId}) => {
   const { cards, toggleFreezeCard, createNewCard } = useRevolutStore();
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [activeCardIndex, setActiveCardIndex] = useState(() => Math.max(0,cards.findIndex(card=>card.id===initialCardId)));
   const [showDetails, setShowDetails] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isNewCardModalOpen, setIsNewCardModalOpen] = useState(false);
