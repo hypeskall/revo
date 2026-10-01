@@ -1,6 +1,6 @@
 {
-  "name": "Revolut Sandbox",
-  "short_name": "Revolut Sandbox",
+  "name": "Revolut",
+  "short_name": "Revolut",
   "description": "Interactive demo with fictional balances and transactions",
   "start_url": "/",
   "display": "standalone",
@@ -9,12 +9,12 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/home-icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icon-512.png",
+      "src": "/home-icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

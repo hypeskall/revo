@@ -86,6 +86,19 @@ const names = [
   "credit",
   "logo-visa",
   "logo-mc",
+  "cash",
+  "envelope",
+  "megaphone",
+  "profile",
+  "time-outline",
+  "sim-card",
+  "coins-earning",
+  "inbox",
+  "logo-revolut",
+  "performance",
+  "resort",
+  "invest",
+  "arrow-rates",
 ];
 fs.mkdirSync(output, { recursive: true });
 for (const name of names) {

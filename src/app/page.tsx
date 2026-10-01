@@ -123,7 +123,7 @@ export default function App() {
                 {homeAccount === "bills" ? (
                   <BillsHome onNavigate={handleTabChange} />
                 ) : (
-                  <PersonalHome />
+                  <PersonalHome onNavigate={handleTabChange} />
                 )}
               </motion.div>
             )}
@@ -214,6 +214,7 @@ export default function App() {
             onClose={() => setHomeTool(null)}
             onSelectTool={setHomeTool}
             onOpenWallet={() => setWalletOpen(true)}
+            onNavigatePoints={() => handleTabChange("hub")}
           />
         )}
         {walletOpen && <ReferenceWallet />}

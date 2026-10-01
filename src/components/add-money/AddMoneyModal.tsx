@@ -25,6 +25,10 @@ export function AddMoneyModal() {
   const [operand, setOperand] = useState<number | null>(null);
   const [replace, setReplace] = useState(false);
   const [error, setError] = useState("");
+  const overlayOpen = appleOpen || methodsOpen;
+  const backgroundRef = (node: HTMLElement | null) => {
+    if (node) node.inert = overlayOpen;
+  };
   const amount = Number(input.replace(",", "."));
   const digit = (value: string) => {
     setError("");
@@ -99,7 +103,7 @@ export function AddMoneyModal() {
       aria-label="Add money"
       className="reference-add-money"
     >
-      <header>
+      <header aria-hidden={overlayOpen} ref={backgroundRef}>
         <button
           className="reference-back"
           aria-label="Close add money"
@@ -119,7 +123,11 @@ export function AddMoneyModal() {
         </div>
         <span />
       </header>
-      <div className="reference-topup-main">
+      <div
+        className="reference-topup-main"
+        aria-hidden={overlayOpen}
+        ref={backgroundRef}
+      >
         <div className="reference-topup-amount">
           <AnimatedAmount
             value={
@@ -166,7 +174,11 @@ export function AddMoneyModal() {
           </button>
         </div>
       </div>
-      <div className="reference-keypad">
+      <div
+        className="reference-keypad"
+        aria-hidden={overlayOpen}
+        ref={backgroundRef}
+      >
         <div className="reference-operators">
           {["+", "−", "×", "÷", "="].map((op) => (
             <button

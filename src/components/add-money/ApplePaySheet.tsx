@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, CreditCard, Loader2, X } from "@/components/ui/OfficialIcons";
+import { CreditCard, Loader2, X } from "@/components/ui/OfficialIcons";
 import { Currency } from "@/types";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { ApplePayLogo } from "@/components/ui/AppleLogo";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import { ReferencePaymentArt } from "./ReferencePaymentArt";
 
 interface Props {
   isOpen: boolean;
@@ -23,13 +24,16 @@ export function ApplePaySheet({
   onSuccess,
 }: Props) {
   const cards = useRevolutStore((state) => state.cards);
-  const [selectedId, setSelectedId] = useState("card-blood");
+  const [selectedId, setSelectedId] = useState("reference-amex");
   const [options, setOptions] = useState(false);
   const [phase, setPhase] = useState<"ready" | "processing" | "done">("ready");
   const success = useRef(onSuccess);
   success.current = onSuccess;
   const selected =
     cards.find((card) => card.id === selectedId) ||
+    (selectedId === "reference-amex"
+      ? cards.find((card) => card.id === "card-blood" && !card.isFrozen)
+      : undefined) ||
     cards.find((card) => !card.isFrozen);
   const formatted = formatCurrencyAmount(amount, currency, {
     useFormalCode: true,
@@ -83,9 +87,24 @@ export function ApplePaySheet({
               <h2>{formatted}</h2>
             </div>
             <div className="reference-apple-cards">
-              <div className="apple-back-card left" />
-              <div className="apple-back-card right" />
-              {selected && <CardPreview card={selected} details />}
+              <div
+                className={`apple-back-card left ${selectedId === "reference-amex" ? "apple-bmw-card" : ""}`}
+              >
+                {selectedId === "reference-amex" && (
+                  <>
+                    <strong>///M</strong>
+                    <span>··6326</span>
+                  </>
+                )}
+              </div>
+              <div
+                className={`apple-back-card right ${selectedId === "reference-amex" ? "apple-pattern-card" : ""}`}
+              />
+              {selectedId === "reference-amex" ? (
+                <ReferencePaymentArt />
+              ) : (
+                selected && <CardPreview card={selected} details />
+              )}
             </div>
             <button
               className="reference-other-cards"
@@ -95,6 +114,14 @@ export function ApplePaySheet({
             </button>
             {options && (
               <div className="reference-apple-options">
+                <button
+                  onClick={() => {
+                    setSelectedId("reference-amex");
+                    setOptions(false);
+                  }}
+                >
+                  Decorative Amex ··0177
+                </button>
                 {cards
                   .filter((card) => !card.isFrozen)
                   .map((card) => (

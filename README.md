@@ -14,9 +14,10 @@ An interactive mobile prototype built with Next.js, Tailwind CSS, Framer Motion 
 - **Restored Add money**: Numeric keypad, decimal amounts, calculator operations, payment-method chooser and a cancellable simulated Apple Pay confirmation. Successful confirmation updates RON balance, activity and notifications.
 - **Payments and Wallet**: Contacts open their own histories; new recipients can be added; scheduled payments execute while the app is open. Wallet lists live cards, supports creation and opens freeze/details controls.
 - **Notifications and profile**: In-app banners, persistent history, read states, sound and notification preferences, plus opt-in browser notifications identifying the prototype.
-- **Official favicon and installation icons**: Retrieved from Revolut's public asset server. Asset sources and typography limitations are documented in [docs/home-reference.md](docs/home-reference.md).
+- **Home Screen icon**: Rose glass background and white Revolut glyph reconstructed from the latest supplied launcher reference. PNGs cover the favicon, Apple touch icon and PWA installation sizes; the installed label is Revolut. Original public Revolut icons remain available in the asset folder.
 
-- **Account tools**: Search people and payments, inspect spending analytics, exchange using fixed demo rates, copy account details and download fictional statements.
+- **Account tools**: Fullscreen search with removable saved queries and Converter/ATMs/RevPoints/Stays shortcuts. Analytics filters by account and period, derives spending/income/cashflow from saved activity and switches charts. Account details use the same fictional REVO identifier throughout.
+- **October reference screens**: Large-photo profile with working menu destinations, teal Wallet with card creation and sample ATM map, paginated Home cards and full wealth rows. RevPoints includes the purple light arcs, promotion carousel and Miles/Stays/eSIM/Shops panels. Crypto includes the blue arc, transaction history, BTC/ETH charts, gainers/losers, earning information and validated local trade/send/swap flows. Artwork and native materials are approximations, as detailed in [docs/home-reference.md](docs/home-reference.md).
 - **Presentation settings**: Available from Profile to edit balances, add example transactions, toggle sounds and reset demo data.
 
 ## Sandbox behavior

@@ -30,6 +30,21 @@ The newly supplied Payments, Briana chat, amount input, bank-transfer review and
 
 All six existing sections and their local flows are covered. Unprovided screens are functional presentation layouts, not independently verified carbon copies. Native account onboarding, identity checks, camera QR scanning, real credit applications, insurance, bookings and financial network operations are not implemented. The project cannot honestly claim indistinguishability from the entire current native app.
 
+## October 1 reference batch
+
+The ten newly supplied screenshots control Analytics, the launcher icon, Wallet, RevPoints, Profile, Crypto, the lower Home wealth widget, fullscreen Search, the floral Apple Pay card and Crypto market widgets. Earlier assets are background information rather than evidence of a current native layout.
+
+- Analytics uses saved completed transactions, currency and period filters, previous-period comparisons, cumulative charts and category totals. Migration corrects the reference payment timestamps to September 30 in Romania while preserving saved balances, added transactions, holdings and conversations.
+- Profile retains the previously requested photo and identity. Personal info saves the local display name; account details share `RO00 REVO 4826 1937 5084 6219` with Home. Its intentionally invalid checksum prevents interpreting the presentation identifier as a working bank account. Revtag displays a decorative QR glyph and copyable handle, not a scannable payment QR.
+- Home card pagination, direct card selection, wealth destinations, reward products/carousel, Crypto selectors and Wallet menus work after scrolling. ATM maps and external account linking are local presentation views. Student email entry sends no email. No bookings, card purchases or external invitations are submitted.
+- `public/home-screen-icon.svg` uses the official public R glyph with a locally reconstructed rose glass background. `scripts/render-home-icon.cjs` produces 32/180/192/512px PNGs with Sharp. The launcher label is Revolut. Native notification badges, launcher tint, corner masks, system keyboard and real side-button authentication belong to the device; they are not baked into the icon or simulated as operating-system controls.
+- The floral American Express-style card, side cards, promotion artwork, map and light arcs are local SVG/CSS reconstructions. They are illustrative rather than exact native artwork. The Apple Pay sheet remains cancellable and operates entirely on fictional balances.
+- Additional Revolut glyphs come unchanged from `@revolut/icons@2.8.0`, including `invest`, `arrow-rates` and `resort`, matching the reference silhouettes more closely. The education glyph is a local reconstruction.
+- Eight cryptocurrency marks are vendored from [`@web3icons/core@4.0.57`](https://github.com/0xa3k5/web3icons), with its MIT licence in `public/icons/crypto/LICENSE.txt`. `scripts/import-crypto-icons.cjs` recreates that import from an extracted package. IOTX, ELA, MON, PONKE and the reference-era DIMO variant are local SVG reconstructions. These are not claims of official Revolut asset provenance.
+- BTC/ETH reference quotes, sparklines, market moves, savings/earning APYs and loan limits are fixed screenshot/presentation data. Local holdings are allocated RON values, with token quantities derived from fixed quotes. Crypto send debits the holding without crediting cash as a sale would; reload preserves its activity. None of these values is a current financial quote, rate or offer.
+
+Visual verification uses a 393×852 browser viewport. Native iOS installation, push delivery, fonts and Liquid Glass rendering cannot be fully verified in this desktop browser.
+
 ## Functional checks
 
 Run `npm run check:sandbox` for validation, fund conservation, activity, persistence, and reset checks against the actual store.

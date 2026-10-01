@@ -1,51 +1,53 @@
-import type { Metadata, Viewport } from 'next';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
-import './globals.css';
-import './reference.css';
-import './payment-reference.css';
+import type { Metadata, Viewport } from "next";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import "./globals.css";
+import "./reference.css";
+import "./payment-reference.css";
+import "./new-reference.css";
 
 const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-revolut',
-  display: 'swap',
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-revolut",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: 'Revolut Sandbox',
-  description: 'Interactive Revolut-style sandbox with fictional balances and transactions',
-  manifest: '/manifest.json',
+  title: "Revolut Sandbox",
+  description:
+    "Interactive Revolut-style sandbox with fictional balances and transactions",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Revolut Sandbox',
+    statusBarStyle: "black-translucent",
+    title: "Revolut",
   },
   formatDetection: {
     telephone: false,
   },
   icons: {
     icon: [
-      { url: '/revolut-official-favicon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: "/home-favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/home-icon-192.png", sizes: "192x192", type: "image/png" },
     ],
-    shortcut: '/revolut-official-favicon.png',
-    apple: '/apple-touch-icon.png',
+    shortcut: "/home-favicon.png",
+    apple: "/home-apple-touch-icon.png",
   },
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover',
-  themeColor: '#000000',
+  viewportFit: "cover",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -54,9 +56,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${plusJakarta.variable}`}>
+    <html
+      lang="en"
+      className={`dark ${inter.variable} ${plusJakarta.variable}`}
+    >
       <head>
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/home-apple-touch-icon.png" />
       </head>
       <body className="bg-black text-white antialiased overflow-hidden select-none font-sans">
         {children}

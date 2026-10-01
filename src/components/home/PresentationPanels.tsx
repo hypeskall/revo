@@ -18,6 +18,7 @@ import { ReferenceActivity } from "./ReferenceActivity";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { TradePanel } from "@/components/invest/TradePanel";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
+import { ReferenceProfile } from "./ReferenceProfile";
 
 export function PresentationPanels({
   panel,
@@ -37,6 +38,7 @@ export function PresentationPanels({
     setMessage("");
   }, [panel]);
   if (panel === "activity") return <ReferenceActivity />;
+  if (panel === "profile") return <ReferenceProfile />;
   if (panel === "invest" || panel === "crypto")
     return <TradePanel kind={panel} />;
   const titles = {
@@ -51,6 +53,8 @@ export function PresentationPanels({
     plan: "Your plan",
     joint: "Maria · Joint account",
     accounts: "Add new account",
+    linked: "Linked accounts",
+    stays: "Stays",
   };
   const field = "w-full bg-white/10 rounded-xl p-3 text-white outline-none";
   return (
@@ -76,6 +80,60 @@ export function PresentationPanels({
         </button>
         <h1>{titles[panel]}</h1>
       </header>
+      {panel === "linked" && (
+        <>
+          <p className="text-white/60">
+            Explore a sample external account. This does not connect to your
+            bank.
+          </p>
+          <label className="block mt-5">
+            Bank name
+            <input
+              className={field}
+              aria-label="Linked bank name"
+              placeholder="Bank name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          <button
+            className="presentation-primary mt-5"
+            disabled={!name.trim()}
+            onClick={() =>
+              setMessage(
+                `${name.trim()} · Preview added. No external bank is connected.`,
+              )
+            }
+          >
+            Add sample account
+          </button>
+        </>
+      )}
+      {panel === "stays" && (
+        <>
+          <h2 className="text-3xl mb-5">A place for your next trip</h2>
+          <p className="text-white/60">
+            Explore Stays rewards using your saved points.
+          </p>
+          <div className="profile-share-card">
+            Stays reward · 1.000 points
+            <br />
+            Available: {state.revPoints} points
+          </div>
+          <button
+            className="presentation-primary"
+            disabled={message === "Reward redeemed"}
+            onClick={() =>
+              setMessage(state.redeemPoints(1000) || "Reward redeemed")
+            }
+          >
+            Redeem 1.000 points
+          </button>
+          <p className="text-sm text-white/40 mt-5">
+            Presentation reward. No accommodation is booked.
+          </p>
+        </>
+      )}
       {panel === "joint" && (
         <div className="space-y-5">
           <h2 className="text-4xl">
@@ -161,63 +219,6 @@ export function PresentationPanels({
             </span>
             <ChevronRight />
           </button>
-        </>
-      )}
-      {panel === "profile" && (
-        <>
-          <div className="presentation-profile">
-            <img src="/profile.png" alt="Profile" />
-            <h2>Mihai</h2>
-            <p>{state.selectedPlan}</p>
-          </div>
-          <div className="presentation-menu">
-            {[
-              {
-                label: "Notifications",
-                Icon: Bell,
-                panel: "notifications" as const,
-              },
-              { label: "Your plan", Icon: CreditCard, panel: "plan" as const },
-              {
-                label: "Scheduled payments",
-                Icon: Calendar,
-                panel: "scheduled" as const,
-              },
-              {
-                label: "Add recipient",
-                Icon: UserPlus,
-                panel: "new-contact" as const,
-              },
-              { label: "Help", Icon: HelpCircle, panel: "help" as const },
-            ].map((item) => (
-              <button
-                key={item.label}
-                onClick={() => state.setUiPanel(item.panel)}
-              >
-                <item.Icon />
-                <span>{item.label}</span>
-                <ChevronRight />
-              </button>
-            ))}
-            <button
-              onClick={() => {
-                transition.close();
-                state.setGodModeOpen(true);
-              }}
-            >
-              <Settings />
-              <span>Presentation settings</span>
-              <ChevronRight />
-            </button>
-          </div>
-          <div className="presentation-about">
-            <strong>Revolut interface prototype</strong>
-            <p>
-              Project presentation. All balances, cards, investments and
-              payments are simulated. This app does not connect to Revolut or
-              Apple Pay.
-            </p>
-          </div>
         </>
       )}
       {panel === "notifications" && (

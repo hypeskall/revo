@@ -291,8 +291,67 @@ async function check() {
   assert.equal(store.getState().revPoints, 920);
   store.getState().markNotificationsRead();
   assert.ok(store.getState().notifications.every((item) => item.read));
+  const cryptoBalance = store.getState().demoHoldings.ETH;
+  const cashBeforeCrypto = store.getState().accounts.RON.balance;
+  const historyBeforeCrypto = store.getState().cryptoActivity.length;
+  for (const invalid of [NaN, Infinity, -1, 0, 0.001, cryptoBalance + 1])
+    assert.ok(store.getState().transferCrypto("ETH", invalid, "c-rares"));
+  assert.ok(store.getState().transferCrypto("AAPL", 1, "c-rares"));
+  assert.ok(store.getState().transferCrypto("ETH", 1, "missing"));
+  assert.equal(
+    store.getState().cryptoActivity.length,
+    historyBeforeCrypto,
+    "Invalid crypto sends create no activity",
+  );
+  assert.equal(store.getState().transferCrypto("ETH", 1, "c-rares"), null);
+  assert.equal(store.getState().demoHoldings.ETH, cryptoBalance - 1);
+  assert.equal(
+    store.getState().accounts.RON.balance,
+    cashBeforeCrypto,
+    "Sending crypto does not credit cash as a sale",
+  );
+  assert.equal(store.getState().cryptoActivity[0].value, -1);
+  assert.equal(store.getState().cryptoActivity[0].title, "To Rareș Roman");
+  assert.ok(store.getState().cryptoActivity[0].units < 0);
+  store.getState().setProfileName("  Presentation Person  ");
+  assert.equal(store.getState().profileName, "Presentation Person");
+  store.getState().setProfileName(" ");
+  assert.equal(store.getState().profileName, "Presentation Person");
+  assert.equal(store.getState().tradeDemo("MON", 1, false), null);
+  const savedCryptoHistory = store.getState().cryptoActivity.length;
+  const persistedSnapshot = saved.get("revolut_simulator_storage_v2");
+  store.setState({ profileName: "temporary", cryptoActivity: [] });
+  saved.set("revolut_simulator_storage_v2", persistedSnapshot);
+  await store.persist.rehydrate();
+  assert.equal(store.getState().profileName, "Presentation Person");
+  assert.equal(store.getState().cryptoActivity.length, savedCryptoHistory);
+  assert.equal(store.getState().cryptoActivity[0].title, "RON → MON");
+  assert.equal(store.getState().cryptoActivity[1].title, "To Rareș Roman");
+  const migrationFixture = JSON.parse(persistedSnapshot);
+  const reference = migrationFixture.state.transactions.find(
+    (t) => t.id === "reference-carrefour",
+  );
+  assert.ok(reference);
+  reference.rawDate = Date.UTC(2026, 8, 30, 21, 35);
+  saved.set(
+    "revolut_simulator_storage_v2",
+    JSON.stringify({ ...migrationFixture, version: 4 }),
+  );
+  await store.persist.rehydrate();
+  assert.equal(
+    store.getState().transactions.find((t) => t.id === reference.id).rawDate,
+    Date.parse("2026-09-30T21:35:00+03:00"),
+    "Migration keeps reference payments in the correct Romanian calendar day",
+  );
+  assert.equal(
+    store.getState().accounts.RON.balance,
+    migrationFixture.state.accounts.RON.balance,
+  );
+  assert.equal(store.getState().cryptoActivity.length, savedCryptoHistory);
   store.getState().resetToDefaults();
   assert.equal(store.getState().accounts.RON.balance, 1796.46);
+  assert.equal(store.getState().profileName, "Mihai");
+  assert.equal(store.getState().cryptoActivity.length, 0);
   console.log(
     "Sandbox checks passed: top-ups, transfers, cancellation guards, holdings, schedules, notifications, persistence and reset.",
   );

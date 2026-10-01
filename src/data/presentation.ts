@@ -130,7 +130,7 @@ const entries = [
   ["nufaru-small", "Nufaru Nonstop", -2.3, "10:54", "Groceries"],
 ] as const;
 export const presentationTransactions: Transaction[] = entries.map(
-  ([id, title, amount, timestamp, category], index) => ({
+  ([id, title, amount, timestamp, category]) => ({
     id: `reference-${id}`,
     title,
     amount,
@@ -142,7 +142,7 @@ export const presentationTransactions: Transaction[] = entries.map(
     brand: amount > 0 ? "Contact" : title,
     isIncoming: amount > 0,
     status: "completed",
-    rawDate: Date.UTC(2026, 8, 30, 21, 35) - index * 60000,
+    rawDate: Date.parse(`2026-09-30T${timestamp}:00+03:00`),
     ...(amount > 0
       ? { contactId: "c-briana", contactName: "Briana Filip" }
       : {}),

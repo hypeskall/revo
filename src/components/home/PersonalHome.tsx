@@ -19,10 +19,18 @@ import { AnimatedAmount } from "@/components/ui/AnimatedAmount";
 import { TransactionRow } from "./ReferenceActivity";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import { presentationIban } from "@/data/account-details";
+import { TabId } from "@/components/navigation/BottomTabBar";
+import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 
-export function PersonalHome() {
+export function PersonalHome({
+  onNavigate,
+}: {
+  onNavigate: (tab: TabId) => void;
+}) {
   const state = useRevolutStore();
   const [showPromo, setShowPromo] = useState(true);
+  const [cardPage, setCardPage] = useState(0);
   const currencies = ["RON", "EUR", "USD", "GBP"] as const;
   const current = state.accounts[state.activeCurrency];
   const cash =
@@ -96,7 +104,7 @@ export function PersonalHome() {
           onClick={() => state.setHomeTool("details")}
         >
           <BankGlyph />
-          <span>RO00 DEMO 0000 0000 0000 0000</span>
+          <span>{presentationIban}</span>
         </button>
         <button
           className="reference-accounts"
@@ -163,18 +171,46 @@ export function PersonalHome() {
           >
             Cards <ChevronRight size={19} />
           </button>
-          <div className="reference-mini-cards">
-            {["card-blood", "card-shirt", "card-surge"]
+          <motion.div
+            key={cardPage}
+            className="reference-mini-cards"
+            initial={{ opacity: 0, x: 15 }}
+            animate={{ opacity: 1, x: 0 }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.1}
+            onDragEnd={(_, info) => {
+              if (Math.abs(info.offset.x) > 40)
+                setCardPage((cardPage + (info.offset.x < 0 ? 1 : 2)) % 3);
+            }}
+          >
+            {[
+              ["card-blood", "card-shopping-blue", "card-shirt"],
+              ["card-surge", "card-orange", "card-lavender"],
+              ["card-disposable"],
+            ][cardPage]
               .flatMap((id) => state.cards.filter((card) => card.id === id))
               .map((card) => (
-                <button key={card.id} onClick={() => state.setWalletOpen(true)}>
+                <button
+                  key={card.id}
+                  onClick={() => state.openWalletCard(card.id)}
+                >
                   <CardPreview card={card} />
                   <span>{card.name}</span>
                   <small>··{card.last4}</small>
                 </button>
               ))}
+          </motion.div>
+          <div className="reference-carousel-dots">
+            {[0, 1, 2].map((index) => (
+              <button
+                key={index}
+                aria-label={`Card page ${index + 1}`}
+                aria-pressed={index === cardPage}
+                onClick={() => setCardPage(index)}
+              />
+            ))}
           </div>
-          <div className="reference-dots">● ● ●</div>
         </section>
         <section className="reference-widget reference-wealth">
           <button
@@ -188,6 +224,7 @@ export function PersonalHome() {
               showDecimalsIfZero: false,
             })}
           </strong>
+          <p className="wealth-period">Past month</p>
           <button onClick={() => state.setAccountsDrawerOpen(true)}>
             <i>
               <Coins />
@@ -200,10 +237,60 @@ export function PersonalHome() {
               <PiggyBank />
             </i>
             <span>
-              Savings & Funds<small>Explore savings in this prototype</small>
+              Savings & Funds
+              <small>
+                Earn up to 4,25% p.a. with savings or invest in low-risk funds
+              </small>
             </span>
             <ChevronRight />
           </button>
+          {[
+            {
+              title: "Loan",
+              desc: "Get a low-rate loan up to 200.000 lei",
+              icon: "credit",
+              color: "#c6dc06",
+              action: () => onNavigate("credit"),
+            },
+            {
+              title: "Invest",
+              desc: "Invest for as little as 1 lei",
+              icon: "line-chart",
+              color: "#26aff0",
+              action: () => onNavigate("invest"),
+            },
+            {
+              title: "Crypto",
+              desc: formatCurrencyAmount(
+                Object.entries(state.demoHoldings)
+                  .filter(([key]) => ["BTC", "ETH", "SOL", "XRP"].includes(key))
+                  .reduce((sum, [, value]) => sum + value, 0),
+                "RON",
+                { showDecimalsIfZero: false },
+              ),
+              icon: "bitcoin",
+              color: "#ba4feb",
+              action: () => onNavigate("cards"),
+            },
+            {
+              title: "Linked",
+              desc: "Link external accounts",
+              icon: "link",
+              color: "#21bdc6",
+              action: () => state.setUiPanel("linked"),
+            },
+          ].map((item) => (
+            <button key={item.title} onClick={item.action}>
+              <i style={{ background: item.color }}>
+                <OfficialIcon name={item.icon} />
+              </i>
+              <span>
+                {item.title}
+                <small>{item.desc}</small>
+              </span>
+              <ChevronRight />
+            </button>
+          ))}
         </section>
       </section>
     </div>

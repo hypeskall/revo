@@ -29,7 +29,7 @@ export const BankGlyph = (props: Props) => (
   <OfficialIcon name="bank" {...props} />
 );
 export const InvestGlyph = (props: Props) => (
-  <OfficialIcon name="line-chart" {...props} />
+  <OfficialIcon name="invest" {...props} />
 );
 export const PaymentsGlyph = (props: Props) => (
   <OfficialIcon name="arrow-right-left" {...props} />

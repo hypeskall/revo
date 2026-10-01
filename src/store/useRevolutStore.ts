@@ -9,6 +9,21 @@ import { demoAssets } from "@/data/assets";
 import { Account, BankCard, Contact, Currency, Transaction } from "@/types";
 
 interface RevolutState {
+  profileName: string;
+  setProfileName: (name: string) => void;
+  cryptoActivity: {
+    id: string;
+    asset: string;
+    units: number;
+    value: number;
+    title: string;
+    timestamp: number;
+  }[];
+  transferCrypto: (
+    asset: string,
+    amount: number,
+    contactId: string,
+  ) => string | null;
   screenOverlayOpen: boolean;
   setScreenOverlayOpen: (open: boolean) => void;
   tradeTicket: { asset: string; sell: boolean };
@@ -32,11 +47,15 @@ interface RevolutState {
     | "plan"
     | "joint"
     | "accounts"
+    | "linked"
+    | "stays"
     | null;
   jointBalance: number;
   moveJointMoney: (amount: number, withdraw: boolean) => string | null;
   setUiPanel: (panel: RevolutState["uiPanel"]) => void;
   walletOpen: boolean;
+  walletCardId: string | null;
+  openWalletCard: (id: string) => void;
   setWalletOpen: (open: boolean) => void;
   notifications: {
     id: string;
@@ -370,6 +389,49 @@ export const useRevolutStore = create<RevolutState>()(
         }
       },
       demoHoldings: {},
+      profileName: "Mihai",
+      setProfileName: (name) => {
+        const value = name.trim().slice(0, 80);
+        if (value) set({ profileName: value });
+      },
+      cryptoActivity: [],
+      transferCrypto: (asset, amount, contactId) => {
+        const state = get();
+        const selected = demoAssets.find(
+          (a) => a.symbol === asset && a.kind === "crypto",
+        );
+        const contact = state.contacts.find((c) => c.id === contactId);
+        if (!selected || !contact) return "Choose a token and recipient.";
+        if (!Number.isFinite(amount) || amount < 0.01)
+          return "Enter at least 0.01 RON.";
+        const value = Math.round(amount * 100) / 100;
+        if (value > (state.demoHoldings[asset] || 0))
+          return "Not enough in this holding.";
+        set({
+          demoHoldings: {
+            ...state.demoHoldings,
+            [asset]:
+              Math.round(((state.demoHoldings[asset] || 0) - value) * 100) /
+              100,
+          },
+          cryptoActivity: [
+            {
+              id: crypto.randomUUID(),
+              asset,
+              units: -value / selected.price,
+              value: -value,
+              title: `To ${contact.name}`,
+              timestamp: Date.now(),
+            },
+            ...state.cryptoActivity,
+          ],
+        });
+        get().notify(
+          "Crypto transfer sent",
+          `You sent ${(value / selected.price).toFixed(8)} ${asset} to ${contact.name}. Simulated transfer completed.`,
+        );
+        return null;
+      },
       tradeDemo: (asset, amount, sell) => {
         if (!demoAssets.some((item) => item.symbol === asset))
           return "Select an available asset.";
@@ -403,6 +465,23 @@ export const useRevolutStore = create<RevolutState>()(
                   100,
               ) / 100,
           },
+          cryptoActivity:
+            demoAssets.find((a) => a.symbol === asset)?.kind === "crypto"
+              ? [
+                  {
+                    id: crypto.randomUUID(),
+                    asset,
+                    units:
+                      (value /
+                        demoAssets.find((a) => a.symbol === asset)!.price) *
+                      (sell ? -1 : 1),
+                    value: value * (sell ? -1 : 1),
+                    title: sell ? `${asset} → RON` : `RON → ${asset}`,
+                    timestamp: Date.now(),
+                  },
+                  ...state.cryptoActivity,
+                ]
+              : state.cryptoActivity,
         });
         get().notify(
           "Demo order completed",
@@ -435,7 +514,13 @@ export const useRevolutStore = create<RevolutState>()(
       },
       setUiPanel: (uiPanel) => set({ uiPanel }),
       walletOpen: false,
-      setWalletOpen: (walletOpen) => set({ walletOpen }),
+      walletCardId: null,
+      openWalletCard: (id) => {
+        if (get().cards.some((card) => card.id === id))
+          set({ walletOpen: true, walletCardId: id });
+      },
+      setWalletOpen: (walletOpen) =>
+        set({ walletOpen, ...(walletOpen ? {} : { walletCardId: null }) }),
       notifications: [
         {
           id: "welcome",
@@ -938,20 +1023,29 @@ export const useRevolutStore = create<RevolutState>()(
           notifications: [],
           scheduledPayments: [],
           demoHoldings: {},
+          cryptoActivity: [],
           revPoints: 1420,
           selectedPlan: "Standard",
+          profileName: "Mihai",
           rates: DEFAULT_RATES,
         });
       },
     }),
     {
       name: "revolut_simulator_storage_v2",
-      version: 4,
+      version: 5,
       migrate: (persisted, version) => {
         const old = persisted as Partial<RevolutState>;
         if (version >= 3)
           return {
             ...old,
+            transactions:
+              old.transactions?.map((tx) => {
+                const reference = presentationTransactions.find(
+                  (item) => item.id === tx.id,
+                );
+                return reference ? { ...tx, rawDate: reference.rawDate } : tx;
+              }) || presentationTransactions,
             contacts: [
               ...presentationContacts.map((reference) => {
                 const previous = old.contacts?.find(
@@ -1003,6 +1097,8 @@ export const useRevolutStore = create<RevolutState>()(
       },
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        profileName: state.profileName,
+        cryptoActivity: state.cryptoActivity,
         jointBalance: state.jointBalance,
         notifications: state.notifications,
         notificationsEnabled: state.notificationsEnabled,

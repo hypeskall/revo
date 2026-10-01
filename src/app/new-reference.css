@@ -1,0 +1,1255 @@
+/* October user references. Native device status/keyboard are supplied by the device. */
+.reference-full-tool,
+.reference-profile-screen,
+.reference-crypto-screen,
+.reference-points-screen,
+.reference-crypto-dialog {
+  container-type: inline-size;
+  font-family: var(--font-inter), Arial, sans-serif;
+  color: #f5f5f7;
+  letter-spacing: -0.025em;
+  overflow-y: auto;
+}
+.reference-full-tool,
+.reference-profile-screen,
+.reference-crypto-dialog {
+  position: absolute;
+  inset: 0;
+  z-index: 76;
+  padding: 15cqw 4.15cqw max(7cqw, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse 100% 28% at 25% 35%, #22204465, transparent),
+    radial-gradient(ellipse 110% 30% at 80% 65%, #37383a55, transparent),
+    #131415;
+}
+.reference-full-tool h1,
+.reference-profile-subpage h1,
+.reference-crypto-dialog h1 {
+  font-size: 8cqw;
+  font-weight: 650;
+  line-height: 1.1;
+  margin: 3.4cqw 0 10cqw;
+}
+.reference-full-tool h2 {
+  font-size: 4.6cqw;
+  margin: 8cqw 0 3.5cqw;
+}
+.reference-analytics-selectors {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 7cqw 0 4cqw;
+  gap: 4cqw;
+}
+.reference-analytics-selectors label {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  position: relative;
+}
+.reference-analytics-selectors select {
+  appearance: none;
+  background: transparent;
+  outline: none;
+  max-width: 100%;
+  font-size: 4.5cqw;
+  padding: 0 3cqw 0 0;
+}
+.reference-analytics-selectors > select {
+  font-size: 3.7cqw;
+  color: #6e9fff;
+  text-align: right;
+  max-width: 38%;
+  padding: 0;
+}
+.reference-analytics-selectors option {
+  background: #242426;
+  color: white;
+}
+.reference-analytics-main {
+  background: #ffffff10;
+  border-radius: 6cqw;
+  padding: 3cqw 4cqw 4.5cqw;
+  min-height: 44cqw;
+  overflow: hidden;
+}
+.reference-analytics-main > span,
+.reference-analytics-pair > button > span,
+.reference-analytics-assets > span {
+  color: #a8a7ad;
+  font-size: 3.8cqw;
+  display: block;
+}
+.reference-analytics-main > strong,
+.reference-analytics-pair strong,
+.reference-analytics-assets strong {
+  display: block;
+  font-size: 6.2cqw;
+  font-weight: 650;
+  line-height: 1.2;
+  margin-top: 0.6cqw;
+}
+.reference-analytics-main > svg {
+  width: 100%;
+  height: 23cqw;
+  margin-top: 4cqw;
+  overflow: visible;
+}
+.analytics-days {
+  display: flex;
+  justify-content: space-between;
+  font-size: 3cqw;
+  color: #969698;
+  margin-top: 0.7cqw;
+}
+.reference-analytics-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4cqw;
+  margin-top: 4cqw;
+}
+.reference-analytics-pair > button {
+  min-width: 0;
+  text-align: left;
+  border-radius: 6cqw;
+  background: #ffffff10;
+  padding: 3.5cqw 4cqw;
+  min-height: 44cqw;
+}
+.reference-analytics-pair small {
+  font-size: 3.5cqw;
+  display: block;
+  margin-top: 0.5cqw;
+}
+.positive {
+  color: #11b89a;
+}
+.negative {
+  color: #ff516b;
+}
+.analytics-bars {
+  height: 13.3cqw;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 3cqw;
+  margin-top: 7cqw;
+}
+.analytics-bars i {
+  width: 2cqw;
+  border-radius: 0.5cqw;
+}
+.cashflow-bars {
+  height: 13.3cqw;
+  margin-top: 7cqw;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4cqw;
+}
+.cashflow-bars i {
+  height: 2.2cqw;
+  min-width: 3%;
+  border-radius: 0.5cqw;
+  background: linear-gradient(90deg, #21bd9c, #059769);
+}
+.cashflow-bars i:last-child {
+  background: linear-gradient(90deg, #ff4d6a, #ff243c);
+}
+.reference-carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqw;
+  height: 5cqw;
+  margin: 1cqw auto 4cqw;
+}
+.reference-carousel-dots button {
+  width: 1.4cqw;
+  height: 1.4cqw;
+  border-radius: 50%;
+  background: #77758280;
+}
+.reference-carousel-dots button[aria-pressed="true"] {
+  background: #a6a4af;
+}
+.reference-analytics-assets {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #ffffff10;
+  border-radius: 6cqw;
+  padding: 3.5cqw 4cqw;
+  min-height: 44cqw;
+}
+.reference-analytics-assets > div {
+  height: 2cqw;
+  border-radius: 0.4cqw;
+  background: #6598ff;
+  margin: 19cqw 0 2cqw;
+}
+.reference-analytics-assets small {
+  font-size: 3.4cqw;
+  display: flex;
+  gap: 2cqw;
+  align-items: center;
+}
+.reference-analytics-assets small i {
+  width: 2cqw;
+  height: 2cqw;
+  background: #6598ff;
+  border-radius: 0.5cqw;
+}
+.reference-analytics-categories {
+  background: #ffffff10;
+  border-radius: 6cqw;
+  padding: 4cqw;
+}
+.reference-analytics-categories > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2cqw;
+  margin-bottom: 4cqw;
+  font-size: 3.8cqw;
+}
+.reference-analytics-categories i {
+  height: 1cqw;
+  background: #6699ff;
+  border-radius: 1cqw;
+}
+.reference-search-top {
+  display: flex;
+  gap: 3cqw;
+  align-items: center;
+}
+.reference-search-top label {
+  height: 11cqw;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 3cqw;
+  gap: 2cqw;
+  min-width: 0;
+  border-radius: 999px;
+}
+.reference-search-top label svg {
+  width: 5cqw;
+  height: 5cqw;
+  flex-shrink: 0;
+}
+.reference-search-top input {
+  width: 100%;
+  min-width: 0;
+  outline: none;
+  background: transparent;
+  font-size: 3.8cqw;
+  color: #fff;
+}
+.reference-search-top input::placeholder {
+  color: #f2f2f2;
+}
+.reference-search-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3cqw;
+  padding: 4cqw;
+  margin: 6.7cqw 0 4cqw;
+  background: #ffffff10;
+  border-radius: 6cqw;
+}
+.reference-search-shortcuts button {
+  font-size: 3.2cqw;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.5cqw;
+}
+.reference-search-shortcuts i {
+  height: 15cqw;
+  width: 15cqw;
+  display: grid;
+  place-items: center;
+  background: #ffffff12;
+  border-radius: 4cqw;
+}
+.reference-search-shortcuts svg {
+  width: 8cqw;
+  height: 8cqw;
+}
+.reference-search-history {
+  display: flex;
+  align-items: center;
+  padding: 4cqw;
+  background: #ffffff10;
+  border-radius: 6cqw;
+  margin-top: 4cqw;
+}
+.reference-search-history > button:first-child {
+  display: flex;
+  gap: 4cqw;
+  align-items: center;
+  flex: 1;
+  font-size: 4.2cqw;
+  text-align: left;
+}
+.reference-search-history svg {
+  width: 5cqw;
+  height: 5cqw;
+}
+.reference-search-history > button:last-child {
+  color: #929297;
+}
+.reference-search-results > button {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  background: #ffffff0c;
+  padding: 4cqw;
+  width: 100%;
+  text-align: left;
+  font-size: 4cqw;
+}
+.reference-search-results > button > span:first-of-type {
+  flex: 1;
+  min-width: 0;
+}
+.reference-search-results small {
+  display: block;
+  font-size: 3cqw;
+  color: #aaa;
+}
+.reference-search-results i {
+  display: grid;
+  place-items: center;
+  width: 10cqw;
+  height: 10cqw;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #494651;
+  font-size: 4cqw;
+}
+.reference-local-sheet {
+  position: absolute;
+  inset: 0;
+  background: #141719;
+  padding: 15cqw 4.15cqw;
+  z-index: 2;
+}
+.reference-map {
+  position: relative;
+  min-height: 32cqw;
+  border-radius: 6cqw;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 22px,
+      #65808555 24px 25px,
+      transparent 27px 56px
+    ),
+    repeating-linear-gradient(
+      -25deg,
+      #224536 0 39px,
+      #38566a 40px 42px,
+      #223c44 44px 60px
+    );
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin: 4cqw 0;
+}
+.reference-map svg {
+  background: #1c1e20;
+  border-radius: 50%;
+  padding: 2cqw;
+  width: 10cqw;
+  height: 10cqw;
+}
+.reference-profile-screen {
+  background:
+    radial-gradient(ellipse 120% 23% at 80% 26%, #006d7875, transparent),
+    radial-gradient(ellipse 130% 16% at 20% 38%, #aa22c16a, transparent),
+    radial-gradient(ellipse 120% 40% at 70% 90%, #6e677d66, transparent),
+    #14181a;
+}
+.reference-profile-screen > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile-upgrade {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  border-radius: 999px;
+  padding: 2.4cqw 3.5cqw;
+  font-size: 3.8cqw;
+  height: 11cqw;
+}
+.profile-upgrade svg {
+  width: 4cqw;
+  height: 4cqw;
+}
+.reference-profile-identity {
+  text-align: center;
+  margin: 5cqw 0 10cqw;
+}
+.reference-profile-identity > img {
+  height: 25cqw;
+  width: 25cqw;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: auto;
+}
+.reference-profile-identity h1 {
+  font-size: 8cqw;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  margin: 4cqw 0 2.5cqw;
+  line-height: 1.2;
+}
+.reference-profile-identity > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6cqw;
+  color: #adadbd;
+  font-size: 4.4cqw;
+  margin: auto;
+}
+.reference-profile-identity > button svg {
+  height: 3.4cqw;
+  width: 3.4cqw;
+}
+.reference-profile-plan {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+  background: #ffffff10;
+  border-radius: 6cqw;
+  padding: 3.5cqw 4cqw;
+  min-height: 20cqw;
+}
+.reference-profile-plan > span {
+  flex: 1;
+}
+.reference-profile-plan strong {
+  display: block;
+  font-size: 5cqw;
+  font-weight: 650;
+}
+.reference-profile-plan small {
+  display: block;
+  font-size: 3.8cqw;
+  color: #b8b6c5;
+  margin-top: 0.5cqw;
+}
+.reference-profile-plan i {
+  background: #ffffff10;
+  display: grid;
+  place-items: center;
+  width: 10cqw;
+  height: 10cqw;
+  border-radius: 50%;
+}
+.reference-profile-plan svg {
+  width: 3.7cqw;
+  height: 3.7cqw;
+}
+.reference-profile-menu {
+  background: #ffffff10;
+  border-radius: 6cqw;
+  margin-top: 4cqw;
+  padding: 1.6cqw 4cqw;
+}
+.reference-profile-menu > button {
+  display: flex;
+  align-items: flex-start;
+  gap: 4cqw;
+  text-align: left;
+  width: 100%;
+  min-height: 15cqw;
+  padding: 4cqw 0;
+  font-size: 4.2cqw;
+}
+.reference-profile-menu > button > svg {
+  height: 5.5cqw;
+  width: 5.5cqw;
+  flex-shrink: 0;
+  margin-top: 0.2cqw;
+}
+.reference-profile-menu > button > span {
+  flex: 1;
+}
+.reference-profile-menu small {
+  display: block;
+  font-size: 3.8cqw;
+  color: #b5b3bd;
+  line-height: 1.2;
+  margin-top: 0.6cqw;
+}
+.reference-profile-menu b {
+  width: 6cqw;
+  height: 6cqw;
+  background: white;
+  color: #111;
+  border-radius: 999px;
+  font-size: 3cqw;
+  display: grid;
+  place-items: center;
+  font-weight: 500;
+}
+.reference-prototype-note {
+  color: #9696a2;
+  font-size: 2.8cqw;
+  line-height: 1.45;
+  margin: 5cqw 4cqw 0;
+}
+.reference-profile-subpage {
+  font-size: 4cqw;
+}
+.reference-profile-subpage p {
+  color: #b3b4bc;
+  margin: 4cqw 0;
+  line-height: 1.5;
+}
+.reference-profile-subpage form {
+  display: flex;
+  flex-direction: column;
+  gap: 4cqw;
+}
+.reference-profile-subpage input,
+.reference-crypto-dialog input,
+.reference-crypto-dialog select {
+  width: 100%;
+  background: #ffffff10;
+  color: white;
+  border-radius: 3cqw;
+  padding: 3.5cqw;
+  outline: none;
+  margin: 2cqw 0 4cqw;
+}
+.reference-crypto-dialog select option {
+  background: #222;
+  color: #fff;
+}
+.profile-share-card {
+  background: #ffffff10;
+  border-radius: 6cqw;
+  padding: 8cqw;
+  text-align: center;
+  margin: 6cqw 0;
+  font-size: 4.2cqw;
+  overflow-wrap: anywhere;
+}
+.profile-share-card svg {
+  width: 20cqw;
+  height: 20cqw;
+  margin: 0 auto 4cqw;
+}
+.profile-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4cqw;
+  width: 100%;
+  text-align: left;
+  background: #ffffff10;
+  border-radius: 4cqw;
+  padding: 4cqw;
+  margin-top: 3cqw;
+  font-size: 4cqw;
+}
+.profile-detail-row small {
+  display: block;
+  color: #a9a8b4;
+  font-size: 3.2cqw;
+  margin-bottom: 1cqw;
+}
+.reference-wallet {
+  background:
+    radial-gradient(ellipse 140% 22% at 20% 28%, #007a808a, transparent),
+    radial-gradient(ellipse 130% 22% at 30% 41%, #8d959487, transparent),
+    radial-gradient(ellipse 130% 20% at 70% 62%, #23405c88, transparent),
+    #132125;
+}
+.reference-wallet-list {
+  background: #aabac522;
+  backdrop-filter: blur(15px);
+}
+.reference-wallet .reference-map {
+  width: 100%;
+  margin-top: 4cqw;
+  min-height: 36cqw;
+}
+.reference-wallet-add {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(10cqw, env(safe-area-inset-bottom));
+  margin: 0;
+  z-index: 5;
+  font-size: 4.2cqw;
+  padding: 3.6cqw 6cqw;
+  gap: 2.5cqw;
+}
+.reference-wallet-add svg {
+  width: 5.7cqw;
+  height: 5.7cqw;
+}
+.reference-wealth > strong {
+  font-size: 8.5cqw;
+  margin: 2cqw 0 0.7cqw;
+}
+.wealth-period {
+  font-size: 3.8cqw;
+  color: #9fa0ad;
+  margin-bottom: 6cqw;
+}
+.reference-wealth > button:not(.reference-widget-title) {
+  margin: 7cqw 0;
+  align-items: center;
+  gap: 4cqw;
+}
+.reference-wealth i {
+  width: 10.2cqw;
+  height: 10.2cqw;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  padding: 2.2cqw;
+}
+.reference-wealth i svg {
+  width: 5.5cqw;
+  height: 5.5cqw;
+}
+.reference-wealth > button > span {
+  min-width: 0;
+  flex: 1;
+}
+.reference-wealth > button > span:last-child {
+  text-align: right;
+  flex: initial;
+}
+.reference-wealth small {
+  font-size: 3.65cqw;
+  line-height: 1.2;
+  max-width: 64cqw;
+}
+.reference-wealth > button > svg {
+  color: #9696a2;
+  flex-shrink: 0;
+}
+.reference-wealth > button:nth-of-type(3) > i {
+  background: #ff8044;
+}
+.reference-points-screen,
+.reference-crypto-screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 29cqw;
+  background-color: #05060b;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  background-attachment: local;
+}
+.reference-points-screen {
+  background-image: url("/reference/points-background.svg");
+  background-color: #593369;
+}
+.reference-crypto-screen {
+  background-image:
+    url("/reference/crypto-background.svg"),
+    linear-gradient(90deg, #020306, #090920);
+  background-size:
+    100% auto,
+    100% 100%;
+  background-attachment: local, local;
+}
+.reference-points-hero {
+  text-align: center;
+  margin: 22.6cqw 0 19cqw;
+}
+.reference-points-hero > p {
+  font-size: 3.8cqw;
+}
+.reference-points-hero h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqw;
+  font-size: 11.8cqw;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  margin: 2cqw 0;
+}
+.reference-points-hero h1 > svg {
+  width: 8cqw;
+  height: 8cqw;
+}
+.reference-points-hero > button {
+  font-size: 3.8cqw;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+}
+.reference-points-hero > button > svg {
+  width: 3.2cqw;
+  height: 3.2cqw;
+}
+.reference-points-hero > .reference-points-upgrade {
+  margin: 2.6cqw auto 0;
+  background: #ffffff24;
+  padding: 2.5cqw 4.2cqw;
+  border-radius: 999px;
+}
+.points-actions,
+.crypto-actions {
+  margin-top: 0;
+}
+.reference-points-promo,
+.reference-crypto-promo {
+  position: relative;
+  background: #ffffff10;
+  border-radius: 6cqw;
+  min-height: 28cqw;
+  padding: 7cqw 4cqw 4cqw;
+  margin: 4cqw 4.15cqw 0;
+  overflow: hidden;
+}
+.reference-points-promo > button:not(.reference-promo-close),
+.reference-crypto-promo > button:not(.reference-promo-close) {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+.reference-points-promo strong,
+.reference-crypto-promo strong {
+  display: block;
+  font-size: 4.2cqw;
+  font-weight: 500;
+  line-height: 1.15;
+}
+.reference-points-promo span,
+.reference-crypto-promo span {
+  display: block;
+  font-size: 3.6cqw;
+  color: #c1bbc8;
+  line-height: 1.25;
+  margin-top: 0.8cqw;
+  width: 67%;
+}
+.reference-points-promo .reference-promo-close,
+.reference-crypto-promo .reference-promo-close {
+  z-index: 2;
+}
+.reference-promo-close svg {
+  width: 3.4cqw;
+  height: 3.4cqw;
+}
+.points-card-art,
+.crypto-promo-art {
+  position: absolute;
+  right: 4cqw;
+  bottom: -2cqw;
+  width: 24cqw;
+  height: 27cqw;
+  perspective: 400px;
+}
+.points-card-art > i,
+.crypto-promo-art > i {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 16cqw;
+  height: 25cqw;
+  border-radius: 1.2cqw;
+  background: linear-gradient(130deg, #090909, #34343d, #04040a);
+  border: 1px solid #a4a4a4;
+  color: #eee;
+  font-size: 2cqw;
+  font-style: normal;
+  padding: 2cqw;
+  box-shadow: 3px 2px 2px #0009;
+  transform: rotateY(-35deg) rotate(-4deg);
+}
+.points-card-art > i:last-child,
+.crypto-promo-art > i:last-child {
+  left: 8cqw;
+  bottom: -1cqw;
+  transform: rotateY(-35deg) rotate(-8deg);
+  background: linear-gradient(170deg, #030303 35%, #630518 70%, #19121e);
+  z-index: -1;
+}
+.points-card-art > i:first-child::after {
+  content: "";
+  display: block;
+  width: 10cqw;
+  height: 6cqw;
+  background: linear-gradient(100deg, #111 0 20%, #ff272744 30% 45%, #111 60%);
+  margin-top: 2cqw;
+}
+.reference-points-products {
+  background: #ffffff10;
+  border-radius: 6cqw;
+  padding: 3.5cqw 4cqw;
+  margin: 4cqw 4.15cqw 0;
+}
+.reference-points-products h2 {
+  color: #afa7b9;
+  font-size: 3.8cqw;
+  margin-bottom: 3cqw;
+}
+.reference-points-products > div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3.5cqw;
+}
+.reference-points-products button {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.5cqw;
+  font-size: 3.5cqw;
+}
+.reference-points-products i {
+  background: #ffffff12;
+  display: grid;
+  place-items: center;
+  width: 15cqw;
+  height: 15cqw;
+  border-radius: 4cqw;
+}
+.reference-points-products svg {
+  width: 8cqw;
+  height: 8cqw;
+}
+.reference-points-content > .asset-list,
+.reference-points-content > .asset-learn,
+.reference-points-content > .asset-search {
+  margin: 4cqw 4.15cqw 0;
+}
+.points-explore-title {
+  font-size: 4.6cqw;
+  margin: 7cqw 4.15cqw 3cqw;
+}
+.reference-crypto-hero {
+  text-align: center;
+  margin: 28cqw 0 25.8cqw;
+}
+.reference-crypto-hero > p {
+  font-size: 3.8cqw;
+}
+.reference-crypto-hero h1 {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1cqw;
+  font-size: 11.8cqw;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  margin: 2cqw 0;
+}
+.reference-crypto-hero h1 small {
+  font-size: 5cqw;
+}
+.reference-crypto-hero > span {
+  font-size: 3.8cqw;
+}
+.reference-crypto-promo {
+  background: #ffffff0c;
+}
+.reference-crypto-promo > button > strong {
+  max-width: 72%;
+}
+.crypto-promo-art {
+  right: 3cqw;
+  bottom: -3cqw;
+}
+.crypto-promo-art > i {
+  height: 27cqw;
+  width: 12cqw;
+  border-color: #777;
+  background: linear-gradient(130deg, #030303, #242426);
+  padding: 1.5cqw 1cqw;
+  writing-mode: vertical-rl;
+}
+.crypto-promo-art > i span {
+  color: #cd90c7;
+  font-size: 2cqw;
+  width: auto;
+  margin: 6cqw 1cqw 0;
+}
+.crypto-promo-art > i:last-child {
+  background: linear-gradient(120deg, #000, #1c2421);
+  left: 11cqw;
+}
+.crypto-promo-art > i:last-child span {
+  color: #7ad4c9;
+}
+.reference-crypto-transactions {
+  background: #ffffff0d;
+  border-radius: 6cqw;
+  padding: 4cqw;
+  margin: 4cqw 4.15cqw 0;
+}
+.crypto-transaction-row {
+  display: flex;
+  align-items: center;
+  gap: 4cqw;
+  width: 100%;
+  text-align: left;
+  padding: 4cqw 0;
+  font-size: 4.2cqw;
+  line-height: 1.2;
+}
+.crypto-transaction-row > span:first-of-type {
+  flex: 1;
+  min-width: 0;
+}
+.crypto-transaction-row > span:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.crypto-transaction-row small {
+  display: block;
+  color: #a0a0a7;
+  font-size: 3.6cqw;
+  line-height: 1.3;
+  margin-top: 0.8cqw;
+}
+.crypto-person {
+  position: relative;
+  width: 10.2cqw;
+  height: 10.2cqw;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #333438;
+  flex-shrink: 0;
+  font-size: 4cqw;
+  font-style: normal;
+}
+.crypto-person b {
+  position: absolute;
+  right: -0.7cqw;
+  bottom: -0.7cqw;
+  background: #fff;
+  color: #111;
+  border-radius: 50%;
+  width: 4cqw;
+  height: 4cqw;
+  display: grid;
+  place-items: center;
+}
+.crypto-person b svg {
+  width: 2.8cqw;
+  height: 2.8cqw;
+}
+.crypto-exchange-badge {
+  position: relative;
+  width: 10.2cqw;
+  height: 10.2cqw;
+  flex-shrink: 0;
+}
+.crypto-exchange-badge > svg {
+  width: 10.2cqw;
+  height: 10.2cqw;
+}
+.crypto-exchange-badge .reference-token {
+  width: 5cqw;
+  height: 5cqw;
+  position: absolute;
+  bottom: -1cqw;
+  right: -1cqw;
+}
+.crypto-exchange-badge .reference-token svg {
+  width: 3cqw;
+  height: 3cqw;
+}
+.reference-token {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  width: 14.2cqw;
+  height: 14.2cqw;
+  overflow: hidden;
+  font-style: normal;
+  flex-shrink: 0;
+}
+.reference-token img {
+  height: 90%;
+  width: 90%;
+  object-fit: contain;
+}
+.reference-token svg {
+  height: 70%;
+  width: 70%;
+}
+.reference-token.token-ETH {
+  background: #7584ec !important;
+}
+.reference-token.token-DIMO img {
+  filter: brightness(0) invert(1);
+}
+.reference-market-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4cqw;
+  margin: 4cqw 4.15cqw 0;
+}
+.reference-market-pair > button {
+  min-width: 0;
+  position: relative;
+  border-radius: 6cqw;
+  background: #ffffff0d;
+  padding: 4cqw;
+  text-align: left;
+}
+.reference-market-pair > button > span {
+  color: #a1a1aa;
+  font-size: 3.8cqw;
+}
+.reference-market-pair .reference-token {
+  position: absolute;
+  right: 4cqw;
+  top: 3cqw;
+  width: 6cqw;
+  height: 6cqw;
+}
+.reference-market-pair strong {
+  display: block;
+  white-space: nowrap;
+  font-size: 5.3cqw;
+  font-weight: 650;
+  margin: 1.5cqw 0 1cqw;
+  letter-spacing: -0.04em;
+}
+.reference-market-pair small {
+  color: #12b597;
+  font-size: 3.6cqw;
+}
+.reference-market-pair > button > svg {
+  width: 100%;
+  height: 19cqw;
+  margin-top: 5cqw;
+}
+.reference-top-movers {
+  background: #ffffff0d;
+  border-radius: 6cqw;
+  padding: 4cqw;
+  margin: 4cqw 4.15cqw 0;
+}
+.mover-tabs {
+  display: flex;
+  align-items: center;
+  padding: 0.5cqw;
+  border-radius: 999px;
+  background: #ffffff10;
+  margin: 4cqw 0;
+}
+.mover-tabs button {
+  flex: 1;
+  padding: 2.5cqw;
+  border-radius: 999px;
+  font-size: 3.8cqw;
+  color: #b1afba;
+}
+.mover-tabs button[aria-pressed="true"] {
+  background: #ffffff27;
+  color: white;
+}
+.movers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5cqw 3cqw;
+  padding: 2cqw 0 1cqw;
+}
+.movers-grid > button {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 1cqw;
+  min-width: 0;
+  font-size: 3.1cqw;
+}
+.movers-grid small {
+  font-size: 3cqw;
+  white-space: nowrap;
+}
+.movers-grid .reference-token {
+  margin-bottom: 1cqw;
+}
+.reference-crypto-features {
+  background: #ffffff0d;
+  border-radius: 6cqw;
+  padding: 4cqw;
+  margin: 4cqw 4.15cqw 0;
+}
+.reference-crypto-features h2 {
+  color: #aaa;
+  font-size: 3.8cqw;
+  margin-bottom: 3cqw;
+}
+.reference-crypto-features > button {
+  display: flex;
+  gap: 4cqw;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+  padding: 2cqw 0;
+  font-size: 4.2cqw;
+}
+.reference-crypto-features i {
+  background: #ffffff15;
+  border-radius: 3cqw;
+  padding: 2cqw;
+}
+.reference-crypto-features i > svg {
+  height: 6cqw;
+  width: 6cqw;
+}
+.reference-crypto-features > button > span {
+  flex: 1;
+}
+.reference-crypto-features small {
+  display: block;
+  font-size: 3.6cqw;
+  color: #aaa;
+}
+.reference-crypto-dialog {
+  background:
+    radial-gradient(ellipse 150% 40% at 100% 0, #14355b90, transparent), #08090d;
+  z-index: 78;
+  font-size: 3.8cqw;
+}
+.reference-crypto-dialog > p,
+.reference-crypto-dialog form > p {
+  color: #aaa;
+  line-height: 1.45;
+  margin: 4cqw 0;
+}
+.reference-crypto-dialog h2 {
+  font-size: 7cqw;
+  margin: 6cqw 0;
+}
+.reference-crypto-dialog .asset-list {
+  margin-top: 4cqw;
+}
+.reference-crypto-dialog .asset-list .reference-token {
+  width: 10cqw;
+  height: 10cqw;
+}
+.reference-crypto-screen > .reference-header,
+.reference-points-screen > .reference-header,
+.reference-home > .reference-header {
+  position: sticky;
+  top: 0;
+  z-index: 22;
+}
+.reference-header.is-scrolled {
+  backdrop-filter: blur(16px);
+  background: linear-gradient(#17232690, #18262d30);
+  padding-bottom: 3cqw;
+  margin-bottom: -3cqw;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reference-full-tool *,
+  .reference-crypto-screen *,
+  .reference-points-screen *,
+  .reference-profile-screen * {
+    scroll-behavior: auto !important;
+  }
+}
+.reference-amex-art {
+  position: relative;
+  width: 43cqw;
+  height: auto;
+  z-index: 2;
+  display: block;
+  flex-shrink: 0;
+  border-radius: 1.2cqw;
+  box-shadow: 0 0 3px #ffffff66;
+}
+.reference-amex-art > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.apple-back-card.apple-bmw-card {
+  background: linear-gradient(130deg, #020202, #242626);
+  color: #999;
+}
+.apple-bmw-card strong {
+  display: block;
+  position: absolute;
+  top: 2cqw;
+  left: 2cqw;
+  font-style: italic;
+  font-size: 3.6cqw;
+}
+.apple-bmw-card span {
+  position: absolute;
+  bottom: 1.5cqw;
+  left: 2cqw;
+  font-size: 1.5cqw;
+}
+.apple-back-card.apple-pattern-card {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 1.8cqw,
+      #b9a15c 1.9cqw 2.1cqw,
+      transparent 2.2cqw 3cqw
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      #100d0c 0 1.8cqw,
+      #b9a15c 1.9cqw 2.1cqw,
+      #100d0c 2.2cqw 3cqw
+    );
+}
+.reference-section-root {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  container-type: inline-size;
+  overflow: hidden;
+}
+.reference-wallet-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 75;
+  container-type: inline-size;
+  overflow: hidden;
+  font-family: var(--font-inter), Arial, sans-serif;
+}
+.reference-wallet-frame > .reference-wallet {
+  z-index: 0;
+}
+.reference-wallet-frame > .reference-wallet-add {
+  position: absolute;
+}
+
+.analytics-total {
+  display: flex;
+  align-items: baseline;
+  gap: 2cqw;
+}
+.analytics-total strong {
+  font-size: 6.2cqw;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+.analytics-total small {
+  font-size: 3.6cqw;
+}

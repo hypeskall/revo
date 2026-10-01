@@ -6,12 +6,14 @@ import { Plus, X, ArrowLeft } from "@/components/ui/OfficialIcons";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { CardPreview } from "./CardPreview";
 import { CardsScreen } from "./CardsScreen";
+import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 
 export function ReferenceWallet() {
   const state = useRevolutStore();
   const transition = useClosingScreen(() => state.setWalletOpen(false));
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(state.walletCardId);
   const [adding, setAdding] = useState(false);
+  const [mapOpen, setMapOpen] = useState(false);
   if (selected)
     return (
       <motion.section
@@ -47,48 +49,69 @@ export function ReferenceWallet() {
       role="dialog"
       aria-modal="true"
       aria-label="Wallet"
-      className="reference-wallet no-scrollbar"
+      className="reference-wallet-frame"
     >
-      <button
-        className="reference-back"
-        aria-label="Close wallet"
-        onClick={() => transition.close()}
+      <div
+        className="reference-wallet no-scrollbar"
+        aria-hidden={adding || mapOpen}
+        ref={(node) => {
+          if (node) node.inert = adding || mapOpen;
+        }}
       >
-        <X />
-      </button>
-      <h1>Wallet</h1>
-      <div className="reference-wallet-list">
-        {state.cards.map((card) => (
+        <button
+          className="reference-back"
+          aria-label="Close wallet"
+          onClick={() => transition.close()}
+        >
+          <X />
+        </button>
+        <h1>Wallet</h1>
+        <div className="reference-wallet-list">
+          {state.cards.map((card) => (
+            <button
+              key={card.id}
+              className="reference-wallet-row"
+              onClick={() => setSelected(card.id)}
+            >
+              <CardPreview card={card} />
+              <span>
+                <strong>{card.name}</strong>
+                <small>
+                  {card.isFrozen
+                    ? "Card is frozen"
+                    : card.type === "disposable"
+                      ? "Regenerates details after each use"
+                      : `··${card.last4}, ${card.expiry}`}
+                </small>
+              </span>
+            </button>
+          ))}
           <button
-            key={card.id}
             className="reference-wallet-row"
-            onClick={() => setSelected(card.id)}
+            onClick={() => state.setUiPanel("rewards")}
           >
-            <CardPreview card={card} />
+            <span className="reference-pay-card">R Pay</span>
             <span>
-              <strong>{card.name}</strong>
-              <small>
-                {card.isFrozen
-                  ? "Card is frozen"
-                  : card.type === "disposable"
-                    ? "Regenerates details after each use"
-                    : `··${card.last4}, ${card.expiry}`}
-              </small>
+              <strong>Revolut Pay</strong>
+              <small>A secure 1-click checkout</small>
             </span>
           </button>
-        ))}
+        </div>
         <button
-          className="reference-wallet-row"
-          onClick={() => state.setUiPanel("rewards")}
+          className="reference-map wallet-map"
+          aria-label="View sample ATM locations"
+          onClick={() => setMapOpen(true)}
         >
-          <span className="reference-pay-card">R Pay</span>
-          <span>
-            <strong>Revolut Pay</strong>
-            <small>A secure 1-click checkout</small>
-          </span>
+          <OfficialIcon name="bank" />
+          <OfficialIcon name="bank" />
+          <OfficialIcon name="bank" />
         </button>
       </div>
-      <button className="reference-wallet-add" onClick={() => setAdding(true)}>
+      <button
+        className="reference-wallet-add"
+        disabled={adding || mapOpen}
+        onClick={() => setAdding(true)}
+      >
         <Plus />
         Add new
       </button>
@@ -123,6 +146,33 @@ export function ReferenceWallet() {
             ))}
           </section>
         </div>
+      )}
+      {mapOpen && (
+        <section
+          className="reference-local-sheet"
+          role="dialog"
+          aria-label="ATM locations"
+        >
+          <button
+            className="reference-back"
+            aria-label="Close ATM locations"
+            onClick={() => setMapOpen(false)}
+          >
+            <OfficialIcon name="cross" />
+          </button>
+          <h2>ATMs</h2>
+          <div className="reference-map">
+            <OfficialIcon name="cash" />
+            <OfficialIcon name="cash" />
+          </div>
+          <p>Sample locations for your presentation</p>
+          <button
+            className="presentation-primary"
+            onClick={() => setMapOpen(false)}
+          >
+            Done
+          </button>
+        </section>
       )}
     </motion.section>
   );

@@ -6,22 +6,38 @@ import {
 } from "@/components/ui/ReferenceIcons";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { AnalyticsGlyph, CardsGlyph } from "@/components/ui/ReferenceIcons";
+import { useEffect, useRef, useState } from "react";
 
 export function AppHeader({
   payments = false,
   onSearch,
   onAnalytics,
+  hideAnalytics = false,
 }: {
   payments?: boolean;
   onSearch?: () => void;
   onAnalytics?: () => void;
+  hideAnalytics?: boolean;
 }) {
   const state = useRevolutStore();
+  const header = useRef<HTMLElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const parent = header.current?.parentElement;
+    if (!parent) return;
+    const update = () => setScrolled(parent.scrollTop > 25);
+    parent.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => parent.removeEventListener("scroll", update);
+  }, []);
   const unread =
     state.notifications.some((item) => !item.read) ||
     state.contacts.some((contact) => contact.unread);
   return (
-    <header className="reference-header">
+    <header
+      ref={header}
+      className={`reference-header ${scrolled ? "is-scrolled" : ""}`}
+    >
       <button
         aria-label="Profile"
         className="reference-avatar"
@@ -38,19 +54,21 @@ export function AppHeader({
         <Search />
         <span>Search</span>
       </button>
-      <button
-        aria-label={payments ? "Scheduled payments" : "Analytics"}
-        className="reference-header-circle"
-        onClick={() =>
-          payments
-            ? state.setUiPanel("scheduled")
-            : onAnalytics
-              ? onAnalytics()
-              : state.setHomeTool("analytics")
-        }
-      >
-        {payments ? <Calendar /> : <AnalyticsGlyph />}
-      </button>
+      {!hideAnalytics && (
+        <button
+          aria-label={payments ? "Scheduled payments" : "Analytics"}
+          className="reference-header-circle"
+          onClick={() =>
+            payments
+              ? state.setUiPanel("scheduled")
+              : onAnalytics
+                ? onAnalytics()
+                : state.setHomeTool("analytics")
+          }
+        >
+          {payments ? <Calendar /> : <AnalyticsGlyph />}
+        </button>
+      )}
       <button
         aria-label={payments ? "New payment" : "Wallet & Cards"}
         className="reference-header-circle"
