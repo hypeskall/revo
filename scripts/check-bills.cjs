@@ -43,12 +43,30 @@ assets._compile(
   }).outputText,
   assetsFilename,
 );
+const financeFilename = path.resolve(__dirname, "../src/utils/finance.ts");
+const finance = new Module(financeFilename, module);
+finance.require = function (name) {
+  return name === "@/data/assets"
+    ? assets.exports
+    : Module.prototype.require.call(this, name);
+};
+finance._compile(
+  ts.transpileModule(fs.readFileSync(financeFilename, "utf8"), {
+    compilerOptions: {
+      module: ts.ModuleKind.CommonJS,
+      target: ts.ScriptTarget.ES2020,
+    },
+  }).outputText,
+  financeFilename,
+);
 loaded.require = function (name) {
-  return name === "@/data/presentation"
-    ? fixtures.exports
-    : name === "@/data/assets"
-      ? assets.exports
-      : Module.prototype.require.call(this, name);
+  return name === "@/utils/finance"
+    ? finance.exports
+    : name === "@/data/presentation"
+      ? fixtures.exports
+      : name === "@/data/assets"
+        ? assets.exports
+        : Module.prototype.require.call(this, name);
 };
 loaded._compile(compiled, filename);
 const store = loaded.exports.useRevolutStore;
@@ -352,8 +370,182 @@ async function check() {
   assert.equal(store.getState().accounts.RON.balance, 1796.46);
   assert.equal(store.getState().profileName, "Mihai");
   assert.equal(store.getState().cryptoActivity.length, 0);
+  // A pre-v6 top-up/buy snapshot must recover its missing cash history once.
+  const legacy = JSON.parse(saved.get("revolut_simulator_storage_v2"));
+  legacy.version = 5;
+  legacy.state.cryptoActivity = [
+    {
+      id: "legacy-buy",
+      asset: "BTC",
+      units:
+        22 / assets.exports.demoAssets.find((a) => a.symbol === "BTC").price,
+      value: 22,
+      title: "RON → BTC",
+      timestamp: Date.now(),
+    },
+  ];
+  legacy.state.transactions = legacy.state.transactions.filter(
+    (t) => t.kind !== "investment",
+  );
+  legacy.state.accounts.RON.balance = 1774.46;
+  legacy.state.demoHoldings = { BTC: 22 };
+  saved.set("revolut_simulator_storage_v2", JSON.stringify(legacy));
+  await store.persist.rehydrate();
+  assert.equal(
+    store.getState().accounts.RON.balance,
+    1774.46,
+    "History recovery never debits the saved balance again",
+  );
+  assert.equal(
+    store.getState().transactions.find((t) => t.linkedId === "legacy-buy")
+      .amount,
+    -22,
+  );
+  const recoveredCount = store.getState().transactions.length;
+  await store.persist.rehydrate();
+  assert.equal(
+    store.getState().transactions.length,
+    recoveredCount,
+    "History recovery is idempotent",
+  );
+  store.getState().resetToDefaults();
+  const { accountSummary, wealthSummary, exchangeRate } = finance.exports;
+  store.getState().resetToDefaults();
+  const summary = (c = "RON") =>
+    accountSummary(
+      store.getState().transactions,
+      store.getState().accounts[c].balance,
+      c,
+      0,
+      Infinity,
+    );
+  const opening = summary().opening;
+  const originalWealth = wealthSummary(store.getState()).total;
+  const originalIncome = summary().income,
+    originalSpent = summary().spent;
+  store.getState().addMoney(23.45, "RON", "Apple Pay", "card-blood");
+  assert.equal(store.getState().transactions[0].cardId, "card-blood");
+  assert.equal(
+    summary().income,
+    Math.round((originalIncome + 23.45) * 100) / 100,
+  );
+  store.getState().sendTransfer("c-briana", 7.2, "RON");
+  assert.equal(summary().spent, Math.round((originalSpent + 7.2) * 100) / 100);
+  assert.equal(
+    store.getState().transactions[0].linkedId,
+    store
+      .getState()
+      .contacts.find((c) => c.id === "c-briana")
+      .transfers.at(-1).id,
+  );
+  store.getState().tradeDemo("BTC", 9.4, false);
+  assert.equal(
+    store.getState().transactions[0].linkedId,
+    store.getState().cryptoActivity[0].id,
+  );
+  const spentBeforeMoves = summary().spent;
+  store.getState().tradeDemo("BTC", 2.3, true);
+  store.getState().moveJointMoney(1, false);
+  assert.equal(
+    summary().spent,
+    spentBeforeMoves,
+    "Buying assets and moving to joint are not external spending",
+  );
+  assert.equal(
+    summary().opening,
+    opening,
+    "Opening balance stays stable through top-ups, transfers, buys and internal moves",
+  );
+  const beforeExchange = wealthSummary(store.getState()).total;
+  const rate = exchangeRate(store.getState().rates, "RON", "EUR");
+  assert.equal(
+    store.getState().exchangeCurrency("RON", "EUR", 10, 99999).success,
+    true,
+  );
+  assert.equal(
+    store.getState().transactions[1].amount,
+    Math.round(10 * rate * 100) / 100,
+    "Exchange derives the received amount; caller cannot create funds",
+  );
+  assert.equal(
+    store.getState().transactions[1].linkedId,
+    store.getState().transactions[0].id,
+  );
+  assert.ok(
+    Math.abs(wealthSummary(store.getState()).total - beforeExchange) < 0.03,
+    "Exchange conserves value to currency rounding precision",
+  );
+  const eurOpening = summary("EUR").opening;
+  const pocketMove = store.getState().moveBillsMoney(1, false);
+  assert.equal(pocketMove, null);
+  assert.equal(
+    summary("EUR").opening,
+    eurOpening,
+    "Pocket activity reconciles from the personal account perspective",
+  );
+  assert.equal(summary().opening, opening);
+  const beforeFreeze = store.getState().accounts.RON.balance;
+  store.getState().toggleFreezeCard("card-blood");
+  assert.ok(store.getState().addMoney(10, "RON", "Apple Pay", "card-blood"));
+  assert.ok(store.getState().addMoney(10, "RON", "Apple Pay", "missing"));
+  store.getState().injectCustomTransaction({
+    title: "Invalid",
+    amount: NaN,
+    currency: "RON",
+  });
+  store.getState().overrideBalance("RON", Infinity);
+  assert.equal(
+    store.getState().accounts.RON.balance,
+    beforeFreeze,
+    "Invalid or frozen card operations never change funds",
+  );
+  store.getState().overrideBalance("RON", 2000);
+  assert.equal(
+    summary().opening,
+    opening,
+    "Balance adjustments remain recorded and reconcilable",
+  );
+  const monthStart = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1,
+  ).getTime();
+  const current = accountSummary(
+    store.getState().transactions,
+    2000,
+    "RON",
+    monthStart,
+    Infinity,
+  );
+  assert.equal(
+    Math.round(
+      (current.opening + current.income - current.spent + current.moved) * 100,
+    ) / 100,
+    current.closing,
+  );
+  store.getState().setTopUpCard("card-surge");
+  const snapshot = saved.get("revolut_simulator_storage_v2");
+  const snapshotSummary = summary();
+  store.setState({
+    topUpCardId: "temporary",
+    accounts: {
+      ...store.getState().accounts,
+      RON: { ...store.getState().accounts.RON, balance: 0 },
+    },
+    transactions: [],
+  });
+  saved.set("revolut_simulator_storage_v2", snapshot);
+  await store.persist.rehydrate();
+  assert.equal(store.getState().topUpCardId, "card-surge");
+  assert.deepEqual(
+    summary(),
+    JSON.parse(JSON.stringify(snapshotSummary)),
+    "Account ledger and analytics survive reload together",
+  );
+  store.getState().resetToDefaults();
+  assert.equal(wealthSummary(store.getState()).total, originalWealth);
   console.log(
-    "Sandbox checks passed: top-ups, transfers, cancellation guards, holdings, schedules, notifications, persistence and reset.",
+    "Sandbox checks passed: ledger/analytics reconciliation, wallet-card validation, exchanges, holdings, schedules, migration, persistence and reset.",
   );
 }
 check().catch((error) => {

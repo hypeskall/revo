@@ -19,6 +19,14 @@ import { AnimatedAmount } from "@/components/ui/AnimatedAmount";
 import { TransactionRow } from "./ReferenceActivity";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import {
+  wealthSummary,
+  transactionDate,
+  personalTransaction,
+  isExternalFlow,
+  exchangeRate,
+  roundMoney,
+} from "@/utils/finance";
 import { presentationIban } from "@/data/account-details";
 import { TabId } from "@/components/navigation/BottomTabBar";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
@@ -33,16 +41,33 @@ export function PersonalHome({
   const [cardPage, setCardPage] = useState(0);
   const currencies = ["RON", "EUR", "USD", "GBP"] as const;
   const current = state.accounts[state.activeCurrency];
-  const cash =
-    state.accounts.RON.balance +
-    state.accounts.EUR.balance * 4.9765 +
-    state.accounts.USD.balance * 4.582 +
-    state.accounts.GBP.balance * 5.891 +
-    state.billsBalance * 4.9765 +
-    state.jointBalance;
-  const holdings = Object.values(state.demoHoldings).reduce(
-    (sum, value) => sum + value,
-    0,
+  const wealth = wealthSummary(state);
+  const { cash, total } = wealth;
+  const monthStart = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth() - 1,
+    1,
+  ).getTime();
+  const monthEnd = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    1,
+  ).getTime();
+  const monthChange = roundMoney(
+    state.transactions
+      .map(personalTransaction)
+      .filter(
+        (t) =>
+          (isExternalFlow(t) || t.kind === "asset-transfer") &&
+          t.status === "completed" &&
+          t.rawDate >= monthStart &&
+          t.rawDate < monthEnd,
+      )
+      .reduce(
+        (sum, t) =>
+          sum + t.amount * exchangeRate(state.rates, t.currency, "RON"),
+        0,
+      ),
   );
   const [whole, cents] = new Intl.NumberFormat(
     state.activeCurrency === "RON" ? "ro-RO" : "en-GB",
@@ -69,7 +94,13 @@ export function PersonalHome({
     },
   ];
   const activity = state.transactions
-    .filter((tx) => tx.currency === state.activeCurrency)
+    .map(personalTransaction)
+    .map((tx) => ({ ...tx, date: transactionDate(tx.rawDate) }))
+    .sort((a, b) => b.rawDate - a.rawDate)
+    .filter(
+      (tx) =>
+        tx.currency === state.activeCurrency && tx.kind !== "asset-transfer",
+    )
     .slice(0, 3);
   return (
     <div className="reference-home no-scrollbar">
@@ -110,7 +141,7 @@ export function PersonalHome({
           className="reference-accounts"
           onClick={() => state.setAccountsDrawerOpen(true)}
         >
-          Accounts<span>5</span>
+          Accounts<span>{Object.keys(state.accounts).length + 2}</span>
         </button>
       </motion.section>
       <div className="reference-actions">
@@ -220,11 +251,17 @@ export function PersonalHome({
             Total wealth <ChevronRight size={19} />
           </button>
           <strong>
-            {formatCurrencyAmount(cash + holdings, "RON", {
+            {formatCurrencyAmount(total, "RON", {
               showDecimalsIfZero: false,
             })}
           </strong>
-          <p className="wealth-period">Past month</p>
+          <p className="wealth-period">
+            <span className={monthChange >= 0 ? "positive" : "negative"}>
+              {monthChange >= 0 ? "▲" : "▼"}{" "}
+              {formatCurrencyAmount(Math.abs(monthChange), "RON")}
+            </span>{" "}
+            · Past month
+          </p>
           <button onClick={() => state.setAccountsDrawerOpen(true)}>
             <i>
               <Coins />
@@ -261,13 +298,9 @@ export function PersonalHome({
             },
             {
               title: "Crypto",
-              desc: formatCurrencyAmount(
-                Object.entries(state.demoHoldings)
-                  .filter(([key]) => ["BTC", "ETH", "SOL", "XRP"].includes(key))
-                  .reduce((sum, [, value]) => sum + value, 0),
-                "RON",
-                { showDecimalsIfZero: false },
-              ),
+              desc: formatCurrencyAmount(wealth.crypto, "RON", {
+                showDecimalsIfZero: false,
+              }),
               icon: "bitcoin",
               color: "#ba4feb",
               action: () => onNavigate("cards"),

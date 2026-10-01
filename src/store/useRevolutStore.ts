@@ -6,9 +6,12 @@ import {
   presentationCards,
 } from "@/data/presentation";
 import { demoAssets } from "@/data/assets";
+import { exchangeRate, roundMoney } from "@/utils/finance";
 import { Account, BankCard, Contact, Currency, Transaction } from "@/types";
 
 interface RevolutState {
+  topUpCardId: string;
+  setTopUpCard: (id: string) => void;
   profileName: string;
   setProfileName: (name: string) => void;
   cryptoActivity: {
@@ -146,7 +149,12 @@ interface RevolutState {
   setSoundEnabled: (enabled: boolean) => void;
 
   // Financial Operations
-  addMoney: (amount: number, currency: Currency, method?: string) => void;
+  addMoney: (
+    amount: number,
+    currency: Currency,
+    method?: string,
+    cardId?: string,
+  ) => string | null;
   sendTransfer: (
     contactId: string,
     amount: number,
@@ -229,6 +237,10 @@ const DEFAULT_RATES: Record<string, number> = {
 export const useRevolutStore = create<RevolutState>()(
   persist(
     (set, get) => ({
+      topUpCardId: "card-blood",
+      setTopUpCard: (id) => {
+        if (get().cards.some((c) => c.id === id)) set({ topUpCardId: id });
+      },
       screenOverlayOpen: false,
       setScreenOverlayOpen: (screenOverlayOpen) => set({ screenOverlayOpen }),
       jointBalance: 1.28,
@@ -254,6 +266,7 @@ export const useRevolutStore = create<RevolutState>()(
                 ? "Withdrawn from joint account"
                 : "Added to joint account",
               subtitle: "Internal transfer",
+              kind: "internal",
               amount: withdraw ? value : -value,
               currency: "RON",
               date: "Today",
@@ -309,7 +322,28 @@ export const useRevolutStore = create<RevolutState>()(
         const value = Math.round(amount * 100) / 100;
         const holdings = get().demoHoldings;
         if (value > (holdings[from] || 0)) return "Not enough in this holding.";
+        const eventId = crypto.randomUUID();
+        const now = Date.now();
         set({
+          cryptoActivity: [
+            {
+              id: eventId + "-out",
+              asset: from,
+              units: -value / demoAssets.find((a) => a.symbol === from)!.price,
+              value: -value,
+              title: from + " → " + to,
+              timestamp: now,
+            },
+            {
+              id: eventId + "-in",
+              asset: to,
+              units: value / demoAssets.find((a) => a.symbol === to)!.price,
+              value,
+              title: from + " → " + to,
+              timestamp: now,
+            },
+            ...get().cryptoActivity,
+          ],
           demoHoldings: {
             ...holdings,
             [from]: Math.round(((holdings[from] || 0) - value) * 100) / 100,
@@ -407,7 +441,33 @@ export const useRevolutStore = create<RevolutState>()(
         const value = Math.round(amount * 100) / 100;
         if (value > (state.demoHoldings[asset] || 0))
           return "Not enough in this holding.";
+        const eventId = crypto.randomUUID();
+        const eventDate = Date.now();
         set({
+          transactions: [
+            {
+              id: "tx-crypto-send-" + eventId,
+              linkedId: eventId,
+              title: asset + " to " + contact.name,
+              subtitle: "Crypto transfer",
+              amount: -value,
+              currency: "RON",
+              category: "Transfers",
+              kind: "asset-transfer",
+              brand: "Contact",
+              contactId: contact.id,
+              contactName: contact.name,
+              isIncoming: false,
+              status: "completed",
+              date: "Today",
+              timestamp: new Date(eventDate).toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              rawDate: eventDate,
+            },
+            ...state.transactions,
+          ],
           demoHoldings: {
             ...state.demoHoldings,
             [asset]:
@@ -416,12 +476,12 @@ export const useRevolutStore = create<RevolutState>()(
           },
           cryptoActivity: [
             {
-              id: crypto.randomUUID(),
+              id: eventId,
               asset,
               units: -value / selected.price,
               value: -value,
               title: `To ${contact.name}`,
-              timestamp: Date.now(),
+              timestamp: eventDate,
             },
             ...state.cryptoActivity,
           ],
@@ -439,6 +499,8 @@ export const useRevolutStore = create<RevolutState>()(
           return "Enter at least 0.01 RON.";
         const value = Math.round(amount * 100) / 100;
         const state = get();
+        const eventId = crypto.randomUUID();
+        const eventDate = Date.now();
         const available = sell
           ? state.demoHoldings[asset] || 0
           : state.accounts.RON.balance;
@@ -447,6 +509,28 @@ export const useRevolutStore = create<RevolutState>()(
             ? "Not enough in this holding."
             : "Insufficient RON balance.";
         set({
+          transactions: [
+            {
+              id: "tx-trade-" + eventId,
+              linkedId: eventId,
+              title: (sell ? "Sold " : "Bought ") + asset,
+              subtitle: "Personal account · " + asset,
+              amount: sell ? value : -value,
+              currency: "RON",
+              date: "Today",
+              timestamp: new Date(eventDate).toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              category: "Exchange",
+              kind: "investment",
+              brand: "Revolut",
+              isIncoming: sell,
+              status: "completed",
+              rawDate: eventDate,
+            },
+            ...state.transactions,
+          ],
           accounts: {
             ...state.accounts,
             RON: {
@@ -469,7 +553,7 @@ export const useRevolutStore = create<RevolutState>()(
             demoAssets.find((a) => a.symbol === asset)?.kind === "crypto"
               ? [
                   {
-                    id: crypto.randomUUID(),
+                    id: eventId,
                     asset,
                     units:
                       (value /
@@ -477,7 +561,7 @@ export const useRevolutStore = create<RevolutState>()(
                       (sell ? -1 : 1),
                     value: value * (sell ? -1 : 1),
                     title: sell ? `${asset} → RON` : `RON → ${asset}`,
-                    timestamp: Date.now(),
+                    timestamp: eventDate,
                   },
                   ...state.cryptoActivity,
                 ]
@@ -651,6 +735,7 @@ export const useRevolutStore = create<RevolutState>()(
               id: `bills-${crypto.randomUUID()}`,
               title: withdraw ? "Withdrawn from Bills" : "Added to Bills",
               subtitle: "Pocket transfer · Sandbox",
+              kind: "internal",
               amount: withdraw ? -value : value,
               currency: "EUR",
               date: "Today",
@@ -709,12 +794,23 @@ export const useRevolutStore = create<RevolutState>()(
       setFrameMode: (mode: "iphone" | "fullscreen") => set({ frameMode: mode }),
       setSoundEnabled: (enabled: boolean) => set({ soundEnabled: enabled }),
 
-      addMoney: (amount: number, currency: Currency, method = "Apple Pay") => {
+      addMoney: (
+        amount: number,
+        currency: Currency,
+        method = "Apple Pay",
+        cardId?: string,
+      ) => {
         const state = get();
         const account = state.accounts[currency];
-        if (!account || !Number.isFinite(amount) || amount <= 0) return;
+        if (!account || !Number.isFinite(amount) || amount <= 0)
+          return "Enter a valid amount.";
+        const card = cardId
+          ? state.cards.find((c) => c.id === cardId)
+          : undefined;
+        if (cardId && (!card || card.isFrozen || card.onlineEnabled === false))
+          return "Choose an active card with online payments enabled.";
         amount = Math.round(amount * 100) / 100;
-        if (amount <= 0) return;
+        if (amount <= 0) return "Minimum amount is 0.01.";
 
         const newBalance = Math.round((account.balance + amount) * 100) / 100;
         const now = new Date();
@@ -723,7 +819,10 @@ export const useRevolutStore = create<RevolutState>()(
         const newTx: Transaction = {
           id: `tx-topup-${crypto.randomUUID()}`,
           title: `Added via ${method}`,
-          subtitle: "Top-up · Arrived instantly",
+          subtitle: card
+            ? `Top-up · ${card.name} ··${card.last4}`
+            : "Top-up · Arrived instantly",
+          cardId: card?.id,
           amount: amount,
           currency: currency,
           date: "Today",
@@ -749,6 +848,7 @@ export const useRevolutStore = create<RevolutState>()(
           "Money added",
           `${amount.toFixed(2)} ${currency} added via ${method}.`,
         );
+        return null;
       },
 
       sendTransfer: (
@@ -816,6 +916,7 @@ export const useRevolutStore = create<RevolutState>()(
           brand: "Contact",
           isIncoming: false,
           status: "completed",
+          linkedId: newTransfer.id,
           contactId: contact?.id,
           contactName: contact?.name,
           note: note,
@@ -866,6 +967,15 @@ export const useRevolutStore = create<RevolutState>()(
         if (!fromAcc || !toAcc) {
           return { success: false, error: "Invalid currency account" };
         }
+        fromAmount = roundMoney(fromAmount);
+        toAmount = roundMoney(
+          fromAmount * exchangeRate(state.rates, fromCurr, toCurr),
+        );
+        if (!Number.isFinite(toAmount) || fromAmount < 0.01 || toAmount < 0.01)
+          return {
+            success: false,
+            error: "Minimum amount is 0.01 in each currency",
+          };
         if (fromAcc.balance < fromAmount) {
           return { success: false, error: "Insufficient balance for exchange" };
         }
@@ -897,7 +1007,19 @@ export const useRevolutStore = create<RevolutState>()(
             [fromCurr]: { ...fromAcc, balance: newFromBalance },
             [toCurr]: { ...toAcc, balance: newToBalance },
           },
-          transactions: [newTx, ...state.transactions],
+          transactions: [
+            newTx,
+            {
+              ...newTx,
+              id: newTx.id + "-received",
+              linkedId: newTx.id,
+              title: `Exchange from ${fromCurr}`,
+              amount: toAmount,
+              currency: toCurr,
+              isIncoming: true,
+            },
+            ...state.transactions,
+          ],
         });
 
         get().notify(
@@ -959,8 +1081,31 @@ export const useRevolutStore = create<RevolutState>()(
       overrideBalance: (currency: Currency, newBalance: number) => {
         const state = get();
         const account = state.accounts[currency];
-        if (!account) return;
+        if (!account || !Number.isFinite(newBalance) || newBalance < 0) return;
+        const delta = roundMoney(newBalance - account.balance);
+        if (!delta) return;
         set({
+          transactions: [
+            {
+              id: "tx-adjustment-" + crypto.randomUUID(),
+              title: "Balance adjustment",
+              subtitle: "Presentation balance adjustment",
+              amount: delta,
+              currency,
+              date: "Today",
+              timestamp: new Date().toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              category: "General",
+              kind: "adjustment",
+              brand: "Revolut",
+              isIncoming: delta > 0,
+              status: "completed",
+              rawDate: Date.now(),
+            },
+            ...state.transactions,
+          ],
           accounts: {
             ...state.accounts,
             [currency]: {
@@ -976,14 +1121,22 @@ export const useRevolutStore = create<RevolutState>()(
         const now = new Date();
         const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
         const currency = txData.currency || state.activeCurrency;
+        const value = roundMoney(txData.amount);
+        if (
+          !Number.isFinite(value) ||
+          Math.abs(value) < 0.01 ||
+          !txData.title.trim() ||
+          state.accounts[currency].balance + value < 0
+        )
+          return;
 
         const newTx: Transaction = {
-          id: `tx-custom-${Date.now()}`,
+          id: `tx-custom-${crypto.randomUUID()}`,
           title: txData.title,
           subtitle:
             txData.subtitle ||
             (txData.amount > 0 ? "Received transfer" : "Card payment"),
-          amount: txData.amount,
+          amount: value,
           currency: currency,
           date: "Today",
           timestamp: timeStr,
@@ -998,8 +1151,7 @@ export const useRevolutStore = create<RevolutState>()(
         // Also adjust balance
         const acc = state.accounts[currency];
         if (acc) {
-          const updatedBalance =
-            Math.round((acc.balance + txData.amount) * 100) / 100;
+          const updatedBalance = Math.round((acc.balance + value) * 100) / 100;
           set({
             accounts: {
               ...state.accounts,
@@ -1027,15 +1179,51 @@ export const useRevolutStore = create<RevolutState>()(
           revPoints: 1420,
           selectedPlan: "Standard",
           profileName: "Mihai",
+          topUpCardId: "card-blood",
           rates: DEFAULT_RATES,
         });
       },
     }),
     {
       name: "revolut_simulator_storage_v2",
-      version: 5,
+      version: 6,
       migrate: (persisted, version) => {
         const old = persisted as Partial<RevolutState>;
+        // Recover cash legs of saved crypto purchases without changing balances.
+        // Older builds only wrote these operations to cryptoActivity.
+        if (version < 6) {
+          const ledger = [...(old.transactions || presentationTransactions)];
+          for (const activity of old.cryptoActivity || []) {
+            const buy = activity.title === "RON → " + activity.asset;
+            const sell = activity.title === activity.asset + " → RON";
+            if (
+              (!buy && !sell) ||
+              ledger.some((t) => t.linkedId === activity.id)
+            )
+              continue;
+            ledger.push({
+              id: "tx-trade-" + activity.id,
+              linkedId: activity.id,
+              title: (sell ? "Sold " : "Bought ") + activity.asset,
+              subtitle: "Personal account · " + activity.asset,
+              amount: -activity.value,
+              currency: "RON",
+              date: "Today",
+              timestamp: new Date(activity.timestamp).toLocaleTimeString(
+                "en-GB",
+                { hour: "2-digit", minute: "2-digit" },
+              ),
+              category: "Exchange",
+              kind: "investment",
+              brand: "Revolut",
+              isIncoming: sell,
+              status: "completed",
+              rawDate: activity.timestamp,
+            });
+          }
+          old.transactions = ledger.sort((a, b) => b.rawDate - a.rawDate);
+        }
+        if (version >= 5) return old;
         if (version >= 3)
           return {
             ...old,
@@ -1097,6 +1285,8 @@ export const useRevolutStore = create<RevolutState>()(
       },
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        topUpCardId: state.topUpCardId,
+        rates: state.rates,
         profileName: state.profileName,
         cryptoActivity: state.cryptoActivity,
         jointBalance: state.jointBalance,

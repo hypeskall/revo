@@ -6,6 +6,7 @@ import { useClosingScreen } from "@/components/ui/useClosingScreen";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { Currency, Transaction } from "@/types";
+import { accountSummary, wealthSummary, roundMoney } from "@/utils/finance";
 
 export function ReferenceTools({
   tool,
@@ -68,33 +69,26 @@ export function ReferenceTools({
     period === "All time"
       ? Infinity
       : new Date(now.getFullYear(), month + 1, 1).getTime();
-  const txs = transactions.filter(
-    (t) =>
-      t.currency === selectedCurrency &&
-      t.status === "completed" &&
-      !t.id.startsWith("bills-") &&
-      t.rawDate >= start &&
-      t.rawDate < end,
+  const summary = accountSummary(
+    state.transactions,
+    state.accounts[selectedCurrency].balance,
+    selectedCurrency,
+    start,
+    end,
   );
-  const spent = txs.reduce((a, t) => a + Math.max(0, -t.amount), 0);
-  const income = txs.reduce((a, t) => a + Math.max(0, t.amount), 0);
-  const net = income - spent;
+  const { external: txs, spent, income, net } = summary;
   const previousStart = new Date(now.getFullYear(), month - 1, 1).getTime();
-  const previous =
-    period === "All time"
-      ? []
-      : transactions.filter(
-          (t) =>
-            t.currency === selectedCurrency &&
-            t.status === "completed" &&
-            !t.id.startsWith("bills-") &&
-            t.rawDate >= previousStart &&
-            t.rawDate < start,
-        );
+  const previous = accountSummary(
+    state.transactions,
+    state.accounts[selectedCurrency].balance,
+    selectedCurrency,
+    previousStart,
+    start,
+  );
   const spendingChange =
-    spent - previous.reduce((a, t) => a + Math.max(0, -t.amount), 0);
+    period === "All time" ? 0 : roundMoney(spent - previous.spent);
   const incomeChange =
-    income - previous.reduce((a, t) => a + Math.max(0, t.amount), 0);
+    period === "All time" ? 0 : roundMoney(income - previous.income);
   const categories = Array.from(
     new Set(txs.filter((t) => t.amount < 0).map((t) => t.category)),
   )
@@ -145,15 +139,8 @@ export function ReferenceTools({
       )
       .reduce((a, t) => a + t.amount, 0),
   );
-  const cash =
-    state.accounts.RON.balance +
-    state.accounts.EUR.balance * 4.9765 +
-    state.accounts.USD.balance * 4.582 +
-    state.accounts.GBP.balance * 5.891 +
-    state.billsBalance * 4.9765 +
-    state.jointBalance;
-  const total =
-    cash + Object.values(state.demoHoldings).reduce((a, b) => a + b, 0);
+  const wealth = wealthSummary(state);
+  const { cash, total } = wealth;
   return (
     <motion.section
       {...closing.props}
@@ -467,12 +454,75 @@ export function ReferenceTools({
                 showDecimalsIfZero: false,
               })}
             </strong>
-            <div />
+            <div className="analytics-allocation" aria-label="Asset allocation">
+              <i
+                style={{
+                  width: total ? (cash / total) * 100 + "%" : "100%",
+                  background: "#699cff",
+                }}
+              />
+              <i
+                style={{
+                  width: total
+                    ? (wealth.investments / total) * 100 + "%"
+                    : "0%",
+                  background: "#f88b4c",
+                }}
+              />
+              <i
+                style={{
+                  width: total ? (wealth.crypto / total) * 100 + "%" : "0%",
+                  background: "#b666ef",
+                }}
+              />
+            </div>
             <small>
               <i />
-              Cash
+              Cash · {formatCurrencyAmount(cash, "RON")}
             </small>
+            {wealth.investments > 0 && (
+              <small>
+                Investments · {formatCurrencyAmount(wealth.investments, "RON")}
+              </small>
+            )}
+            {wealth.crypto > 0 && (
+              <small>
+                Crypto · {formatCurrencyAmount(wealth.crypto, "RON")}
+              </small>
+            )}
           </button>
+          <h2>Account balance</h2>
+          <section
+            className="analytics-reconciliation"
+            aria-label="Account balance reconciliation"
+          >
+            <div>
+              <span>Opening balance</span>
+              <strong>{money(summary.opening)}</strong>
+            </div>
+            <div>
+              <span>Income</span>
+              <strong className="positive">+{money(income)}</strong>
+            </div>
+            <div>
+              <span>Spent</span>
+              <strong>{money(-spent)}</strong>
+            </div>
+            {summary.moved !== 0 && (
+              <div>
+                <span>Exchanges & account moves</span>
+                <strong>{money(summary.moved)}</strong>
+              </div>
+            )}
+            <div>
+              <span>
+                {period === "Last month"
+                  ? "Closing balance"
+                  : "Current balance"}
+              </span>
+              <strong>{money(summary.closing)}</strong>
+            </div>
+          </section>
           {categories.length > 0 && (
             <>
               <h2>Spending by category</h2>

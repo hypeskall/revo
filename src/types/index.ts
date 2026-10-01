@@ -37,6 +37,14 @@ export type BrandName =
   | string;
 
 export interface Transaction {
+  kind?:
+    | "external"
+    | "internal"
+    | "investment"
+    | "adjustment"
+    | "asset-transfer";
+  linkedId?: string;
+  cardId?: string;
   id: string;
   title: string;
   subtitle: string;

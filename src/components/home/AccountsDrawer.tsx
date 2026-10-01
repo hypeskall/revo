@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import { exchangeRate, roundMoney } from "@/utils/finance";
 export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
   const state = useRevolutStore();
   const close = () => state.setAccountsDrawerOpen(false);
@@ -12,11 +13,14 @@ export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
     state.setHomeAccount("personal");
     close();
   };
-  const total =
-    state.accounts.RON.balance +
-    state.accounts.EUR.balance * 4.9765 +
-    state.accounts.USD.balance * 4.582 +
-    state.accounts.GBP.balance * 5.891;
+  const total = roundMoney(
+    Object.values(state.accounts).reduce(
+      (sum, account) =>
+        sum +
+        account.balance * exchangeRate(state.rates, account.currency, "RON"),
+      0,
+    ),
+  );
   return (
     <AnimatePresence>
       {state.isAccountsDrawerOpen && (
@@ -88,7 +92,7 @@ export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
                 </i>
                 <span>
                   <strong>All accounts</strong>
-                  <small>4 accounts</small>
+                  <small>{Object.keys(state.accounts).length} accounts</small>
                 </span>
                 <strong>{formatCurrencyAmount(total, "RON")}</strong>
               </div>

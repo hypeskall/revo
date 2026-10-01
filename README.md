@@ -22,6 +22,10 @@ An interactive mobile prototype built with Next.js, Tailwind CSS, Framer Motion 
 
 ## Sandbox behavior
 
+Home, Accounts and Analytics use the same saved rate table and holdings. Completed cash operations form an account ledger; top-ups are income, purchases/transfers are spending, and exchanges, investments and pocket/joint moves are shown separately. Analytics reconciles opening balance, income, spending, account moves and closing balance. Reverted/pending payments never count towards totals. Existing saved balances are preserved while old crypto purchase/sale activity is recovered into the cash ledger.
+
+Apple Pay and debit-card top-ups select the actual saved Wallet cards, including newly created cards, and remember the selection. Frozen cards or cards with online payments disabled cannot fund a top-up. Payment animations are simulated locally; cancelling them leaves balances unchanged. Crypto market quotes/charts remain fixed presentation examples, and holdings have no market profit/loss until a price model is introduced.
+
 All balances, cards, account details, payments, and investments are fictional and stored only in the browser. Reference entries are presentation fixtures. The lateral badge is removed; Profile identifies the project as a prototype. It does not connect to Revolut, a bank, Apple Pay, or any payment network. System notifications use the title “Revolut prototype”. Scheduling runs only while the app is open and catches up when it is next opened.
 
 ## Getting Started

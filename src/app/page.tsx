@@ -118,7 +118,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="flex-1 flex flex-col w-full h-full overflow-y-auto no-scrollbar relative"
+                className="flex-1 flex flex-col w-full h-full min-h-0 min-w-0 overflow-hidden relative"
               >
                 {homeAccount === "bills" ? (
                   <BillsHome onNavigate={handleTabChange} />

@@ -1,62 +1,58 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useRevolutStore } from '@/store/useRevolutStore';
-import { Currency } from '@/types';
-import { formatCurrencyAmount } from '@/utils/formatters';
-import { ArrowLeft, ArrowDownUp, RefreshCw, CheckCircle2, AlertCircle } from '@/components/ui/OfficialIcons';
-import { sound } from '@/utils/audio';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRevolutStore } from "@/store/useRevolutStore";
+import { Currency } from "@/types";
+import { formatCurrencyAmount } from "@/utils/formatters";
+import {
+  ArrowLeft,
+  ArrowDownUp,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+} from "@/components/ui/OfficialIcons";
+import { sound } from "@/utils/audio";
+import { exchangeRate } from "@/utils/finance";
 
 export const ExchangeModal: React.FC = () => {
-  const {
-    isExchangeOpen,
-    setExchangeOpen,
-    accounts,
-    rates,
-    exchangeCurrency,
-  } = useRevolutStore();
+  const { isExchangeOpen, setExchangeOpen, accounts, rates, exchangeCurrency } =
+    useRevolutStore();
 
-  const [fromCurr, setFromCurr] = useState<Currency>('EUR');
-  const [toCurr, setToCurr] = useState<Currency>('RON');
-  const [sellAmountStr, setSellAmountStr] = useState('10');
-  const [buyAmountStr, setBuyAmountStr] = useState('49.76');
-  const [lastEdited, setLastEdited] = useState<'sell' | 'buy'>('sell');
+  const [fromCurr, setFromCurr] = useState<Currency>("EUR");
+  const [toCurr, setToCurr] = useState<Currency>("RON");
+  const [sellAmountStr, setSellAmountStr] = useState("10");
+  const [buyAmountStr, setBuyAmountStr] = useState("49.76");
+  const [lastEdited, setLastEdited] = useState<"sell" | "buy">("sell");
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  if (!isExchangeOpen) return null;
-
-  const getRate = (from: Currency, to: Currency) => {
-    if (from === to) return 1;
-    const pair = `${from}_${to}`;
-    if (rates[pair]) return rates[pair];
-    // Fallback compute via RON
-    const fromToRon = rates[`${from}_RON`] || 1;
-    const toToRon = rates[`${to}_RON`] || 1;
-    return fromToRon / toToRon;
-  };
+  const getRate = (from: Currency, to: Currency) =>
+    exchangeRate(rates, from, to);
 
   const currentRate = getRate(fromCurr, toCurr);
 
   // Sync calculations whenever amounts or currencies change
   useEffect(() => {
     const rate = getRate(fromCurr, toCurr);
-    if (lastEdited === 'sell') {
-      const sellNum = parseFloat(sellAmountStr.replace(',', '.')) || 0;
+    if (lastEdited === "sell") {
+      const sellNum = parseFloat(sellAmountStr.replace(",", ".")) || 0;
       const computedBuy = Math.round(sellNum * rate * 100) / 100;
-      setBuyAmountStr(computedBuy.toString().replace('.', ','));
+      setBuyAmountStr(computedBuy.toString().replace(".", ","));
     } else {
-      const buyNum = parseFloat(buyAmountStr.replace(',', '.')) || 0;
-      const computedSell = rate > 0 ? Math.round((buyNum / rate) * 100) / 100 : 0;
-      setSellAmountStr(computedSell.toString().replace('.', ','));
+      const buyNum = parseFloat(buyAmountStr.replace(",", ".")) || 0;
+      const computedSell =
+        rate > 0 ? Math.round((buyNum / rate) * 100) / 100 : 0;
+      setSellAmountStr(computedSell.toString().replace(".", ","));
     }
-  }, [fromCurr, toCurr, sellAmountStr, buyAmountStr, lastEdited]);
+  }, [fromCurr, toCurr, sellAmountStr, buyAmountStr, lastEdited, rates]);
+
+  if (!isExchangeOpen) return null;
 
   const fromAccount = accounts[fromCurr];
   const toAccount = accounts[toCurr];
-  const sellNum = parseFloat(sellAmountStr.replace(',', '.')) || 0;
-  const buyNum = parseFloat(buyAmountStr.replace(',', '.')) || 0;
+  const sellNum = parseFloat(sellAmountStr.replace(",", ".")) || 0;
+  const buyNum = parseFloat(buyAmountStr.replace(",", ".")) || 0;
 
   const handleSwapCurrencies = () => {
     sound.playKeypadClick();
@@ -70,18 +66,18 @@ export const ExchangeModal: React.FC = () => {
     setErrorMsg(null);
     if (!fromAccount) return;
     const val = Math.round(fromAccount.balance * pct * 100) / 100;
-    setLastEdited('sell');
-    setSellAmountStr(val.toString().replace('.', ','));
+    setLastEdited("sell");
+    setSellAmountStr(val.toString().replace(".", ","));
   };
 
   const handleConfirm = () => {
     if (sellNum <= 0) {
-      setErrorMsg('Enter an amount greater than 0');
+      setErrorMsg("Enter an amount greater than 0");
       return;
     }
     if (sellNum > fromAccount.balance) {
       setErrorMsg(
-        `Insufficient ${fromCurr} balance (${formatCurrencyAmount(fromAccount.balance, fromCurr)})`
+        `Insufficient ${fromCurr} balance (${formatCurrencyAmount(fromAccount.balance, fromCurr)})`,
       );
       return;
     }
@@ -96,18 +92,18 @@ export const ExchangeModal: React.FC = () => {
         setExchangeOpen(false);
       }, 1400);
     } else {
-      setErrorMsg(res.error || 'Exchange failed');
+      setErrorMsg(res.error || "Exchange failed");
     }
   };
 
-  const currencies: Currency[] = ['RON', 'EUR', 'USD', 'GBP'];
+  const currencies: Currency[] = ["RON", "EUR", "USD", "GBP"];
 
   return (
     <div className="absolute inset-0 z-[65] bg-black text-white flex flex-col justify-between overflow-hidden">
       {/* Header */}
       <div
         style={{
-          paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+          paddingTop: "max(env(safe-area-inset-top, 0px), 14px)",
         }}
         className="px-5 pb-3 flex items-center justify-between border-b border-white/[0.04]"
       >
@@ -149,7 +145,7 @@ export const ExchangeModal: React.FC = () => {
               type="text"
               value={sellAmountStr}
               onChange={(e) => {
-                setLastEdited('sell');
+                setLastEdited("sell");
                 setErrorMsg(null);
                 setSellAmountStr(e.target.value);
               }}
@@ -176,9 +172,9 @@ export const ExchangeModal: React.FC = () => {
           {/* Quick percentage pills */}
           <div className="flex items-center gap-2 pt-1 border-t border-white/[0.04]">
             {[
-              { label: '25%', val: 0.25 },
-              { label: '50%', val: 0.5 },
-              { label: 'Max', val: 1.0 },
+              { label: "25%", val: 0.25 },
+              { label: "50%", val: 0.5 },
+              { label: "Max", val: 1.0 },
             ].map((p) => (
               <button
                 key={p.label}
@@ -220,7 +216,7 @@ export const ExchangeModal: React.FC = () => {
               type="text"
               value={buyAmountStr}
               onChange={(e) => {
-                setLastEdited('buy');
+                setLastEdited("buy");
                 setErrorMsg(null);
                 setBuyAmountStr(e.target.value);
               }}
@@ -268,7 +264,7 @@ export const ExchangeModal: React.FC = () => {
       {/* Bottom Confirm Action */}
       <div
         style={{
-          paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 20px)",
         }}
         className="px-5 pt-2 bg-gradient-to-t from-black via-black/90 to-transparent"
       >

@@ -4,6 +4,7 @@ import "./globals.css";
 import "./reference.css";
 import "./payment-reference.css";
 import "./new-reference.css";
+import "./mobile-fixes.css";
 
 const inter = Inter({
   subsets: ["latin"],

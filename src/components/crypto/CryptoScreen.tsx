@@ -101,25 +101,7 @@ export function CryptoScreen() {
     setMessage("");
     setMenu(page);
   };
-  const fixtures = [
-    {
-      id: "crypto-reference-send",
-      asset: "BTC",
-      units: -0.000086,
-      value: -25.36,
-      title: "To Rareș Roman",
-      timestamp: new Date(2026, 6, 19, 3, 11).getTime(),
-    },
-    {
-      id: "crypto-reference-buy",
-      asset: "BTC",
-      units: 0.000016,
-      value: 6.4,
-      title: "RON → BTC",
-      timestamp: new Date(2026, 6, 19, 3, 7).getTime(),
-    },
-  ];
-  const activity = [...state.cryptoActivity, ...fixtures];
+  const activity = state.cryptoActivity;
   return (
     <div className="reference-section-root">
       <section

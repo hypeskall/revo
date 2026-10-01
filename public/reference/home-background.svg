@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="945" height="2048" viewBox="0 0 945 2048">
+<defs>
+<linearGradient id="base" x2="0" y2="1"><stop stop-color="#030713"/><stop offset=".65" stop-color="#02051a"/><stop offset="1" stop-color="#080b16"/></linearGradient>
+<filter id="glow" x="-100%" y="-200%" width="300%" height="500%"><feGaussianBlur stdDeviation="65"/></filter>
+<filter id="soft" x="-100%" y="-200%" width="300%" height="500%"><feGaussianBlur stdDeviation="13"/></filter>
+</defs>
+<rect width="945" height="2048" fill="url(#base)"/>
+<g fill="none">
+<path d="M-180 240Q400 450 1130 150" stroke="#2450ff" stroke-width="180" filter="url(#glow)"/>
+<path d="M-180 240Q400 450 1130 150" stroke="#428bff" stroke-width="35" filter="url(#soft)"/>
+<path d="M-180 240Q400 450 1130 150" stroke="#abf2ff" stroke-width="9" filter="url(#soft)"/>
+<path d="M-150 650Q360 925 1150 675" stroke="#223df4" stroke-width="155" filter="url(#glow)"/>
+<path d="M-150 650Q360 925 1150 675" stroke="#517bff" stroke-width="25" filter="url(#soft)"/>
+<path d="M-150 650Q360 925 1150 675" stroke="#a4d6ff" stroke-width="6" filter="url(#soft)"/>
+</g></svg>

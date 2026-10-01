@@ -13,6 +13,7 @@ import { ApplePayLogo } from "@/components/ui/AppleLogo";
 import { ApplePaySheet } from "./ApplePaySheet";
 import { AnimatedAmount } from "@/components/ui/AnimatedAmount";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
+import { CardPreview } from "@/components/cards/CardPreview";
 
 export function AddMoneyModal() {
   const state = useRevolutStore();
@@ -263,10 +264,16 @@ export function AddMoneyModal() {
           onClose={() => setAppleOpen(false)}
           amount={amount}
           currency={state.activeCurrency}
-          onSuccess={() => {
+          onSuccess={(cardId) => {
             setAppleOpen(false);
-            state.addMoney(amount, state.activeCurrency, method);
-            transition.close();
+            const failure = state.addMoney(
+              amount,
+              state.activeCurrency,
+              method,
+              cardId,
+            );
+            if (failure) setError(failure);
+            else transition.close();
           }}
         />
       ) : (
@@ -282,14 +289,49 @@ export function AddMoneyModal() {
                 {formatCurrencyAmount(amount, state.activeCurrency)} · Debit
                 card
               </p>
-              <p>
-                Use the saved demonstration card. No card details are collected.
-              </p>
+              <label>
+                Card
+                <select
+                  aria-label="Top-up card"
+                  value={state.topUpCardId}
+                  onChange={(event) => state.setTopUpCard(event.target.value)}
+                >
+                  {state.cards.map((card) => (
+                    <option
+                      key={card.id}
+                      value={card.id}
+                      disabled={card.isFrozen || card.onlineEnabled === false}
+                    >
+                      {card.name} ··{card.last4}
+                      {card.isFrozen
+                        ? " · Frozen"
+                        : card.onlineEnabled === false
+                          ? " · Online payments disabled"
+                          : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {state.cards.find((c) => c.id === state.topUpCardId) && (
+                <CardPreview
+                  card={state.cards.find((c) => c.id === state.topUpCardId)!}
+                  details
+                />
+              )}
+              {error && <p role="alert">{error}</p>}
               <button
                 onClick={() => {
-                  setAppleOpen(false);
-                  state.addMoney(amount, state.activeCurrency, method);
-                  transition.close();
+                  const failure = state.addMoney(
+                    amount,
+                    state.activeCurrency,
+                    method,
+                    state.topUpCardId,
+                  );
+                  if (failure) setError(failure);
+                  else {
+                    setAppleOpen(false);
+                    transition.close();
+                  }
                 }}
               >
                 Confirm top-up

@@ -18,6 +18,7 @@ import { formatCurrencyAmount } from "@/utils/formatters";
 import { sound } from "@/utils/audio";
 import { Currency, Transaction } from "@/types";
 import { presentationIban } from "@/data/account-details";
+import { personalTransaction } from "@/utils/finance";
 import { ReferenceTools } from "./ReferenceTools";
 
 export type HomeTool = "search" | "analytics" | "details" | "more";
@@ -56,7 +57,10 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
   const [copied, setCopied] = useState<string | null>(null);
   const activeCurrency = currency || selectedCurrency;
   const transactions = useMemo(
-    () => [...storedTransactions, ...(additionalTransactions || [])],
+    () => [
+      ...storedTransactions.map(personalTransaction),
+      ...(additionalTransactions || []),
+    ],
     [storedTransactions, additionalTransactions],
   );
 
