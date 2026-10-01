@@ -1,4 +1,4 @@
-export type Currency = 'RON' | 'EUR' | 'USD' | 'GBP';
+export type Currency = "RON" | "EUR" | "USD" | "GBP";
 
 export interface Account {
   id: string;
@@ -11,29 +11,29 @@ export interface Account {
 }
 
 export type TransactionCategory =
-  | 'Groceries'
-  | 'Tech'
-  | 'Entertainment'
-  | 'Transport'
-  | 'Transfers'
-  | 'Top-up'
-  | 'Exchange'
-  | 'Restaurants'
-  | 'General'
-  | 'Shopping'
-  | 'Verification';
+  | "Groceries"
+  | "Tech"
+  | "Entertainment"
+  | "Transport"
+  | "Transfers"
+  | "Top-up"
+  | "Exchange"
+  | "Restaurants"
+  | "General"
+  | "Shopping"
+  | "Verification";
 
 export type BrandName =
-  | 'Lidl'
-  | 'Apple'
-  | 'Netflix'
-  | 'Uber'
-  | 'Bolt'
-  | 'Starbucks'
-  | 'McDonalds'
-  | 'Revolut'
-  | 'Contact'
-  | 'Explee'
+  | "Lidl"
+  | "Apple"
+  | "Netflix"
+  | "Uber"
+  | "Bolt"
+  | "Starbucks"
+  | "McDonalds"
+  | "Revolut"
+  | "Contact"
+  | "Explee"
   | string;
 
 export interface Transaction {
@@ -47,7 +47,7 @@ export interface Transaction {
   category: TransactionCategory;
   brand: BrandName;
   isIncoming: boolean;
-  status: 'completed' | 'pending' | 'reverted';
+  status: "completed" | "pending" | "reverted";
   contactId?: string;
   contactName?: string;
   note?: string;
@@ -60,11 +60,26 @@ export interface ContactTransfer {
   currency: Currency;
   dateLabel: string; // "27 Sep", "Yesterday", "Today"
   timeLabel: string; // "21:40", "08:18", "15:15"
-  status: 'completed' | 'arriving';
+  status: "completed" | "arriving";
   isSender: boolean; // true if sent by user, false if received
+  note?: string;
+  rawDate?: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  isSender: boolean;
+  dateLabel: string;
+  timeLabel: string;
+  rawDate: number;
+  requestedAmount?: number;
+  currency?: Currency;
 }
 
 export interface Contact {
+  revtag?: string;
+  messages?: ChatMessage[];
   unread?: number;
   id: string;
   name: string;
@@ -77,18 +92,25 @@ export interface Contact {
   transfers: ContactTransfer[];
 }
 
-export type CardTheme = 'platinum' | 'mclaren' | 'blood_drip' | 'neon_purple' | 'cyan_glow';
+export type CardTheme =
+  | "platinum"
+  | "mclaren"
+  | "blood_drip"
+  | "neon_purple"
+  | "cyan_glow";
 
 export interface BankCard {
+  onlineEnabled?: boolean;
+  contactlessEnabled?: boolean;
   id: string;
-  type: 'physical' | 'virtual' | 'disposable';
+  type: "physical" | "virtual" | "disposable";
   name: string;
   last4: string;
   fullNumber: string;
   expiry: string;
   cvv: string;
   isFrozen: boolean;
-  scheme: 'visa' | 'mastercard';
+  scheme: "visa" | "mastercard";
   theme: CardTheme;
-  status: 'active' | 'frozen';
+  status: "active" | "frozen";
 }

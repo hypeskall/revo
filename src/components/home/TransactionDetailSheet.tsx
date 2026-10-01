@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { formatCurrencyAmount } from '@/utils/formatters';
-import { X, CheckCircle2, Split, RotateCcw, HelpCircle, Receipt, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { X, CheckCircle2, Split, RotateCcw, HelpCircle, Receipt, ArrowUpRight, ArrowDownLeft } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 
 export const TransactionDetailSheet: React.FC = () => {

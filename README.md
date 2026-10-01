@@ -1,8 +1,13 @@
 # Revo — Revolut-style Sandbox PWA
 
-An interactive mobile prototype built with Next.js, Tailwind CSS, Framer Motion, and Lucide React. Home opens the personal RON account. Home, Payments, activity, Wallet, Add money and the simulated Apple Pay sheet follow the supplied iPhone screenshots, with English labels and proportional sizing. This is a simulation, not a verified replica of every screen in the current Revolut app.
+An interactive mobile prototype built with Next.js, Tailwind CSS, Framer Motion and Revolut's public icon geometry. Home opens the personal RON account. Home, Payments, chats, activity, Wallet, Add money and the simulated Apple Pay sheet follow the supplied iPhone screenshots, with English labels, Romanian RON number formatting and proportional sizing. This is a simulation, not a verified replica of every screen in the current Revolut app.
 
 ## Features
+
+- **Entire navigation**: Home, Credit, Invest, Payments, Crypto and RevPoints share the profile/search header and a persistent glass dock. Credit includes a local repayment calculator. Invest/Crypto provide search, selected-asset buy/sell review, holdings and a separate validated crypto swap. RevPoints opens each reward category and updates saved points.
+- **Motion and materials**: Animated amount digits, payment-to-chat transitions, message insertion, sheet entrance/exit, Apple Pay processing/completion and glass notification banners. Reduced-motion/transparency preferences have fallbacks. Motion timings are approximations.
+- **Chats and transfers**: Reference history, revtags, text messages, stickers, requests that never debit funds, currency selection, transfer notes, review, scheduled payments and notifications. Bank recipients show a bank-style history and review with fictional account details.
+- **Card/account controls**: Reference card previews, reveal/copy details, freeze/unfreeze, saved online/contactless toggles, card creation, currency switching and conserved movement between personal/joint balances.
 
 - **Bills pocket**: Starts at €100.67. Add money from the EUR account and withdraw it back, with balance validation, saved activity, and a reset option. Accounts switches between the pocket and personal currency accounts.
 - **RON presentation**: Opens with 1,796.46 lei, the supplied profile photo, and reference transaction/contact fixtures. No actual phone numbers, card credentials or friend account identifiers are included in the new fixtures.

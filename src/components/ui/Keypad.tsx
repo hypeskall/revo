@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Delete } from 'lucide-react';
+import { Delete } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 
 interface KeypadProps {

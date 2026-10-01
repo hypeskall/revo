@@ -12,7 +12,7 @@ import {
   ArrowLeftRight,
   MoreHorizontal,
   X,
-} from 'lucide-react';
+} from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 import { WalletDrawer } from '@/components/cards/WalletDrawer';
 import { AccountCarousel } from './AccountCarousel';

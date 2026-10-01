@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Snowflake, Check, ShieldCheck } from 'lucide-react';
+import { X, Plus, Snowflake, Check, ShieldCheck } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 import { RevolutLogo } from '@/components/ui/RevolutLogo';
 

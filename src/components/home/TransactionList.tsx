@@ -17,7 +17,7 @@ import {
   Bitcoin,
   Link2,
   Plus,
-} from 'lucide-react';
+} from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 import { RevolutLogo } from '@/components/ui/RevolutLogo';
 import { WalletDrawer } from '@/components/cards/WalletDrawer';

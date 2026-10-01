@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Plus, ArrowDown, Info, MoreHorizontal, X, ArrowUpRight, TrendingUp, ArrowLeftRight, Bitcoin, Sparkles } from 'lucide-react';
+import { Search, Plus, ArrowDown, Info, MoreHorizontal, X, ArrowUpRight, TrendingUp, ArrowLeftRight, Bitcoin, Sparkles } from '@/components/ui/OfficialIcons';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { HomeToolsSheet } from './HomeToolsSheet';
 import { Transaction } from '@/types';

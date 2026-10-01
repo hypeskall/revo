@@ -14,7 +14,7 @@ import {
   Plus,
   Search,
   X,
-} from 'lucide-react';
+} from '@/components/ui/OfficialIcons';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { sound } from '@/utils/audio';
@@ -67,7 +67,7 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
   const transactions = useMemo(() => [...storedTransactions, ...(additionalTransactions || [])], [storedTransactions, additionalTransactions]);
 
   const account = accounts[activeCurrency];
-  const iban = 'RO50 REVO 0000 1697 1825 8222';
+  const iban = 'RO00 DEMO 0000 0000 0000 0000';
 
   const spending = useMemo(() => {
     const totals = new Map<string, number>();

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { Currency } from '@/types';
 import { formatCurrencyAmount } from '@/utils/formatters';
-import { ArrowLeft, ArrowDownUp, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowDownUp, RefreshCw, CheckCircle2, AlertCircle } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 
 export const ExchangeModal: React.FC = () => {

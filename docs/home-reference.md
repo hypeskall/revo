@@ -15,6 +15,21 @@ The personal RON dashboard, Payments, Wallet, transaction history, Add money and
 
 The supplied images determine layout. Merchant marks without individual supplied assets use local letter/icon placeholders, and card artwork is recreated in SVG/CSS. Aeonik Pro font files, exact native card artwork and undocumented menus remain limitations to a full carbon copy.
 
+## Current screenshot and motion research
+
+The newly supplied Payments, Briana chat, amount input, bank-transfer review and transfer-notification screenshots take priority over older design examples. Their six-tab dock includes Credit; initials are dark grey; chats use translucent payment bubbles over a blurred teal/blue horizon. RON uses Romanian separators while labels stay English.
+
+- [Official Revolut icons package](https://www.npmjs.com/package/@revolut/icons): unchanged glyph paths from version 2.8.0 are vendored into `public/icons/revolut`, with its Apache-2.0 licence. That public package is not proof that every glyph matches the latest native release. Reproduce the import using `scripts/import-revolut-icons.cjs` after extracting the npm package into the ignored `.reference-cache/package` folder.
+- [Revolut design team: Chat / Send money / Send Message](https://dribbble.com/shots/25740532-Chat-Send-money-Send-Message): direction for amount-to-bubble and composer-to-message motion. It does not provide native timings or prove current 2026 parity.
+- [Revolut design team: Animated amount input](https://dribbble.com/shots/25131150-Animated-amount-input): digit transitions and fractional placeholders.
+- [Recent user discussion of the glass dock](https://www.reddit.com/r/Revolut/comments/1tqbqog/bring_back_the_native_liquid_glass_bottom_bar/): May 2026 discussion, useful evidence that appearance varies between releases. The uploaded September screenshots control this implementation.
+- [Apple materials guidance](https://developer.apple.com/design/human-interface-guidelines/materials): platform guidance for translucent material treatment. CSS blur/reflections approximate this; browser rendering does not reproduce iOS's native Liquid Glass compositor.
+- [Official stock workflow](https://www.revolut.com/stocks/): select Stocks, search, enter the amount, review and submit. The prototype follows these steps with fixed fictional quotes.
+- [Official crypto workflow](https://www.revolut.com/crypto/buy-crypto/): select a token, Buy/Sell, amount, review and confirm. No live price or exchange API is connected.
+- [Official RevPoints redemptions](https://help.revolut.com/help/revpoints/what-is-revpoints/question-how-can-i-redeem-my-revpoints/): reward categories include miles, Stays, Experiences, gift cards and shopping. Prototype redemption prices are sample data, not official conversion rates.
+
+All six existing sections and their local flows are covered. Unprovided screens are functional presentation layouts, not independently verified carbon copies. Native account onboarding, identity checks, camera QR scanning, real credit applications, insurance, bookings and financial network operations are not implemented. The project cannot honestly claim indistinguishability from the entire current native app.
+
 ## Functional checks
 
 Run `npm run check:sandbox` for validation, fund conservation, activity, persistence, and reset checks against the actual store.

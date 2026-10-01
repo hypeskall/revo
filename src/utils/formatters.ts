@@ -18,7 +18,7 @@ export function formatCurrencyAmount(
   const minimumFractionDigits = (hasFractions || showDecimalsIfZero) ? 2 : 0;
   const maximumFractionDigits = 2;
 
-  const formattedNumber = new Intl.NumberFormat('en-GB', {
+  const formattedNumber = new Intl.NumberFormat(currency==='RON'?'ro-RO':'en-GB', {
     minimumFractionDigits,
     maximumFractionDigits,
   }).format(absAmount);

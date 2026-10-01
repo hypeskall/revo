@@ -1,310 +1,175 @@
-'use client';
-
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useRevolutStore } from '@/store/useRevolutStore';
-import { Currency } from '@/types';
-import { formatCurrencyAmount } from '@/utils/formatters';
-import { X, ChevronUp, Check, Coins, Vault, Wallet2, Plus } from 'lucide-react';
-import { sound } from '@/utils/audio';
-
-export const AccountsDrawer: React.FC = () => {
-  const {
-    isAccountsDrawerOpen,
-    setAccountsDrawerOpen,
-    accounts,
-    activeCurrency,
-    setActiveCurrency,
-    setAddMoneyOpen,
-    homeAccount,
-    setHomeAccount,
-    billsBalance,
-    setUiPanel,
-  } = useRevolutStore();
-
-  const handleSelectCurrency = (currency: Currency) => {
-    sound.playKeypadClick();
-    setActiveCurrency(currency);
-    setHomeAccount('personal');
-    setAccountsDrawerOpen(false);
+"use client";
+import { CurrencyFlag } from "@/components/ui/CurrencyFlag";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRevolutStore } from "@/store/useRevolutStore";
+import { OfficialIcon } from "@/components/ui/ReferenceIcons";
+import { formatCurrencyAmount } from "@/utils/formatters";
+export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
+  const state = useRevolutStore();
+  const close = () => state.setAccountsDrawerOpen(false);
+  const choose = (currency: typeof state.activeCurrency) => {
+    state.setActiveCurrency(currency);
+    state.setHomeAccount("personal");
+    close();
   };
-
-  // Compute total in RON
-  const totalAllRon = accounts.RON.balance + accounts.EUR.balance * 4.9765 + accounts.USD.balance * 4.582 + accounts.GBP.balance * 5.8910;
-
+  const total =
+    state.accounts.RON.balance +
+    state.accounts.EUR.balance * 4.9765 +
+    state.accounts.USD.balance * 4.582 +
+    state.accounts.GBP.balance * 5.891;
   return (
     <AnimatePresence>
-      {isAccountsDrawerOpen && (
-        <div className="absolute inset-0 z-50 flex flex-col justify-end">
-          {/* Backdrop overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => {
-              sound.playKeypadClick();
-              setAccountsDrawerOpen(false);
-            }}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+      {state.isAccountsDrawerOpen && (
+        <motion.div
+          className="accounts-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <button
+            className="accounts-backdrop"
+            aria-label="Dismiss accounts"
+            onClick={close}
           />
-
-          {/* Drawer content (Replicating Screenshot #1) */}
-          <motion.div
-            initial={{ y: '100%' }}
+          <motion.section
+            className="accounts-sheet no-scrollbar"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Accounts"
+            initial={{ y: "100%" }}
             animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             drag="y"
             dragConstraints={{ top: 0 }}
-            dragElastic={0.2}
+            dragElastic={0.12}
             onDragEnd={(_, info) => {
-              if (info.offset.y > 140) {
-                setAccountsDrawerOpen(false);
-              }
+              if (info.offset.y > 120 || info.velocity.y > 700) close();
             }}
-            className="relative w-full max-h-[90vh] bg-[#121417] rounded-t-[32px] border-t border-white/[0.09] flex flex-col overflow-hidden shadow-2xl"
           >
-            {/* Grab handle bar */}
-            <div className="w-full flex justify-center pt-2.5 pb-1">
-              <div className="w-10 h-1 bg-white/20 rounded-full" />
-            </div>
-
-            {/* Top header with close button */}
-            <div className="px-5 pt-2 pb-2 flex items-center justify-between">
-              <button
-                onClick={() => {
-                  sound.playKeypadClick();
-                  setAccountsDrawerOpen(false);
-                }}
-                className="w-9 h-9 rounded-full bg-[#1C2025] hover:bg-[#262B32] active:scale-90 flex items-center justify-center text-neutral-300 transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Scrollable list */}
-            <div className="flex-1 overflow-y-auto px-5 pb-24 pt-1 space-y-4 no-scrollbar">
-              <h2 className="text-xl font-bold text-white tracking-tight">Pockets</h2>
-              <button className="w-full bg-[#191C20] rounded-2xl p-4 flex items-center justify-between text-left" onClick={() => { setHomeAccount('bills'); setAccountsDrawerOpen(false); }}>
-                <span><span className="block text-[15px]">Bills</span><span className="text-xs text-neutral-400">EUR pocket</span></span>
-                <span className="flex items-center gap-2">{formatCurrencyAmount(billsBalance, 'EUR')}{homeAccount === 'bills' && <Check size={18} className="text-blue-400" />}</span>
-              </button>
-              <h2 className="text-xl font-bold text-white tracking-tight">Personal</h2>
-
-              {/* Accounts Card Block */}
-              <div className="bg-[#191C20] rounded-2xl p-4 border border-white/[0.05] space-y-4">
-                <div className="flex items-center justify-between text-neutral-400 text-xs font-semibold">
-                  <span>Accounts</span>
-                  <ChevronUp className="w-4 h-4" />
-                </div>
-
-                {/* Euro */}
-                <div
-                  onClick={() => handleSelectCurrency('EUR')}
-                  className="flex items-center justify-between cursor-pointer group active:opacity-75 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full bg-[#003399] flex items-center justify-center text-white text-base overflow-hidden shadow-sm">
-                      🇪🇺
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-medium text-white">Euro</div>
-                      <div className="text-xs text-neutral-400">EUR</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-medium text-white">
-                      {formatCurrencyAmount(accounts.EUR.balance, 'EUR')}
-                    </span>
-                    {homeAccount === 'personal' && activeCurrency === 'EUR' && (
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Romanian Leu */}
-                <div
-                  onClick={() => handleSelectCurrency('RON')}
-                  className="flex items-center justify-between cursor-pointer group active:opacity-75 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full bg-[#1b263b] flex items-center justify-center text-white text-base overflow-hidden shadow-sm">
-                      🇷🇴
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-medium text-white">Romanian Leu</div>
-                      <div className="text-xs text-neutral-400">RON · Primary</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-medium text-white">
-                      {formatCurrencyAmount(accounts.RON.balance, 'RON')}
-                    </span>
-                    {homeAccount === 'personal' && activeCurrency === 'RON' && (
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* US Dollar */}
-                <div
-                  onClick={() => handleSelectCurrency('USD')}
-                  className="flex items-center justify-between cursor-pointer group active:opacity-75 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full bg-[#1e293b] flex items-center justify-center text-white text-base overflow-hidden shadow-sm">
-                      🇺🇸
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-medium text-white">US Dollar</div>
-                      <div className="text-xs text-neutral-400">USD</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-medium text-white">
-                      {formatCurrencyAmount(accounts.USD.balance, 'USD')}
-                    </span>
-                    {homeAccount === 'personal' && activeCurrency === 'USD' && (
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* British Pound */}
-                <div
-                  onClick={() => handleSelectCurrency('GBP')}
-                  className="flex items-center justify-between cursor-pointer group active:opacity-75 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full bg-[#1e293b] flex items-center justify-center text-white text-base overflow-hidden shadow-sm">
-                      🇬🇧
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-medium text-white">British Pound</div>
-                      <div className="text-xs text-neutral-400">GBP</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[15px] font-medium text-white">
-                      {formatCurrencyAmount(accounts.GBP.balance, 'GBP')}
-                    </span>
-                    {homeAccount === 'personal' && activeCurrency === 'GBP' && (
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* All accounts row */}
-                <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#262B32] flex items-center justify-center text-neutral-300">
-                      <Coins className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-medium text-white">All accounts</div>
-                      <div className="text-xs text-neutral-400">4 accounts</div>
-                    </div>
-                  </div>
-                  <span className="text-[15px] font-medium text-white">
-                    {formatCurrencyAmount(totalAllRon, 'RON')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Savings & Funds Discovery Card */}
-              <div className="bg-[#191C20] rounded-2xl p-4 border border-white/[0.05] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
-                    <Vault className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-[15px] font-semibold text-white">Savings & Funds</h3>
-                    <p className="text-xs text-neutral-400 leading-snug">
-                      Earn up to 4,25% p.a. with savings or invest in low-risk funds
-                    </p>
-                  </div>
-                </div>
-                <button
-                  aria-label="Close accounts"
-                  onClick={() => {setAccountsDrawerOpen(false);setUiPanel('invest');}}
-                  className="px-3.5 py-1.5 rounded-full bg-[#282E36] hover:bg-[#323943] text-xs font-semibold text-white shrink-0 active:scale-95 transition"
-                >
-                  Discover
-                </button>
-              </div>
-
-              {/* Personal Loan Discovery Card */}
-              <div className="bg-[#191C20] rounded-2xl p-4 border border-white/[0.05] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                    <Wallet2 className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-[15px] font-semibold text-white">Personal loan</h3>
-                    <p className="text-xs text-neutral-400 leading-snug">
-                      Up to 200.000 lei
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {setAccountsDrawerOpen(false);setUiPanel('help');}}
-                  className="px-3.5 py-1.5 rounded-full bg-[#282E36] hover:bg-[#323943] text-xs font-semibold text-white shrink-0 active:scale-95 transition"
-                >
-                  Discover
-                </button>
-              </div>
-
-              {/* Joint / Other Accounts: Maria */}
-              <div className="pt-2">
-                <h3 className="text-lg font-bold text-white mb-2">Maria</h3>
-                <div className="bg-[#191C20] rounded-2xl p-4 border border-white/[0.05] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full bg-pink-600/30 text-pink-400 flex items-center justify-center font-bold text-sm">
-                      M
-                      <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-neutral-900 border border-neutral-700 text-[10px] text-white flex items-center justify-center">
-                        5
-                      </span>
-                    </div>
-                    <div>
-                      <div className="text-[15px] font-medium text-white">Main</div>
-                      <div className="text-xs text-neutral-400">5 new transactions</div>
-                    </div>
-                  </div>
-                  <span className="text-[15px] font-medium text-white">1,28 lei</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom floating "+ Add new" pill matching screenshot #1 */}
-            <div
-              style={{
-                bottom: 'max(env(safe-area-inset-bottom, 0px), 20px)',
-              }}
-              className="absolute left-1/2 -translate-x-1/2 z-10"
+            <div className="sheet-handle" />
+            <button
+              className="reference-back"
+              aria-label="Close accounts"
+              onClick={close}
             >
-              <button
-                onClick={() => {
-                  sound.playKeypadClick();
-                  setAccountsDrawerOpen(false);
-                  setAddMoneyOpen(true);
-                }}
-                className="flex items-center gap-2 px-5 py-3 rounded-full bg-white text-black font-semibold text-sm shadow-xl hover:bg-neutral-200 active:scale-95 transition"
-              >
-                <Plus className="w-4 h-4 stroke-[3]" />
-                <span>Add new</span>
-              </button>
+              <OfficialIcon name="cross" />
+            </button>
+            <h2>Personal</h2>
+            <div className="accounts-card">
+              {Object.values(state.accounts).map((account) => (
+                <button
+                  key={account.id}
+                  className="account-row"
+                  onClick={() => choose(account.currency)}
+                >
+                  <i>
+                    <CurrencyFlag currency={account.currency} />
+                  </i>
+                  <span>
+                    <strong>{account.name}</strong>
+                    <small>
+                      {account.code}
+                      {account.code === "RON" ? " · Primary" : ""}
+                    </small>
+                  </span>
+                  <strong>
+                    {formatCurrencyAmount(account.balance, account.currency)}
+                  </strong>
+                  {state.homeAccount === "personal" &&
+                    state.activeCurrency === account.code && (
+                      <OfficialIcon name="check" />
+                    )}
+                </button>
+              ))}
+              <div className="account-row">
+                <i>
+                  <OfficialIcon name="coins" />
+                </i>
+                <span>
+                  <strong>All accounts</strong>
+                  <small>4 accounts</small>
+                </span>
+                <strong>{formatCurrencyAmount(total, "RON")}</strong>
+              </div>
             </div>
-          </motion.div>
-        </div>
+            <h2>Pockets</h2>
+            <button
+              className="accounts-card account-row"
+              onClick={() => {
+                state.setHomeAccount("bills");
+                close();
+              }}
+            >
+              <i>
+                <OfficialIcon name="pocket" />
+              </i>
+              <span>
+                <strong>Bills</strong>
+                <small>EUR pocket</small>
+              </span>
+              <strong>{formatCurrencyAmount(state.billsBalance, "EUR")}</strong>
+            </button>
+            <button
+              className="accounts-card account-row"
+              onClick={() => {
+                close();
+                state.openTrade("SAVINGS");
+              }}
+            >
+              <i>
+                <OfficialIcon name="savings-vault" />
+              </i>
+              <span>
+                <strong>Savings & Funds</strong>
+                <small>Explore savings</small>
+              </span>
+              <OfficialIcon name="chevron-right" />
+            </button>
+            <button
+              className="accounts-card account-row"
+              onClick={() => {
+                close();
+                onCredit?.();
+              }}
+            >
+              <i>
+                <OfficialIcon name="credit" />
+              </i>
+              <span>
+                <strong>Personal loan</strong>
+                <small>Calculate repayments</small>
+              </span>
+              <OfficialIcon name="chevron-right" />
+            </button>
+            <h2>Maria</h2>
+            <button
+              className="accounts-card account-row"
+              onClick={() => {
+                close();
+                state.setUiPanel("joint");
+              }}
+            >
+              <i>M</i>
+              <span>
+                <strong>Main</strong>
+                <small>Joint account</small>
+              </span>
+              <strong>{formatCurrencyAmount(state.jointBalance, "RON")}</strong>
+            </button>
+            <button
+              className="accounts-add"
+              onClick={() => {
+                close();
+                state.setUiPanel("accounts");
+              }}
+            >
+              <OfficialIcon name="plus" />
+              Add new
+            </button>
+          </motion.section>
+        </motion.div>
       )}
     </AnimatePresence>
   );
-};
+}

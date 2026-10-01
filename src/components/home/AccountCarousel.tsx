@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Landmark, Wallet, PiggyBank, Sparkles } from 'lucide-react';
+import { Landmark, Wallet, PiggyBank, Sparkles } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { Currency } from '@/types';

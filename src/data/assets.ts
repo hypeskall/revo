@@ -1,0 +1,53 @@
+export const demoAssets = [
+  { symbol: "AAPL", name: "Apple", price: 1035, kind: "invest", color: "#aaa" },
+  {
+    symbol: "MSFT",
+    name: "Microsoft",
+    price: 1950,
+    kind: "invest",
+    color: "#21a1f1",
+  },
+  {
+    symbol: "NVDA",
+    name: "NVIDIA",
+    price: 650,
+    kind: "invest",
+    color: "#76b900",
+  },
+  {
+    symbol: "TSLA",
+    name: "Tesla",
+    price: 1100,
+    kind: "invest",
+    color: "#e82127",
+  },
+  {
+    symbol: "SAVINGS",
+    name: "Savings & Funds",
+    price: 1,
+    kind: "invest",
+    color: "#ff8e46",
+  },
+  {
+    symbol: "BTC",
+    name: "Bitcoin",
+    price: 298410,
+    kind: "crypto",
+    color: "#f7931a",
+  },
+  {
+    symbol: "ETH",
+    name: "Ethereum",
+    price: 12450,
+    kind: "crypto",
+    color: "#8b95bc",
+  },
+  {
+    symbol: "SOL",
+    name: "Solana",
+    price: 680,
+    kind: "crypto",
+    color: "#14f195",
+  },
+  { symbol: "XRP", name: "XRP", price: 2.85, kind: "crypto", color: "#737e8b" },
+] as const;

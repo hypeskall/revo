@@ -1,0 +1,2 @@
+<!-- Copyright 2018-present Revolut LTD. Apache-2.0. Source: @revolut/icons@2.8.0/minus-circle. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><symbol id="glyph" viewBox="0 0 24 24"><g fill="currentColor"><path fill="currentColor" d="M12 21.5a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19ZM8.536 10.153h6.928c.583 0 1.055.472 1.055 1.055v1.584c0 .583-.472 1.055-1.055 1.055H8.535a1.056 1.056 0 0 1-1.055-1.055v-1.584c0-.583.472-1.055 1.055-1.055Z"></path></g></symbol><use href="#glyph"/></svg>

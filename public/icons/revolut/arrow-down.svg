@@ -1,0 +1,2 @@
+<!-- Copyright 2018-present Revolut LTD. Apache-2.0. Source: @revolut/icons@2.8.0/arrow-down. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><symbol id="glyph" viewBox="0 0 24 24"><g fill="currentColor"><path fill="currentColor" d="M10.435 12.414v-8.01c0-.64.519-1.159 1.159-1.159h.81c.64 0 1.159.519 1.159 1.159v8.01h2.632c1.524 0 1.991 1.373 1.118 2.475l-4.205 5.315c-.57.734-1.646.734-2.235 0l-4.185-5.316c-.894-1.12-.366-2.474 1.097-2.474h2.65Z"></path></g></symbol><use href="#glyph"/></svg>

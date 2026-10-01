@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRevolutStore } from '@/store/useRevolutStore';
-import { Plus, ArrowLeftRight, Shuffle, MoreHorizontal, Copy, Check, ShieldCheck, X } from 'lucide-react';
+import { Plus, ArrowLeftRight, Shuffle, MoreHorizontal, Copy, Check, ShieldCheck, X } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 import { motion, AnimatePresence } from 'framer-motion';
 

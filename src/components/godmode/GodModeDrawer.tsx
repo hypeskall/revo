@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { Currency, TransactionCategory } from '@/types';
-import { X, Sparkles, PlusCircle, MinusCircle, RotateCcw, Volume2, VolumeX, Smartphone, Maximize2, Check } from 'lucide-react';
+import { X, Sparkles, PlusCircle, MinusCircle, RotateCcw, Volume2, VolumeX, Smartphone, Maximize2, Check } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 
 export const GodModeDrawer: React.FC = () => {

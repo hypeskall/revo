@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import './reference.css';
+import './payment-reference.css';
 
 const inter = Inter({
   subsets: ['latin'],
