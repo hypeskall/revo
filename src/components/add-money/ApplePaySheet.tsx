@@ -7,6 +7,7 @@ import { useRevolutStore } from "@/store/useRevolutStore";
 import { ApplePayLogo } from "@/components/ui/AppleLogo";
 import { CardPreview } from "@/components/cards/CardPreview";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import { FaceIdIsland } from "@/components/ui/FaceIdIsland";
 
 interface Props {
   isOpen: boolean;
@@ -49,7 +50,7 @@ export function ApplePaySheet({
     }
   }, [isOpen]);
   useEffect(() => {
-    if (!isOpen || phase === "ready") return;
+    if (!isOpen || phase !== "done") return;
     const timer = window.setTimeout(
       () => {
         const card = useRevolutStore
@@ -65,10 +66,9 @@ export function ApplePaySheet({
           setPhase("ready");
           return;
         }
-        if (phase === "processing") setPhase("done");
-        else success.current(card.id);
+        success.current(card.id);
       },
-      phase === "processing" ? 1200 : 700,
+      700,
     );
     return () => window.clearTimeout(timer);
   }, [isOpen, phase]);
@@ -85,9 +85,9 @@ export function ApplePaySheet({
             role="dialog"
             aria-modal="true"
             aria-label="Apple Pay confirmation"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            initial={{ y: "-25%", clipPath: "inset(0% 34% 92% 34% round 48px)", opacity: 0.4 }}
+            animate={{ y: 0, clipPath: "inset(0% 0% 0% 0% round 40px)", opacity: 1 }}
+            exit={{ y: "-25%", clipPath: "inset(0% 34% 92% 34% round 48px)", opacity: 0 }}
             transition={{
               type: "spring",
               stiffness: 340,
@@ -117,10 +117,10 @@ export function ApplePaySheet({
                   <motion.div
                     key={selected.id}
                     className="apple-selected-card"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
+                    initial={{ y: -120, scale: 0.65, opacity: 0 }}
+                    animate={{ y: 0, scale: 1, opacity: 1 }}
                     exit={{ y: -20, opacity: 0 }}
-                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ type: "spring", stiffness: 300, damping: 28, delay: 0.12 }}
                   >
                     <CardPreview card={selected} details />
                   </motion.div>
@@ -262,22 +262,7 @@ export function ApplePaySheet({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      <svg
-                        className="apple-progress"
-                        viewBox="0 0 48 48"
-                        fill="none"
-                      >
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeDasharray="80 45"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      Processing…
+                      Confirming with Face ID…
                     </motion.span>
                   ) : (
                     <motion.button
@@ -319,6 +304,15 @@ export function ApplePaySheet({
               </div>
             </div>
           </motion.section>
+          {phase === "processing" && (
+            <FaceIdIsland onComplete={() => {
+              const card = useRevolutStore.getState().cards.find((c) => c.id === confirmedId.current);
+              if (!card || card.archived || card.isFrozen || card.onlineEnabled === false) {
+                setError("Choose an active card with online payments enabled.");
+                setPhase("ready");
+              } else setPhase("done");
+            }} />
+          )}
         </motion.div>
       )}
     </AnimatePresence>

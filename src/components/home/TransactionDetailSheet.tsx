@@ -6,12 +6,14 @@ import { useRevolutStore } from '@/store/useRevolutStore';
 import { formatCurrencyAmount } from '@/utils/formatters';
 import { X, CheckCircle2, Split, RotateCcw, HelpCircle, Receipt, ArrowUpRight, ArrowDownLeft } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
+import { useClosingScreen } from '@/components/ui/useClosingScreen';
 
 export const TransactionDetailSheet: React.FC = () => {
   const { selectedTransactionDetail, setSelectedTransactionDetail, setTransferOpen, setSelectedContactForTransfer, setUiPanel, contacts } =
     useRevolutStore();
   const [showSplit,setShowSplit]=useState(false);
   const [people,setPeople]=useState(2);
+  const closing = useClosingScreen(() => setSelectedTransactionDetail(null));
 
   if (!selectedTransactionDetail) return null;
   const tx = selectedTransactionDetail;
@@ -33,21 +35,22 @@ export const TransactionDetailSheet: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="absolute inset-0 z-[95] flex flex-col justify-end">
+      <div {...closing.props} className="transaction-detail-overlay absolute inset-0 z-[95] flex flex-col justify-end">
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: closing.closing ? 0 : 1 }}
           exit={{ opacity: 0 }}
           onClick={() => {
             sound.playKeypadClick();
-            setSelectedTransactionDetail(null);
+            closing.close();
           }}
           className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         />
 
         <motion.div
           initial={{ y: '100%' }}
-          animate={{ y: 0 }}
+          animate={{ y: closing.closing ? '100%' : 0 }}
+          onAnimationComplete={closing.finish}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 300 }}
           drag="y"
@@ -55,7 +58,7 @@ export const TransactionDetailSheet: React.FC = () => {
           dragElastic={0.2}
           onDragEnd={(_, info) => {
             if (info.offset.y > 120) {
-              setSelectedTransactionDetail(null);
+              closing.close();
             }
           }}
           style={{
@@ -79,7 +82,7 @@ export const TransactionDetailSheet: React.FC = () => {
               aria-label="Close transaction details"
               onClick={() => {
                 sound.playKeypadClick();
-                setSelectedTransactionDetail(null);
+                closing.close();
               }}
               className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-neutral-300 active:scale-90 transition"
             >

@@ -6,9 +6,11 @@ import { Currency } from "@/types";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { exchangeRate, roundMoney } from "@/utils/finance";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import { useClosingScreen } from "@/components/ui/useClosingScreen";
 const currencies: Currency[] = ["RON", "EUR", "USD", "GBP"];
 export const ExchangeModal = () => {
   const state = useRevolutStore();
+  const closing = useClosingScreen(() => state.setExchangeOpen(false));
   const [from, setFrom] = useState<Currency>("EUR");
   const [to, setTo] = useState<Currency>("RON");
   const [amount, setAmount] = useState("0");
@@ -57,8 +59,10 @@ export const ExchangeModal = () => {
     );
   return (
     <motion.section
+      {...closing.props}
+      onAnimationComplete={closing.finish}
       initial={{ x: "100%" }}
-      animate={{ x: 0 }}
+      animate={{ x: closing.closing ? "100%" : 0 }}
       transition={{ type: "spring", damping: 34, stiffness: 340 }}
       className="move-screen"
       role="dialog"
@@ -72,7 +76,7 @@ export const ExchangeModal = () => {
           onClick={() =>
             phase === "review"
               ? setPhase("entry")
-              : state.setExchangeOpen(false)
+              : closing.close()
           }
         >
           <OfficialIcon name="back-button-arrow" />
@@ -87,7 +91,7 @@ export const ExchangeModal = () => {
         </div>
       </header>
       {phase === "done" ? (
-        <div className="move-success">
+        <motion.div initial={{ opacity: 0, scale: 0.94, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="move-success">
           <OfficialIcon name="check-success" />
           <h2>Money moved</h2>
           <p>
@@ -96,11 +100,11 @@ export const ExchangeModal = () => {
           </p>
           <button
             className="presentation-primary"
-            onClick={() => state.setExchangeOpen(false)}
+            onClick={closing.close}
           >
             Done
           </button>
-        </div>
+        </motion.div>
       ) : (
         <>
           <div className="move-body no-scrollbar">

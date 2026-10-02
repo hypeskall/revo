@@ -270,7 +270,7 @@ export function ContactChatScreen({
                   )}
                   {entry.kind === "payment" ? (
                     <motion.div
-                      layout
+                      layout="position"
                       layoutId={morphId === item.id ? motionId : undefined}
                       transition={spring}
                       initial={
@@ -297,7 +297,7 @@ export function ContactChatScreen({
                     </motion.div>
                   ) : (
                     <motion.div
-                      layout
+                      layout="position"
                       layoutId={
                         messageMorphId === item.id
                           ? `message-${contact.id}`
@@ -390,8 +390,13 @@ export function ContactChatScreen({
               </motion.form>
             )}
           </footer>
+          <AnimatePresence>
           {optionsOpen && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 8 }}
+              transition={spring}
               className="chat-options glass-control"
               role="dialog"
               aria-label="Payment options"
@@ -410,10 +415,10 @@ export function ContactChatScreen({
               <p>
                 {live.name} · {live.badge === "Salt" ? "Salt Bank" : "Revolut"}
               </p>
-            </div>
+            </motion.div>
           )}
           {stickersOpen && (
-            <div className="chat-stickers glass-control">
+            <motion.div initial={{ opacity: 0, y: 14, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 14, scale: 0.92 }} transition={spring} className="chat-stickers glass-control">
               {["👍", "❤️", "💸", "🎉", "🙏"].map((emoji) => (
                 <button
                   key={emoji}
@@ -426,8 +431,9 @@ export function ContactChatScreen({
                   {emoji}
                 </button>
               ))}
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
         <AnimatePresence initial={false}>
           {stage === "amount" && (
@@ -441,7 +447,7 @@ export function ContactChatScreen({
               className="transfer-input"
               initial={reduced ? false : { y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ opacity: 0 }}
+              exit={{ y: "100%", opacity: 0 }}
               transition={spring}
             >
               {header()}
@@ -570,7 +576,7 @@ export function ContactChatScreen({
               className="transfer-review no-scrollbar"
               initial={reduced ? false : { x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ opacity: 0 }}
+              exit={{ x: "100%", opacity: 0 }}
               transition={spring}
             >
               {header(true)}
@@ -677,9 +683,11 @@ export function ContactChatScreen({
             </motion.section>
           )}
         </AnimatePresence>
+        <AnimatePresence>
         {accountsOpen && (
-          <div className="transfer-choice-backdrop">
-            <section
+          <motion.div key="accounts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="transfer-choice-backdrop">
+            <motion.section
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={spring}
               className="transfer-choice"
               role="dialog"
               aria-label="Choose payment account"
@@ -699,12 +707,13 @@ export function ContactChatScreen({
                 </button>
               ))}
               <button onClick={() => setAccountsOpen(false)}>Cancel</button>
-            </section>
-          </div>
+            </motion.section>
+          </motion.div>
         )}
         {scheduleOpen && (
-          <div className="transfer-choice-backdrop">
-            <form
+          <motion.div key="schedule" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="transfer-choice-backdrop">
+            <motion.form
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={spring}
               className="transfer-choice"
               role="dialog"
               aria-label="Schedule transfer"
@@ -745,9 +754,10 @@ export function ContactChatScreen({
               <button type="button" onClick={() => setScheduleOpen(false)}>
                 Cancel
               </button>
-            </form>
-          </div>
+            </motion.form>
+          </motion.div>
         )}
+        </AnimatePresence>
       </motion.section>
     </LayoutGroup>
   );

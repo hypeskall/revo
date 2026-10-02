@@ -12,7 +12,7 @@ import { personalTransaction, transactionDate } from "@/utils/finance";
 import { Transaction } from "@/types";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { formatCurrencyAmount } from "@/utils/formatters";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 
@@ -217,8 +217,9 @@ export function ReferenceActivity() {
           </button>
         ))}
       </nav>
+      <AnimatePresence initial={false}>
       {filtersOpen && (
-        <label className="reference-filter">
+        <motion.label initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.22 }} style={{ overflow: "hidden" }} className="reference-filter">
           Show
           <select
             aria-label="Transaction direction"
@@ -230,8 +231,9 @@ export function ReferenceActivity() {
             <option value="outgoing">Money out</option>
           </select>
           <ChevronDown size={16} />
-        </label>
+        </motion.label>
       )}
+      </AnimatePresence>
       {dates.map((date) => (
         <section key={date}>
           <header className="reference-day">

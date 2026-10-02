@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
 import { useRevolutStore } from "@/store/useRevolutStore";
@@ -126,6 +126,8 @@ export function ReferenceProfile() {
           </button>
         )}
       </header>
+      <AnimatePresence mode="wait" initial={false}>
+      <motion.div key={page || "profile"} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>
       {!page ? (
         <>
           <div className="reference-profile-identity">
@@ -304,6 +306,8 @@ export function ReferenceProfile() {
           {message && <p role="status">{message}</p>}
         </div>
       )}
+      </motion.div>
+      </AnimatePresence>
     </motion.section>
   );
 }

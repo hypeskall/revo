@@ -6,6 +6,8 @@ import { useRevolutStore } from '@/store/useRevolutStore';
 import { Currency, TransactionCategory } from '@/types';
 import { X, Sparkles, PlusCircle, MinusCircle, RotateCcw, Volume2, VolumeX, Smartphone, Maximize2, Check } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
+import { useClosingScreen } from '@/components/ui/useClosingScreen';
+import { formatCurrencyAmount } from '@/utils/formatters';
 
 export const GodModeDrawer: React.FC = () => {
   const {
@@ -14,6 +16,8 @@ export const GodModeDrawer: React.FC = () => {
     accounts,
     overrideBalance,
     injectCustomTransaction,
+    transactions,
+    deleteHistoryTransaction,
     resetToDefaults,
     soundEnabled,
     setSoundEnabled,
@@ -21,6 +25,7 @@ export const GodModeDrawer: React.FC = () => {
     setFrameMode,
     activeCurrency,
   } = useRevolutStore();
+  const closing = useClosingScreen(() => setGodModeOpen(false));
 
   const [balances, setBalances] = useState<Record<Currency, string>>({
     RON: accounts.RON.balance.toString(),
@@ -46,6 +51,11 @@ export const GodModeDrawer: React.FC = () => {
   const [customType, setCustomType] = useState<'incoming' | 'outgoing'>('incoming');
   const [customCategory, setCustomCategory] = useState<TransactionCategory>('Top-up');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [customCurrency, setCustomCurrency] = useState<Currency>(activeCurrency);
+  const [customDate, setCustomDate] = useState('');
+  const [historyOnly, setHistoryOnly] = useState(true);
+  const [historyQuery, setHistoryQuery] = useState('');
+  const [customError, setCustomError] = useState('');
 
   if (!isGodModeOpen) return null;
 
@@ -64,16 +74,25 @@ export const GodModeDrawer: React.FC = () => {
   const handleInjectCustom = (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(customAmount);
-    if (!customTitle || isNaN(amt) || amt <= 0) return;
+    if (!customTitle.trim() || !Number.isFinite(amt) || amt < 0.01) {
+      setCustomError('Enter a title and an amount of at least 0.01.');
+      return;
+    }
+    if (!historyOnly && customType === 'outgoing' && amt > accounts[customCurrency].balance) {
+      setCustomError('Insufficient balance. Choose history only or a smaller amount.');
+      return;
+    }
+    setCustomError('');
 
     sound.playSuccessSound();
     injectCustomTransaction({
       title: customTitle,
       amount: customType === 'incoming' ? amt : -amt,
       category: customCategory,
-      currency: activeCurrency,
+      currency: customCurrency,
       brand: 'Revolut',
-    });
+      rawDate: customDate ? new Date(customDate).getTime() : Date.now(),
+    }, historyOnly);
 
     setCustomTitle('');
     setCustomAmount('');
@@ -100,15 +119,15 @@ export const GodModeDrawer: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div className="absolute inset-0 z-[90] flex flex-col justify-end">
+      <div {...closing.props} role="dialog" aria-modal="true" aria-label="Secret mode" className="secret-editor absolute inset-0 z-[90] flex flex-col justify-end">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: closing.closing ? 0 : 1 }}
           exit={{ opacity: 0 }}
           onClick={() => {
             sound.playKeypadClick();
-            setGodModeOpen(false);
+            closing.close();
           }}
           className="absolute inset-0 bg-black/85 backdrop-blur-md"
         />
@@ -116,7 +135,8 @@ export const GodModeDrawer: React.FC = () => {
         {/* Drawer content */}
         <motion.div
           initial={{ y: '100%' }}
-          animate={{ y: 0 }}
+          animate={{ y: closing.closing ? '100%' : 0 }}
+          onAnimationComplete={closing.finish}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 300 }}
           drag="y"
@@ -124,7 +144,7 @@ export const GodModeDrawer: React.FC = () => {
           dragElastic={0.2}
           onDragEnd={(_, info) => {
             if (info.offset.y > 150) {
-              setGodModeOpen(false);
+              closing.close();
             }
           }}
           className="relative w-full max-h-[92vh] bg-[#121417] rounded-t-[36px] border-t border-blue-500/40 p-5 pb-10 flex flex-col shadow-[0_-10px_40px_rgba(0,117,235,0.2)] overflow-hidden"
@@ -153,7 +173,7 @@ export const GodModeDrawer: React.FC = () => {
             <button
               onClick={() => {
                 sound.playKeypadClick();
-                setGodModeOpen(false);
+                closing.close();
               }}
               aria-label="Close simulator controls"
               className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition"
@@ -329,8 +349,9 @@ export const GodModeDrawer: React.FC = () => {
 
                   <input
                     type="number"
-                    step="any"
-                    placeholder={`Amount (${activeCurrency})`}
+                    step="0.01"
+                    min="0.01"
+                    placeholder={`Amount (${customCurrency})`}
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
                     className="bg-[#121417] text-white text-xs px-3 py-2 rounded-xl border border-white/[0.08] focus:outline-none focus:border-blue-500 font-mono"
@@ -357,6 +378,17 @@ export const GodModeDrawer: React.FC = () => {
                   </select>
                 </div>
 
+                <div className="flex gap-2">
+                  <select aria-label="Transaction currency" value={customCurrency} onChange={(e) => setCustomCurrency(e.target.value as Currency)} className="bg-[#121417] rounded-xl p-2 text-xs">
+                    {(['RON', 'EUR', 'USD', 'GBP'] as const).map((currency) => <option key={currency}>{currency}</option>)}
+                  </select>
+                  <input aria-label="Transaction date and time" type="datetime-local" value={customDate} onChange={(e) => setCustomDate(e.target.value)} className="min-w-0 flex-1 bg-[#121417] rounded-xl p-2 text-xs" />
+                </div>
+                <label className="flex items-center gap-2 text-xs text-neutral-300">
+                  <input type="checkbox" checked={historyOnly} onChange={(e) => setHistoryOnly(e.target.checked)} />
+                  History only · keep balances
+                </label>
+                {customError && <p role="alert" className="text-xs text-red-400">{customError}</p>}
                 <button
                   type="submit"
                   className="w-full py-2 rounded-xl bg-white text-black font-semibold text-xs active:scale-95 transition"
@@ -365,6 +397,22 @@ export const GodModeDrawer: React.FC = () => {
                 </button>
               </div>
             </form>
+
+            <section className="space-y-2" aria-label="Edit transaction history">
+              <h2 className="text-xs font-semibold text-neutral-300 uppercase tracking-wider">Transaction history</h2>
+              <p className="text-xs text-neutral-400">Deleting a history entry keeps balances unchanged.</p>
+              <input aria-label="Search transaction history" placeholder="Search history…" value={historyQuery} onChange={(e) => setHistoryQuery(e.target.value)} className="w-full bg-white/10 rounded-xl px-3 py-2 text-sm" />
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                <AnimatePresence initial={false}>
+                  {transactions.filter((tx) => tx.title.toLowerCase().includes(historyQuery.toLowerCase())).map((tx) => (
+                    <motion.div key={tx.id} layout="position" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0, marginBottom: 0 }} className="flex items-center gap-2 rounded-xl bg-white/5 p-3 overflow-hidden">
+                      <div className="min-w-0 flex-1"><p className="text-xs truncate">{tx.title}</p><small className="text-neutral-400">{tx.date} · {formatCurrencyAmount(tx.amount, tx.currency)}</small></div>
+                      <button type="button" aria-label={`Delete ${tx.title}`} onClick={() => deleteHistoryTransaction(tx.id)} className="text-xs text-red-400 bg-red-500/10 rounded-lg p-2">Delete</button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </section>
 
             {/* Section 4: Simulator Settings */}
             <div className="space-y-2">

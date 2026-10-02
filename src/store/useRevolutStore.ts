@@ -6,7 +6,7 @@ import {
   presentationCards,
 } from "@/data/presentation";
 import { demoAssets } from "@/data/assets";
-import { exchangeRate, roundMoney } from "@/utils/finance";
+import { exchangeRate, roundMoney, transactionDate } from "@/utils/finance";
 import { Account, BankCard, Contact, Currency, Transaction } from "@/types";
 
 interface RevolutState {
@@ -183,7 +183,9 @@ interface RevolutState {
   overrideBalance: (currency: Currency, newBalance: number) => void;
   injectCustomTransaction: (
     tx: Partial<Transaction> & { amount: number; title: string },
+    historyOnly?: boolean,
   ) => void;
+  deleteHistoryTransaction: (id: string) => void;
   resetToDefaults: () => void;
 }
 
@@ -1204,9 +1206,24 @@ export const useRevolutStore = create<RevolutState>()(
         });
       },
 
-      injectCustomTransaction: (txData) => {
+      deleteHistoryTransaction: (id) => {
         const state = get();
-        const now = new Date();
+        const tx = state.transactions.find((item) => item.id === id);
+        if (!tx) return;
+        set({
+          transactions: state.transactions.filter((item) => item.id !== id),
+          contacts: state.contacts.map((contact) => ({
+            ...contact,
+            transfers: contact.transfers.filter((transfer) => transfer.id !== tx.linkedId),
+          })),
+          selectedTransactionDetail: state.selectedTransactionDetail?.id === id ? null : state.selectedTransactionDetail,
+        });
+      },
+
+      injectCustomTransaction: (txData, historyOnly = false) => {
+        const state = get();
+        const now = new Date(txData.rawDate ?? Date.now());
+        if (!Number.isFinite(now.getTime())) return;
         const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
         const currency = txData.currency || state.activeCurrency;
         const value = roundMoney(txData.amount);
@@ -1214,29 +1231,29 @@ export const useRevolutStore = create<RevolutState>()(
           !Number.isFinite(value) ||
           Math.abs(value) < 0.01 ||
           !txData.title.trim() ||
-          state.accounts[currency].balance + value < 0
+          (!historyOnly && state.accounts[currency].balance + value < 0)
         )
           return;
 
         const newTx: Transaction = {
           id: `tx-custom-${crypto.randomUUID()}`,
-          title: txData.title,
+          title: txData.title.trim(),
           subtitle:
             txData.subtitle ||
             (txData.amount > 0 ? "Received transfer" : "Card payment"),
           amount: value,
           currency: currency,
-          date: "Today",
+          date: transactionDate(now.getTime()),
           timestamp: timeStr,
           category:
             txData.category || (txData.amount > 0 ? "Top-up" : "Groceries"),
           brand: txData.brand || "Revolut",
           isIncoming: txData.amount > 0,
           status: "completed",
-          rawDate: Date.now(),
+          rawDate: now.getTime(),
         };
         const eligible =
-          value < 0 &&
+          !historyOnly && value < 0 &&
           !["Transfers", "Exchange", "Verification", "Top-up"].includes(
             newTx.category,
           );
@@ -1263,7 +1280,7 @@ export const useRevolutStore = create<RevolutState>()(
         // Also adjust balance
         const acc = state.accounts[currency];
         if (acc) {
-          const updatedBalance = Math.round((acc.balance + value) * 100) / 100;
+          const updatedBalance = historyOnly ? acc.balance : Math.round((acc.balance + value) * 100) / 100;
           set({
             accounts: {
               ...state.accounts,

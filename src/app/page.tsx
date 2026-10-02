@@ -145,9 +145,9 @@ export default function App() {
             }
           />
         )}
-        <ExchangeModal />
-        <TransactionDetailSheet />
-        <GodModeDrawer />
+        <ExchangeModal key={isExchangeOpen ? "exchange-open" : "exchange-closed"} />
+        <TransactionDetailSheet key={selectedTransactionDetail?.id || "no-transaction"} />
+        <GodModeDrawer key={isGodModeOpen ? "secret-open" : "secret-closed"} />
         {!(activeTab === "home" && homeAccount === "bills") && (
           <HomeToolsSheet
             tool={homeTool}

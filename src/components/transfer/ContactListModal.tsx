@@ -17,6 +17,8 @@ import { AppHeader } from "@/components/home/AppHeader";
 import { ContactAvatar } from "./ContactAvatar";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { LightRays } from "@/components/ui/LightRays";
+import { motion } from "framer-motion";
+import { useClosingScreen } from "@/components/ui/useClosingScreen";
 
 export function ContactListModal({
   isTabMode = false,
@@ -26,6 +28,7 @@ export function ContactListModal({
   const state = useRevolutStore();
   const [query, setQuery] = useState("");
   const [paymentType, setPaymentType] = useState("Revolut");
+  const closing = useClosingScreen(() => state.setTransferOpen(false));
   if (!isTabMode && !state.isTransferOpen && !state.selectedContactForTransfer)
     return null;
   const contacts = state.contacts.filter((contact) =>
@@ -49,7 +52,12 @@ export function ContactListModal({
     { label: "Scan", Icon: QrCode },
   ];
   return (
-    <section
+    <motion.section
+      {...closing.props}
+      initial={isTabMode ? false : { x: "100%" }}
+      animate={{ x: closing.closing ? "100%" : 0 }}
+      onAnimationComplete={closing.finish}
+      transition={{ type: "spring", stiffness: 340, damping: 34 }}
       className={`${isTabMode ? "reference-payments" : "reference-new-payment"} no-scrollbar`}
     >
       {isTabMode && <LightRays theme="points" />}
@@ -60,7 +68,7 @@ export function ContactListModal({
           <button
             className="reference-back"
             aria-label="Close new payment"
-            onClick={() => state.setTransferOpen(false)}
+            onClick={closing.close}
           >
             <ArrowLeft />
           </button>
@@ -141,6 +149,6 @@ export function ContactListModal({
       {!contacts.length && (
         <p className="text-center text-white/50 p-8">No contacts found</p>
       )}
-    </section>
+    </motion.section>
   );
 }

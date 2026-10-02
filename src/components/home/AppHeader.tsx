@@ -25,6 +25,13 @@ export function AppHeader({
   const state = useRevolutStore();
   const header = useRef<HTMLElement>(null);
   const [scrolled, setScrolled] = useState(false);
+  const secretTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const secretOpened = useRef(false);
+  const cancelSecret = () => {
+    if (secretTimer.current) clearTimeout(secretTimer.current);
+    secretTimer.current = null;
+  };
+  useEffect(() => cancelSecret, []);
   useEffect(() => {
     const parent = header.current?.parentElement;
     if (!parent) return;
@@ -44,7 +51,22 @@ export function AppHeader({
       <button
         aria-label="Profile"
         className="reference-avatar"
-        onClick={() => state.setUiPanel("profile")}
+        onPointerDown={() => {
+          cancelSecret();
+          secretOpened.current = false;
+          secretTimer.current = setTimeout(() => {
+            secretOpened.current = true;
+            state.setGodModeOpen(true);
+          }, 900);
+        }}
+        onPointerUp={cancelSecret}
+        onPointerCancel={cancelSecret}
+        onPointerLeave={cancelSecret}
+        onContextMenu={(event) => event.preventDefault()}
+        onClick={() => {
+          if (secretOpened.current) { secretOpened.current = false; return; }
+          state.setUiPanel("profile");
+        }}
       >
         <img src="/profile.png" alt="Profile" />
         {unread && <i />}

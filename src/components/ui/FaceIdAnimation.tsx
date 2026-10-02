@@ -44,7 +44,7 @@ export function FaceIdAnimation({ onComplete }: { onComplete?: () => void }) {
         player.addEventListener("complete", finish);
       })
       .catch(() => {
-        /* The static face and welcome timeout remain usable offline. */
+        if (!disposed) hold = window.setTimeout(() => complete.current?.(), 900);
       });
     return () => {
       disposed = true;

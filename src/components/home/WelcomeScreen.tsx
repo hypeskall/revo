@@ -3,12 +3,12 @@ import { useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { LightRays } from "@/components/ui/LightRays";
-import { FaceIdAnimation } from "@/components/ui/FaceIdAnimation";
+import { FaceIdIsland } from "@/components/ui/FaceIdIsland";
 export function WelcomeScreen({ onDone }: { onDone: () => void }) {
   const name = useRevolutStore((s) => s.profileName);
   const reduced = useReducedMotion();
   useEffect(() => {
-    const timer = window.setTimeout(onDone, reduced ? 300 : 4500);
+    const timer = window.setTimeout(onDone, reduced ? 1000 : 5200);
     return () => window.clearTimeout(timer);
   }, [onDone, reduced]);
   return (
@@ -20,9 +20,7 @@ export function WelcomeScreen({ onDone }: { onDone: () => void }) {
       aria-label="Welcome"
     >
       <LightRays />
-      <div className="welcome-face-id">
-        <FaceIdAnimation onComplete={onDone} />
-      </div>
+      <FaceIdIsland onComplete={onDone} />
       <motion.div
         className="welcome-identity"
         initial={{ opacity: 0, y: 12 }}

@@ -660,6 +660,29 @@ async function check() {
   store.getState().resetToDefaults();
   assert.equal(store.getState().lightPalette, "dynamic");
   assert.equal(wealthSummary(store.getState()).total, originalWealth);
+  const historyBalance = store.getState().accounts.RON.balance;
+  const historyPoints = store.getState().revPoints;
+  const historyDate = new Date(2026, 8, 15, 14, 30).getTime();
+  store.getState().injectCustomTransaction({ title: "History editor check", amount: -99999, currency: "RON", rawDate: historyDate }, true);
+  const historyEntry = store.getState().transactions.find((tx) => tx.title === "History editor check");
+  assert.ok(historyEntry);
+  assert.equal(historyEntry.rawDate, historyDate);
+  assert.equal(historyEntry.timestamp, "14:30");
+  assert.equal(store.getState().accounts.RON.balance, historyBalance);
+  assert.equal(store.getState().revPoints, historyPoints);
+  await store.persist.rehydrate();
+  assert.ok(store.getState().transactions.some((tx) => tx.id === historyEntry.id));
+  store.getState().deleteHistoryTransaction(historyEntry.id);
+  assert.ok(!store.getState().transactions.some((tx) => tx.id === historyEntry.id));
+  assert.equal(store.getState().accounts.RON.balance, historyBalance);
+  const transferCheck = store.getState().sendTransfer(store.getState().contacts[0].id, 1, "RON", "History removal check");
+  assert.equal(transferCheck.success, true);
+  const transferEntry = store.getState().transactions[0];
+  const afterTransferBalance = store.getState().accounts.RON.balance;
+  store.getState().deleteHistoryTransaction(transferEntry.id);
+  assert.ok(!store.getState().contacts.flatMap((contact) => contact.transfers).some((transfer) => transfer.id === transferEntry.linkedId));
+  assert.equal(store.getState().accounts.RON.balance, afterTransferBalance);
+  store.getState().resetToDefaults();
   console.log(
     "Sandbox checks passed: ledger/analytics reconciliation, wallet-card validation, exchanges, holdings, schedules, migration, persistence and reset.",
   );
