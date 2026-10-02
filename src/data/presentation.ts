@@ -139,6 +139,7 @@ export const presentationTransactions: Transaction[] = entries.map(
     currency: "RON",
     date: "Yesterday",
     subtitle: amount > 0 ? "Received from Briana" : "Card payment",
+    ...(amount < 0 ? { cardId: "card-blood" } : {}),
     brand: amount > 0 ? "Contact" : title,
     isIncoming: amount > 0,
     status: "completed",

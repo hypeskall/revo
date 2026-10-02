@@ -5,6 +5,9 @@ import { AppHeader } from "@/components/home/AppHeader";
 import { AnimatedAmount } from "@/components/ui/AnimatedAmount";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useRevolutStore } from "@/store/useRevolutStore";
+import { LightRays } from "@/components/ui/LightRays";
+import { BrandIcon } from "@/components/ui/BrandIcon";
+import { transactionDate, exchangeRate } from "@/utils/finance";
 const perks = [
   {
     title: "Shopping",
@@ -82,6 +85,7 @@ export function HubScreen() {
           if (node) node.inert = !!selected || !!menu;
         }}
       >
+        <LightRays theme="points" />
         <AppHeader hideAnalytics />
         <div className="reference-points-content">
           <div className="reference-points-hero">
@@ -208,6 +212,14 @@ export function HubScreen() {
                 { label: "Stays", title: "Stays", icon: "resort" },
                 { label: "eSIM", title: "eSIM", icon: "sim-card" },
                 { label: "Shops", title: "Shopping", icon: "shopping" },
+                { label: "Gift Cards", title: "Gift cards", icon: "gift" },
+                { label: "Lounges", title: "Experiences", icon: "lounges" },
+                { label: "Pocket", title: "Shopping", icon: "rev-points" },
+                {
+                  label: "Fast Track",
+                  title: "Experiences",
+                  icon: "arrow-thin-right",
+                },
               ].map((i) => (
                 <button
                   key={i.label}
@@ -223,7 +235,155 @@ export function HubScreen() {
                 </button>
               ))}
             </div>
+            <button
+              className="points-show-more"
+              onClick={() => setMenu("Redeem")}
+            >
+              Show more
+            </button>
           </section>
+          <section className="points-activity-panel">
+            <h2>
+              Transactions <OfficialIcon name="chevron-right" />
+            </h2>
+            {state.transactions
+              .filter(
+                (tx) =>
+                  tx.amount < 0 &&
+                  tx.status === "completed" &&
+                  !tx.contactId &&
+                  (!tx.kind || tx.kind === "external") &&
+                  !["Exchange", "Transfers", "Verification", "Top-up"].includes(
+                    tx.category,
+                  ),
+              )
+              .slice(0, 3)
+              .map((tx) => (
+                <button
+                  key={tx.id}
+                  onClick={() => state.setSelectedTransactionDetail(tx)}
+                >
+                  <BrandIcon brand={tx.brand} />
+                  <span>
+                    <strong>{tx.title}</strong>
+                    <small>
+                      {transactionDate(tx.rawDate)}, {tx.timestamp}
+                    </small>
+                  </span>
+                  <strong>
+                    +
+                    {(
+                      tx.pointsEarned ??
+                      Math.floor(
+                        ((Math.abs(tx.amount) *
+                          exchangeRate(state.rates, tx.currency, "RON")) /
+                          50) *
+                          100,
+                      ) / 100
+                    ).toLocaleString("ro-RO", {
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    points
+                  </strong>
+                </button>
+              ))}
+            <button
+              className="points-show-more"
+              onClick={() => state.setUiPanel("rewards")}
+            >
+              See all
+            </button>
+          </section>
+          <section className="points-brands-panel">
+            <h2>Top brands</h2>
+            <div>
+              {[
+                "Uber",
+                "Booking",
+                "SHEIN",
+                "Airbnb",
+                "Wizz Air",
+                "Glovo",
+                "Lounge by Zalando",
+                "Nike",
+                "LEGO Store",
+                "Wolt",
+                "Douglas",
+                "99+",
+              ].map((brand) => (
+                <button
+                  key={brand}
+                  onClick={() => {
+                    setSelected({
+                      ...perks[0],
+                      title: brand === "99+" ? "All shops" : brand,
+                    });
+                    setMessage("");
+                  }}
+                >
+                  <span>
+                    <BrandIcon brand={brand} />
+                    <b>
+                      <OfficialIcon name="rev-points" />
+                    </b>
+                  </span>
+                  {brand === "99+" ? "See all" : brand}
+                </button>
+              ))}
+            </div>
+          </section>
+          <section className="points-travel-panel">
+            <h2>
+              <BrandIcon brand="Airbnb" />
+              Airbnb
+            </h2>
+            <div className="points-stays-carousel">
+              {[
+                ["Italian escape", "Bask in the Mediterranean sun"],
+                ["London stays", "Find your home away from home"],
+              ].map(([title, desc], index) => (
+                <button
+                  className={`points-stay stay-${index}`}
+                  key={title}
+                  onClick={() => {
+                    setSelected({ ...perks[1], title });
+                    setMessage("");
+                  }}
+                >
+                  <div className="stay-image">
+                    <OfficialIcon name="resort" />
+                  </div>
+                  <BrandIcon brand="Airbnb" />
+                  <strong>{title}</strong>
+                  <small>{desc}</small>
+                  <span>
+                    <OfficialIcon name="rev-points" />5 / 50 lei
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button
+              className="points-show-more"
+              onClick={() => state.setUiPanel("stays")}
+            >
+              Book now
+            </button>
+          </section>
+          <button
+            className="points-fashion-panel"
+            onClick={() => {
+              setSelected({ ...perks[0], title: "Lounge by Zalando" });
+              setMessage("");
+            }}
+          >
+            <BrandIcon brand="Lounge by Zalando" />
+            <h2>Lounge by Zalando</h2>
+            <div className="fashion-art">
+              <span>New season</span>
+              <strong>Find your next favourite</strong>
+              <OfficialIcon name="shopping" />
+            </div>
+          </button>
           <h2 className="points-explore-title">Explore your rewards</h2>
           <div className="asset-list">
             {perks.map((item) => (

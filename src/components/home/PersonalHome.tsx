@@ -30,6 +30,7 @@ import {
 import { presentationIban } from "@/data/account-details";
 import { TabId } from "@/components/navigation/BottomTabBar";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
+import { LightRays } from "@/components/ui/LightRays";
 
 export function PersonalHome({
   onNavigate,
@@ -38,6 +39,33 @@ export function PersonalHome({
 }) {
   const state = useRevolutStore();
   const [showPromo, setShowPromo] = useState(true);
+  const [promoPage, setPromoPage] = useState(0);
+  const promotions = [
+    {
+      title: "Settle up without the stress",
+      desc: "Get paid back in a tap for one-off or ongoing expenses",
+      icon: "people",
+      action: () => state.setUiPanel("joint"),
+    },
+    {
+      title: "Redeem RevPoints for data",
+      desc: "Use your points for discounts on data plans. T&Cs apply",
+      icon: "sim-card",
+      action: () => state.setUiPanel("rewards"),
+    },
+    {
+      title: "Your wallet, race-ready",
+      desc: "Discover your virtual cards and manage your wallet",
+      icon: "card",
+      action: () => state.setWalletOpen(true),
+    },
+    {
+      title: "Turn RevPoints into discounts",
+      desc: "Redeem your points as discounts with Revolut Pay. T&Cs apply",
+      icon: "rev-points",
+      action: () => state.setUiPanel("rewards"),
+    },
+  ];
   const [cardPage, setCardPage] = useState(0);
   const currencies = ["RON", "EUR", "USD", "GBP"] as const;
   const current = state.accounts[state.activeCurrency];
@@ -81,7 +109,7 @@ export function PersonalHome({
       Icon: Plus,
       action: () => state.setAddMoneyOpen(true),
     },
-    { label: "Move", Icon: Shuffle, action: () => state.setTransferOpen(true) },
+    { label: "Move", Icon: Shuffle, action: () => state.setExchangeOpen(true) },
     {
       label: "Details",
       Icon: BankGlyph,
@@ -104,6 +132,7 @@ export function PersonalHome({
     .slice(0, 3);
   return (
     <div className="reference-home no-scrollbar">
+      <LightRays />
       <AppHeader />
       <motion.section
         className="reference-balance"
@@ -155,26 +184,47 @@ export function PersonalHome({
         ))}
       </div>
       {showPromo && (
-        <section className="reference-promo">
-          <button
-            className="reference-promo-close"
-            aria-label="Dismiss promotion"
-            onClick={() => setShowPromo(false)}
+        <>
+          <motion.section
+            className="reference-promo home-promo-carousel"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.08}
+            onDragEnd={(_, info) => {
+              if (Math.abs(info.offset.x) > 40)
+                setPromoPage((promoPage + (info.offset.x < 0 ? 1 : 3)) % 4);
+            }}
           >
-            <X />
-          </button>
-          <button onClick={() => state.setUiPanel("rewards")}>
-            <strong>Turn RevPoints into discounts</strong>
-            <span>
-              Redeem your points as discounts with Revolut Pay. T&Cs apply
-            </span>
-            <b>Revolut Pay</b>
-          </button>
-        </section>
+            <button
+              className="reference-promo-close"
+              aria-label="Dismiss promotion"
+              onClick={() => setShowPromo(false)}
+            >
+              <X />
+            </button>
+            <button onClick={promotions[promoPage].action}>
+              <strong>{promotions[promoPage].title}</strong>
+              <span>{promotions[promoPage].desc}</span>
+              <b>
+                <OfficialIcon name={promotions[promoPage].icon} />
+              </b>
+            </button>
+          </motion.section>
+          <div className="reference-carousel-dots home-promo-dots">
+            {promotions.map((p, i) => (
+              <button
+                key={p.title}
+                aria-label={`Promotion ${i + 1}`}
+                aria-pressed={i === promoPage}
+                onClick={() => setPromoPage(i)}
+              />
+            ))}
+          </div>
+        </>
       )}
       <section className="reference-feed" aria-label="Recent activity">
         {activity.map((tx) => (
-          <TransactionRow key={tx.id} transaction={tx} />
+          <TransactionRow key={tx.id} transaction={tx} showDate />
         ))}
         <button
           className="reference-see-all"

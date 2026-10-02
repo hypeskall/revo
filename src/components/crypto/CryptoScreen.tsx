@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { AppHeader } from "@/components/home/AppHeader";
+import { LightRays } from "@/components/ui/LightRays";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { AnimatedAmount } from "@/components/ui/AnimatedAmount";
 import { useRevolutStore } from "@/store/useRevolutStore";
@@ -111,6 +112,7 @@ export function CryptoScreen() {
           if (node) node.inert = !!menu;
         }}
       >
+        <LightRays theme="crypto" />
         <AppHeader onAnalytics={() => open("Crypto analytics")} />
         <div className="reference-crypto-hero">
           <p>Crypto</p>

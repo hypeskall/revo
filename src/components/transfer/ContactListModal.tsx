@@ -16,6 +16,7 @@ import { useRevolutStore } from "@/store/useRevolutStore";
 import { AppHeader } from "@/components/home/AppHeader";
 import { ContactAvatar } from "./ContactAvatar";
 import { formatCurrencyAmount } from "@/utils/formatters";
+import { LightRays } from "@/components/ui/LightRays";
 
 export function ContactListModal({
   isTabMode = false,
@@ -51,6 +52,7 @@ export function ContactListModal({
     <section
       className={`${isTabMode ? "reference-payments" : "reference-new-payment"} no-scrollbar`}
     >
+      {isTabMode && <LightRays theme="points" />}
       {isTabMode ? (
         <AppHeader payments />
       ) : (

@@ -543,6 +543,38 @@ async function check() {
     "Account ledger and analytics survive reload together",
   );
   store.getState().resetToDefaults();
+  const pointsBefore = store.getState().revPoints;
+  const cashBefore = store.getState().accounts.RON.balance;
+  store.getState().injectCustomTransaction({
+    title: "Kfc",
+    amount: -28.4,
+    currency: "RON",
+    category: "Restaurants",
+    brand: "Kfc",
+  });
+  const cardPurchase = store.getState().transactions[0];
+  assert.ok(
+    cardPurchase.cardId,
+    "Card purchase belongs to a saved active card",
+  );
+  assert.equal(cardPurchase.pointsEarned, 0.56);
+  assert.equal(store.getState().revPoints, pointsBefore + 0.56);
+  assert.equal(
+    store.getState().accounts.RON.balance,
+    Math.round((cashBefore - 28.4) * 100) / 100,
+  );
+  store.getState().injectCustomTransaction({
+    title: "Incoming transfer",
+    amount: 12,
+    currency: "RON",
+    category: "Transfers",
+  });
+  assert.equal(
+    store.getState().revPoints,
+    pointsBefore + 0.56,
+    "Incoming money never earns card-spend points",
+  );
+  store.getState().resetToDefaults();
   assert.equal(wealthSummary(store.getState()).total, originalWealth);
   console.log(
     "Sandbox checks passed: ledger/analytics reconciliation, wallet-card validation, exchanges, holdings, schedules, migration, persistence and reset.",

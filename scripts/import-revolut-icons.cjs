@@ -7,6 +7,9 @@ const { renderToStaticMarkup } = require("react-dom/server");
 const root = path.resolve(__dirname, "../.reference-cache/package");
 const output = path.resolve(__dirname, "../public/icons/revolut");
 const names = [
+  "lounges",
+  "auto-exchange",
+  "flag",
   "bar-chart",
   "line-chart",
   "arrow-right-left",

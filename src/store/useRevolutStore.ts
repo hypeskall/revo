@@ -56,6 +56,8 @@ interface RevolutState {
   jointBalance: number;
   moveJointMoney: (amount: number, withdraw: boolean) => string | null;
   setUiPanel: (panel: RevolutState["uiPanel"]) => void;
+  activityCardId: string | null;
+  setActivityCardId: (id: string | null) => void;
   walletOpen: boolean;
   walletCardId: string | null;
   openWalletCard: (id: string) => void;
@@ -596,7 +598,9 @@ export const useRevolutStore = create<RevolutState>()(
           `${selectedPlan} selected for this prototype.`,
         );
       },
-      setUiPanel: (uiPanel) => set({ uiPanel }),
+      setUiPanel: (uiPanel) => set({ uiPanel, activityCardId: null }),
+      activityCardId: null,
+      setActivityCardId: (activityCardId) => set({ activityCardId }),
       walletOpen: false,
       walletCardId: null,
       openWalletCard: (id) => {
@@ -1147,6 +1151,30 @@ export const useRevolutStore = create<RevolutState>()(
           status: "completed",
           rawDate: Date.now(),
         };
+        const eligible =
+          value < 0 &&
+          !["Transfers", "Exchange", "Verification", "Top-up"].includes(
+            newTx.category,
+          );
+        const paymentCard = eligible
+          ? state.cards.find(
+              (card) =>
+                !card.isFrozen &&
+                card.onlineEnabled !== false &&
+                card.type !== "disposable",
+            )
+          : undefined;
+        const pointsEarned = paymentCard
+          ? Math.floor(
+              ((Math.abs(value) * exchangeRate(state.rates, currency, "RON")) /
+                50) *
+                100,
+            ) / 100
+          : 0;
+        if (paymentCard) {
+          newTx.cardId = paymentCard.id;
+          newTx.pointsEarned = pointsEarned;
+        }
 
         // Also adjust balance
         const acc = state.accounts[currency];
@@ -1158,6 +1186,7 @@ export const useRevolutStore = create<RevolutState>()(
               [currency]: { ...acc, balance: updatedBalance },
             },
             transactions: [newTx, ...state.transactions],
+            revPoints: roundMoney(state.revPoints + pointsEarned),
           });
         }
       },
@@ -1186,9 +1215,21 @@ export const useRevolutStore = create<RevolutState>()(
     }),
     {
       name: "revolut_simulator_storage_v2",
-      version: 6,
+      version: 7,
       migrate: (persisted, version) => {
         const old = persisted as Partial<RevolutState>;
+        if (version < 7) {
+          old.transactions = (old.transactions || presentationTransactions).map(
+            (tx) => {
+              const reference = presentationTransactions.find(
+                (item) => item.id === tx.id,
+              );
+              return !tx.cardId && reference?.cardId
+                ? { ...tx, cardId: reference.cardId }
+                : tx;
+            },
+          );
+        }
         // Recover cash legs of saved crypto purchases without changing balances.
         // Older builds only wrote these operations to cryptoActivity.
         if (version < 6) {

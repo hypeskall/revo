@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeftRight,
   BarChart3,
-  Check,
-  Copy,
   CreditCard,
   FileText,
   Landmark,
@@ -17,9 +15,9 @@ import { useRevolutStore } from "@/store/useRevolutStore";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { sound } from "@/utils/audio";
 import { Currency, Transaction } from "@/types";
-import { presentationIban } from "@/data/account-details";
 import { personalTransaction } from "@/utils/finance";
 import { ReferenceTools } from "./ReferenceTools";
+import { AccountDetails } from "./AccountDetails";
 
 export type HomeTool = "search" | "analytics" | "details" | "more";
 
@@ -54,7 +52,6 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
     billsBalance,
     setUiPanel,
   } = useRevolutStore();
-  const [copied, setCopied] = useState<string | null>(null);
   const activeCurrency = currency || selectedCurrency;
   const transactions = useMemo(
     () => [
@@ -65,15 +62,6 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
   );
 
   const account = accounts[activeCurrency];
-  const iban = presentationIban;
-
-  const copyValue = async (label: string, value: string) => {
-    sound.playKeypadClick();
-    await navigator.clipboard?.writeText(value);
-    setCopied(label);
-    window.setTimeout(() => setCopied(null), 1400);
-  };
-
   const openTool = (action: () => void) => {
     sound.playKeypadClick();
     onClose();
@@ -87,6 +75,8 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
     more: "More",
   };
 
+  if (tool === "details")
+    return <AccountDetails currency={activeCurrency} onClose={onClose} />;
   if (tool === "search" || tool === "analytics")
     return (
       <ReferenceTools
@@ -152,57 +142,8 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
               </button>
             </div>
 
-            {tool === "details" && (
-              <div className="space-y-4">
-                <div className="rounded-3xl border border-white/10 bg-[#191c21] p-5">
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-500/20 text-blue-300">
-                      <Landmark className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold">
-                        Personal · {activeCurrency}
-                      </div>
-                      <div className="text-xs text-white/45">
-                        Local account · Sandbox
-                      </div>
-                    </div>
-                  </div>
-
-                  {[
-                    ["Beneficiary", useRevolutStore.getState().profileName],
-                    ["IBAN", iban],
-                    ["BIC / SWIFT", "REVOROB1"],
-                  ].map(([label, value]) => (
-                    <button
-                      type="button"
-                      key={label}
-                      onClick={() => copyValue(label, value)}
-                      className="flex w-full items-center justify-between border-t border-white/[0.06] py-3 text-left"
-                    >
-                      <div>
-                        <div className="text-[11px] text-white/40">{label}</div>
-                        <div className="mt-0.5 text-sm font-medium">
-                          {value}
-                        </div>
-                      </div>
-                      {copied === label ? (
-                        <Check className="h-4 w-4 text-emerald-400" />
-                      ) : (
-                        <Copy className="h-4 w-4 text-white/35" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <div className="rounded-2xl bg-blue-500/10 px-4 py-3 text-xs leading-relaxed text-blue-200">
-                  These are fictional sandbox details. They cannot receive or
-                  send real money.
-                </div>
-              </div>
-            )}
-
             {tool === "more" && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="home-more-actions">
                 {[
                   {
                     label: "Exchange",

@@ -22,6 +22,8 @@ An interactive mobile prototype built with Next.js, Tailwind CSS, Framer Motion 
 
 ## Sandbox behavior
 
+The latest 19 October references add the animated welcome screen, breathing light rays, Credit/Invest landing and discovery widgets, Home promotions, fullscreen account details, reviewed currency exchange, expanded Wallet/card history and RevPoints brands/editorial panels. Activity can be filtered by month, direction and card. New eligible example card payments use a saved active card and earn fractional Standard-plan points at 1 point per 50 RON; incoming transfers and account moves do not earn points. Historical fixture card associations are recovered without changing saved funds or points.
+
 Home, Accounts and Analytics use the same saved rate table and holdings. Completed cash operations form an account ledger; top-ups are income, purchases/transfers are spending, and exchanges, investments and pocket/joint moves are shown separately. Analytics reconciles opening balance, income, spending, account moves and closing balance. Reverted/pending payments never count towards totals. Existing saved balances are preserved while old crypto purchase/sale activity is recovered into the cash ledger.
 
 Apple Pay and debit-card top-ups select the actual saved Wallet cards, including newly created cards, and remember the selection. Frozen cards or cards with online payments disabled cannot fund a top-up. Payment animations are simulated locally; cancelling them leaves balances unchanged. Crypto market quotes/charts remain fixed presentation examples, and holdings have no market profit/loss until a price model is introduced.

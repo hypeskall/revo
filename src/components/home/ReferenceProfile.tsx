@@ -5,6 +5,7 @@ import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { presentationIban } from "@/data/account-details";
+import { LightRays } from "@/components/ui/LightRays";
 
 export function ReferenceProfile() {
   const state = useRevolutStore();
@@ -106,6 +107,7 @@ export function ReferenceProfile() {
       animate={{ y: transition.closing ? "100%" : 0 }}
       transition={{ type: "spring", stiffness: 340, damping: 34 }}
     >
+      <LightRays theme="points" />
       <header>
         <button
           className="reference-back"

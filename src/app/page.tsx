@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, MotionConfig } from "framer-motion";
 import { MobileFrame } from "@/components/frame/MobileFrame";
 import { BottomTabBar, TabId } from "@/components/navigation/BottomTabBar";
@@ -26,10 +26,13 @@ import {
 } from "@/components/home/PresentationPanels";
 import { CreditScreen } from "@/components/credit/CreditScreen";
 import { ContactChatScreen } from "@/components/transfer/ContactChatScreen";
+import { WelcomeScreen } from "@/components/home/WelcomeScreen";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [mounted, setMounted] = useState(false);
+  const [welcoming, setWelcoming] = useState(true);
+  const finishWelcome = useCallback(() => setWelcoming(false), []);
 
   const {
     selectedContactForTransfer,
@@ -92,9 +95,9 @@ export default function App() {
 
         {/* Screen Views with Butter-Smooth Cross-Fade (Duration: 0.15s) */}
         <main
-          aria-hidden={isModalActive}
+          aria-hidden={isModalActive || welcoming}
           ref={(node) => {
-            if (node) node.inert = isModalActive;
+            if (node) node.inert = isModalActive || welcoming;
           }}
           className="flex-1 flex flex-col w-full h-full relative overflow-hidden z-10"
         >
@@ -189,7 +192,7 @@ export default function App() {
         <BottomTabBar
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          hidden={isModalActive || screenOverlayOpen}
+          hidden={isModalActive || screenOverlayOpen || welcoming}
         />
 
         {/* Global Bottom Sheets & Modals */}
@@ -220,6 +223,9 @@ export default function App() {
         {walletOpen && <ReferenceWallet />}
         {uiPanel && <PresentationPanels key={uiPanel} panel={uiPanel} />}
         <NotificationToast />
+        <AnimatePresence>
+          {welcoming && <WelcomeScreen onDone={finishWelcome} />}
+        </AnimatePresence>
       </MobileFrame>
     </MotionConfig>
   );

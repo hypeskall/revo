@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/ReferenceIcons";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { AnalyticsGlyph, CardsGlyph } from "@/components/ui/ReferenceIcons";
+import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useEffect, useRef, useState } from "react";
 
 export function AppHeader({
@@ -13,11 +14,13 @@ export function AppHeader({
   onSearch,
   onAnalytics,
   hideAnalytics = false,
+  invest = false,
 }: {
   payments?: boolean;
   onSearch?: () => void;
   onAnalytics?: () => void;
   hideAnalytics?: boolean;
+  invest?: boolean;
 }) {
   const state = useRevolutStore();
   const header = useRef<HTMLElement>(null);
@@ -70,13 +73,29 @@ export function AppHeader({
         </button>
       )}
       <button
-        aria-label={payments ? "New payment" : "Wallet & Cards"}
+        aria-label={
+          payments
+            ? "New payment"
+            : invest
+              ? "Investment products"
+              : "Wallet & Cards"
+        }
         className="reference-header-circle"
         onClick={() =>
-          payments ? state.setTransferOpen(true) : state.setWalletOpen(true)
+          payments
+            ? state.setTransferOpen(true)
+            : invest
+              ? state.setUiPanel("invest")
+              : state.setWalletOpen(true)
         }
       >
-        {payments ? <Plus /> : <CardsGlyph />}
+        {payments ? (
+          <Plus />
+        ) : invest ? (
+          <OfficialIcon name="globe" />
+        ) : (
+          <CardsGlyph />
+        )}
       </button>
     </header>
   );

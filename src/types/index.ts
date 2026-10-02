@@ -45,6 +45,7 @@ export interface Transaction {
     | "asset-transfer";
   linkedId?: string;
   cardId?: string;
+  pointsEarned?: number;
   id: string;
   title: string;
   subtitle: string;

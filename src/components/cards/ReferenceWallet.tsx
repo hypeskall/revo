@@ -7,6 +7,7 @@ import { useRevolutStore } from "@/store/useRevolutStore";
 import { CardPreview } from "./CardPreview";
 import { CardsScreen } from "./CardsScreen";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
+import { LightRays } from "@/components/ui/LightRays";
 
 export function ReferenceWallet() {
   const state = useRevolutStore();
@@ -34,8 +35,15 @@ export function ReferenceWallet() {
         >
           <ArrowLeft />
         </button>
+        <button
+          aria-label="Help with cards"
+          className="reference-back wallet-card-help"
+          onClick={() => state.setUiPanel("help")}
+        >
+          <OfficialIcon name="question-outline" />
+        </button>
         <div className="flex-1 min-h-0">
-          <CardsScreen initialCardId={selected} />
+          <CardsScreen initialCardId={selected} externalHeader />
         </div>
       </motion.section>
     );
@@ -58,6 +66,7 @@ export function ReferenceWallet() {
           if (node) node.inert = adding || mapOpen;
         }}
       >
+        <LightRays theme="points" />
         <button
           className="reference-back"
           aria-label="Close wallet"
@@ -105,6 +114,19 @@ export function ReferenceWallet() {
           <OfficialIcon name="bank" />
           <OfficialIcon name="bank" />
           <OfficialIcon name="bank" />
+          <span className="wallet-map-caption">
+            Find ATMs nearby <OfficialIcon name="chevron-right" />
+          </span>
+        </button>
+        <button
+          className="wallet-reactivate"
+          onClick={() => {
+            const frozen = state.cards.find((card) => card.isFrozen);
+            if (frozen) setSelected(frozen.id);
+            else state.notify("Cards", "All your cards are active.");
+          }}
+        >
+          Reactivate a card <OfficialIcon name="chevron-right" />
         </button>
       </div>
       <button

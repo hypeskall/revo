@@ -47,6 +47,16 @@ Visual verification uses a 393×852 browser viewport. Native iOS installation, p
 
 ## Functional checks
 
+### October evening reference batch
+
+The 19 supplied evening screenshots control the welcome transition, Home's single luminous arc and four promotions, Credit and Invest hero/scroll layouts, joined Move money inputs and review, full account details, card actions/subscriptions/history, Wallet footer and RevPoints brands/photographic panels. Rays pulse as a separate background layer; text and scroll ancestors receive no animated blur or opacity. Header backing uses a clipped opaque layer when scrolled to avoid the iOS ancestor-blur artifact. The document stays inside the phone width; only intentional card/promotion/month carousels scroll horizontally.
+
+The welcome greeting uses the saved profile name and transitions automatically to Home. Its orbit artwork is an in-app animation. It does not perform Face ID or display a fabricated system authentication failure; native authentication remains outside this local prototype. Credit quotes use the annuity formula at a fixed illustrative 9.40% annual interest. Invest discovery quotes and percentage moves are fixed examples; saved holdings are used for account totals. Move money uses the same persisted cross-currency rate table as balances and Analytics, and debits only after confirmation.
+
+Card history filters by its saved card identifier and currency. Existing known card-payment fixtures are associated with the reference red virtual card during version 7 migration; balances, manually added activity and points are preserved. Newly injected eligible card payments earn fractional points rounded down to hundredths at the displayed Standard rate. Transfers, top-ups, conversions and reverted entries are excluded from reward spending. Initial fixture points remain an opening balance, rather than being retroactively awarded again.
+
+Brand glyphs are vendored from [Simple Icons](https://github.com/simple-icons/simple-icons) 16.0.0, with Amazon/Microsoft from 11.0.0 and the CC0 licence in `public/icons/brands/LICENSE.md`; missing marks use local text/CSS fallbacks. `scripts/import-brand-icons.cjs` reproduces the import. The supplied Airbnb/Zalando screenshot is used unmodified as CSS background artwork in `public/reference/rewards-editorial.jpeg`; photographs are displayed from its relevant regions. The supplied red-card and Wallet screenshots are likewise unmodified background assets for the matching reference card and map region; other card themes and Home campaign artwork remain local reconstructions. The map is a static reference image, not live location data.
+
 Run `npm run check:sandbox` for validation, fund conservation, activity, persistence, and reset checks against the actual store.
 
 Verify invalid and over-balance withdrawals are rejected; a €10 withdrawal reduces Bills by €10 and increases EUR by €10; adding €10 reverses that movement; both operations appear in activity; reset restores Bills to €100.67. Search must find the reference utility payment, Accounts must switch to EUR and back to Bills, and Cards must reflect freezing and unfreezing. Statements downloads a CSV containing fictional activity. Analytics totals transactions in one currency and excludes internal pocket movements.

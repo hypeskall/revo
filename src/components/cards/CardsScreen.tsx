@@ -4,7 +4,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { CardPreview } from "./CardPreview";
-export function CardsScreen({ initialCardId }: { initialCardId?: string }) {
+import { TransactionRow } from "@/components/home/ReferenceActivity";
+import { personalTransaction, transactionDate } from "@/utils/finance";
+import { BrandIcon } from "@/components/ui/BrandIcon";
+export function CardsScreen({
+  initialCardId,
+  externalHeader = false,
+}: {
+  initialCardId?: string;
+  externalHeader?: boolean;
+}) {
   const state = useRevolutStore();
   const [selectedId, setSelectedId] = useState(
     initialCardId || state.cards[0]?.id,
@@ -12,6 +21,7 @@ export function CardsScreen({ initialCardId }: { initialCardId?: string }) {
   const [details, setDetails] = useState(false);
   const [copied, setCopied] = useState("");
   const [adding, setAdding] = useState(false);
+  const [more, setMore] = useState(false);
   const card =
     state.cards.find((item) => item.id === selectedId) || state.cards[0];
   const copy = async (value: string, label: string) => {
@@ -26,16 +36,17 @@ export function CardsScreen({ initialCardId }: { initialCardId?: string }) {
   return (
     <section className="card-detail-content no-scrollbar">
       <header>
-        <h1>{card.name}</h1>
-        <button
-          className="glass-control"
-          aria-label="New card"
-          onClick={() => setAdding(true)}
-        >
-          <OfficialIcon name="plus" />
-        </button>
+        {!externalHeader && (
+          <button
+            className="glass-control"
+            aria-label="Help with cards"
+            onClick={() => state.setUiPanel("help")}
+          >
+            <OfficialIcon name="question-outline" />
+          </button>
+        )}
       </header>
-      <div className="card-selector no-scrollbar">
+      <div className="card-selector no-scrollbar" aria-label="Choose card">
         {state.cards.map((item) => (
           <button
             aria-pressed={item.id === card.id}
@@ -55,8 +66,27 @@ export function CardsScreen({ initialCardId }: { initialCardId?: string }) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="card-detail-art"
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.12}
+        onDragEnd={(_, info) => {
+          if (Math.abs(info.offset.x) > 40) {
+            const index = state.cards.findIndex((item) => item.id === card.id);
+            setSelectedId(
+              state.cards[
+                (index + (info.offset.x < 0 ? 1 : state.cards.length - 1)) %
+                  state.cards.length
+              ].id,
+            );
+            setDetails(false);
+          }
+        }}
       >
         <CardPreview card={card} details />
+        <span className="card-display-name">{card.name}</span>
+        <span className="card-display-type">
+          {card.type === "physical" ? "Physical" : "Virtual"}
+        </span>
       </motion.div>
       <div className="card-detail-actions">
         <button onClick={() => setDetails(!details)}>
@@ -71,13 +101,53 @@ export function CardsScreen({ initialCardId }: { initialCardId?: string }) {
           </i>
           {card.isFrozen ? "Unfreeze" : "Freeze"}
         </button>
-        <button onClick={() => setAdding(true)}>
+        <button onClick={() => setMore(!more)}>
           <i className="glass-control">
-            <OfficialIcon name="plus" />
+            <OfficialIcon name="more-i-os" />
           </i>
-          Add new
+          More
         </button>
       </div>
+      {more && (
+        <div className="card-settings">
+          <label>
+            <OfficialIcon name="card-shield" />
+            <span>Online transactions</span>
+            <input
+              type="checkbox"
+              checked={card.onlineEnabled !== false}
+              onChange={(event) =>
+                state.setCardSetting(
+                  card.id,
+                  "onlineEnabled",
+                  event.target.checked,
+                )
+              }
+            />
+          </label>
+          <label>
+            <OfficialIcon name="contactless" />
+            <span>Contactless payments</span>
+            <input
+              type="checkbox"
+              checked={card.contactlessEnabled !== false}
+              onChange={(event) =>
+                state.setCardSetting(
+                  card.id,
+                  "contactlessEnabled",
+                  event.target.checked,
+                )
+              }
+            />
+          </label>
+          <button
+            className="presentation-primary"
+            onClick={() => setAdding(true)}
+          >
+            Add new card
+          </button>
+        </div>
+      )}
       <AnimatePresence>
         {details && (
           <motion.div
@@ -110,38 +180,46 @@ export function CardsScreen({ initialCardId }: { initialCardId?: string }) {
           {copied.includes("unavailable") ? copied : `${copied} copied`}
         </p>
       )}
-      <div className="card-settings">
-        <label>
-          <OfficialIcon name="card-shield" />
-          <span>Online transactions</span>
-          <input
-            type="checkbox"
-            checked={card.onlineEnabled !== false}
-            onChange={(event) =>
-              state.setCardSetting(
-                card.id,
-                "onlineEnabled",
-                event.target.checked,
-              )
-            }
-          />
-        </label>
-        <label>
-          <OfficialIcon name="contactless" />
-          <span>Contactless payments</span>
-          <input
-            type="checkbox"
-            checked={card.contactlessEnabled !== false}
-            onChange={(event) =>
-              state.setCardSetting(
-                card.id,
-                "contactlessEnabled",
-                event.target.checked,
-              )
-            }
-          />
-        </label>
-      </div>
+      <button
+        className="card-subscriptions"
+        onClick={() => state.setUiPanel("scheduled")}
+      >
+        <span>
+          <BrandIcon brand="Spotify" />
+          <BrandIcon brand="AAPL" />
+        </span>
+        <span>
+          <strong>Subscriptions</strong>
+          <small>Manage upcoming payments</small>
+        </span>
+        <OfficialIcon name="chevron-right" />
+      </button>
+      <section className="card-transactions reference-history-card">
+        {state.transactions
+          .map(personalTransaction)
+          .filter((tx) => tx.cardId === card.id && tx.kind !== "asset-transfer")
+          .sort((a, b) => b.rawDate - a.rawDate)
+          .slice(0, 3)
+          .map((tx) => (
+            <TransactionRow
+              key={tx.id}
+              transaction={{ ...tx, date: transactionDate(tx.rawDate) }}
+              compact
+            />
+          ))}
+        {!state.transactions.some((tx) => tx.cardId === card.id) && (
+          <p>No transactions on this card yet</p>
+        )}
+        <button
+          className="reference-see-all"
+          onClick={() => {
+            state.setUiPanel("activity");
+            state.setActivityCardId(card.id);
+          }}
+        >
+          See all
+        </button>
+      </section>
       <AnimatePresence>
         {adding && (
           <motion.div
