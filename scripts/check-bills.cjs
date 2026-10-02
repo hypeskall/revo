@@ -575,6 +575,90 @@ async function check() {
     "Incoming money never earns card-spend points",
   );
   store.getState().resetToDefaults();
+  const beforePoints = store.getState();
+  const beforePointsCash = beforePoints.accounts.RON.balance;
+  const beforePointsCount = beforePoints.transactions.length;
+  assert.equal(beforePoints.buyPoints(100), null);
+  assert.equal(store.getState().revPoints, beforePoints.revPoints + 100);
+  assert.equal(
+    store.getState().accounts.RON.balance,
+    roundMoneyForCheck(beforePointsCash - 10),
+  );
+  assert.equal(store.getState().transactions.length, beforePointsCount + 1);
+  assert.equal(store.getState().transactions[0].pointsEarned, 0);
+  assert.equal(store.getState().transactions[0].pointsPurchased, 100);
+  const afterPoints = store.getState();
+  for (const invalid of [NaN, Infinity, -10, 0, 1, 10.5, 1000001]) {
+    assert.ok(store.getState().buyPoints(invalid));
+    assert.equal(
+      store.getState().accounts.RON.balance,
+      afterPoints.accounts.RON.balance,
+    );
+    assert.equal(store.getState().revPoints, afterPoints.revPoints);
+    assert.equal(
+      store.getState().transactions.length,
+      afterPoints.transactions.length,
+    );
+  }
+  assert.ok(
+    store.getState().buyPoints(1000000),
+    "Unaffordable points purchase is rejected",
+  );
+  const pointsLedger = accountSummary(
+    store.getState().transactions,
+    store.getState().accounts.RON.balance,
+    "RON",
+    -Infinity,
+    Infinity,
+  );
+  assert.equal(
+    roundMoneyForCheck(
+      pointsLedger.opening +
+        pointsLedger.income -
+        pointsLedger.spent +
+        pointsLedger.moved,
+    ),
+    pointsLedger.closing,
+  );
+  const cardHistoryCount = store.getState().transactions.length;
+  store.getState().archiveCard("card-blood");
+  assert.ok(
+    store.getState().cards.find((card) => card.id === "card-blood").archived,
+  );
+  store.getState().toggleFreezeCard("card-blood");
+  assert.ok(
+    store.getState().cards.find((card) => card.id === "card-blood").isFrozen,
+    "Archived cards cannot be unfrozen",
+  );
+  assert.ok(store.getState().addMoney(10, "RON", "Apple Pay", "card-blood"));
+  assert.equal(
+    store.getState().transactions.length,
+    cardHistoryCount,
+    "Archiving never deletes activity or allows a top-up",
+  );
+  store.getState().setLightPalette("teal");
+  const newSnapshot = saved.get("revolut_simulator_storage_v2");
+  const savedPoints = store.getState().revPoints;
+  store.setState({ revPoints: 0, lightPalette: "blue", cards: [] });
+  saved.set("revolut_simulator_storage_v2", newSnapshot);
+  await store.persist.rehydrate();
+  assert.equal(store.getState().revPoints, savedPoints);
+  assert.equal(store.getState().lightPalette, "teal");
+  assert.equal(store.getState().transactions[0].pointsPurchased, 100);
+  assert.ok(
+    store.getState().cards.find((card) => card.id === "card-blood").archived,
+  );
+  store.getState().restoreCard("card-blood");
+  assert.equal(
+    store.getState().cards.find((card) => card.id === "card-blood").archived,
+    false,
+  );
+  assert.equal(
+    store.getState().cards.find((card) => card.id === "card-blood").isFrozen,
+    false,
+  );
+  store.getState().resetToDefaults();
+  assert.equal(store.getState().lightPalette, "dynamic");
   assert.equal(wealthSummary(store.getState()).total, originalWealth);
   console.log(
     "Sandbox checks passed: ledger/analytics reconciliation, wallet-card validation, exchanges, holdings, schedules, migration, persistence and reset.",
@@ -584,3 +668,7 @@ check().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+function roundMoneyForCheck(amount) {
+  return Math.round(amount * 100) / 100;
+}

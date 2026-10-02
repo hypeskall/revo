@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   ChevronDown,
@@ -69,6 +69,10 @@ export function AddMoneyModal() {
   };
   useEffect(() => {
     if (state.isAddMoneyOpen) {
+      const blood = useRevolutStore
+        .getState()
+        .cards.find((card) => card.id === "card-blood" && !card.archived);
+      if (blood) useRevolutStore.getState().setTopUpCard(blood.id);
       setAppleOpen(false);
       setMethodsOpen(false);
       setError("");
@@ -143,7 +147,13 @@ export function AddMoneyModal() {
           className="reference-method"
           onClick={() => setMethodsOpen(true)}
         >
-          {method === "Apple Pay" && <ApplePayLogo variant="white" />}
+          {method === "Apple Pay" && (
+            <img
+              className="apple-pay-mark"
+              src="/apple-pay-mark.svg"
+              alt="Apple Pay"
+            />
+          )}
           <span>
             {method} · {state.activeCurrency}
           </span>
@@ -228,36 +238,47 @@ export function AddMoneyModal() {
           ))}
         </div>
       </div>
-      {methodsOpen && (
-        <div className="absolute inset-0 z-[70] bg-black/70 flex items-end">
-          <section
-            role="dialog"
-            aria-label="Payment method"
-            className="w-full rounded-t-3xl bg-[#202023] p-6"
+      <AnimatePresence>
+        {methodsOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, pointerEvents: "none" }}
+            className="absolute inset-0 z-[70] bg-black/70 flex items-end"
           >
-            <button
-              aria-label="Close payment methods"
-              className="float-right"
-              onClick={() => setMethodsOpen(false)}
+            <motion.section
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 340, damping: 36 }}
+              role="dialog"
+              aria-label="Payment method"
+              className="w-full rounded-t-3xl bg-[#202023] p-6"
             >
-              <X />
-            </button>
-            <h2 className="text-xl mb-6">Add money with</h2>
-            {["Apple Pay", "Debit card"].map((option) => (
               <button
-                className="block w-full p-4 rounded-xl bg-white/10 mb-3 text-left"
-                key={option}
-                onClick={() => {
-                  setMethod(option);
-                  setMethodsOpen(false);
-                }}
+                aria-label="Close payment methods"
+                className="float-right"
+                onClick={() => setMethodsOpen(false)}
               >
-                {option}
+                <X />
               </button>
-            ))}
-          </section>
-        </div>
-      )}
+              <h2 className="text-xl mb-6">Add money with</h2>
+              {["Apple Pay", "Debit card"].map((option) => (
+                <button
+                  className="block w-full p-4 rounded-xl bg-white/10 mb-3 text-left"
+                  key={option}
+                  onClick={() => {
+                    setMethod(option);
+                    setMethodsOpen(false);
+                  }}
+                >
+                  {option}
+                </button>
+              ))}
+            </motion.section>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {method === "Apple Pay" ? (
         <ApplePaySheet
           isOpen={appleOpen}
@@ -277,69 +298,84 @@ export function AddMoneyModal() {
           }}
         />
       ) : (
-        appleOpen && (
-          <div className="transfer-choice-backdrop">
-            <section
-              className="transfer-choice"
-              role="dialog"
-              aria-label="Confirm card top-up"
+        <AnimatePresence>
+          {appleOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, pointerEvents: "none" }}
+              className="transfer-choice-backdrop"
             >
-              <h2>Review top-up</h2>
-              <p>
-                {formatCurrencyAmount(amount, state.activeCurrency)} · Debit
-                card
-              </p>
-              <label>
-                Card
-                <select
-                  aria-label="Top-up card"
-                  value={state.topUpCardId}
-                  onChange={(event) => state.setTopUpCard(event.target.value)}
-                >
-                  {state.cards.map((card) => (
-                    <option
-                      key={card.id}
-                      value={card.id}
-                      disabled={card.isFrozen || card.onlineEnabled === false}
-                    >
-                      {card.name} ··{card.last4}
-                      {card.isFrozen
-                        ? " · Frozen"
-                        : card.onlineEnabled === false
-                          ? " · Online payments disabled"
-                          : ""}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {state.cards.find((c) => c.id === state.topUpCardId) && (
-                <CardPreview
-                  card={state.cards.find((c) => c.id === state.topUpCardId)!}
-                  details
-                />
-              )}
-              {error && <p role="alert">{error}</p>}
-              <button
-                onClick={() => {
-                  const failure = state.addMoney(
-                    amount,
-                    state.activeCurrency,
-                    method,
-                    state.topUpCardId,
-                  );
-                  if (failure) setError(failure);
-                  else {
-                    setAppleOpen(false);
-                    transition.close();
-                  }
-                }}
+              <motion.section
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", stiffness: 340, damping: 36 }}
+                className="transfer-choice"
+                role="dialog"
+                aria-label="Confirm card top-up"
               >
-                Confirm top-up
-              </button>
-              <button onClick={() => setAppleOpen(false)}>Cancel</button>
-            </section>
-          </div>
-        )
+                <h2>Review top-up</h2>
+                <p>
+                  {formatCurrencyAmount(amount, state.activeCurrency)} · Debit
+                  card
+                </p>
+                <label>
+                  Card
+                  <select
+                    aria-label="Top-up card"
+                    value={state.topUpCardId}
+                    onChange={(event) => state.setTopUpCard(event.target.value)}
+                  >
+                    {state.cards
+                      .filter((card) => !card.archived)
+                      .map((card) => (
+                        <option
+                          key={card.id}
+                          value={card.id}
+                          disabled={
+                            card.isFrozen || card.onlineEnabled === false
+                          }
+                        >
+                          {card.name} ··{card.last4}
+                          {card.isFrozen
+                            ? " · Frozen"
+                            : card.onlineEnabled === false
+                              ? " · Online payments disabled"
+                              : ""}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                {state.cards.find((c) => c.id === state.topUpCardId) && (
+                  <CardPreview
+                    card={state.cards.find((c) => c.id === state.topUpCardId)!}
+                    details
+                  />
+                )}
+                {error && <p role="alert">{error}</p>}
+                <button
+                  onClick={() => {
+                    const failure = state.addMoney(
+                      amount,
+                      state.activeCurrency,
+                      method,
+                      state.topUpCardId,
+                    );
+                    if (failure) setError(failure);
+                    else {
+                      setAppleOpen(false);
+                      transition.close();
+                    }
+                  }}
+                >
+                  Confirm top-up
+                </button>
+                <button onClick={() => setAppleOpen(false)}>Cancel</button>
+              </motion.section>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
     </motion.section>
   );

@@ -6,6 +6,7 @@ import "./payment-reference.css";
 import "./new-reference.css";
 import "./mobile-fixes.css";
 import "./october-reference.css";
+import "./motion-reference.css";
 
 const inter = Inter({
   subsets: ["latin"],

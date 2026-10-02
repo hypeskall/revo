@@ -1,26 +1,14 @@
 "use client";
-
-import React, { useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowLeftRight,
-  BarChart3,
-  CreditCard,
-  FileText,
-  Landmark,
-  Plus,
-  X,
-} from "@/components/ui/OfficialIcons";
+import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useRevolutStore } from "@/store/useRevolutStore";
-import { formatCurrencyAmount } from "@/utils/formatters";
 import { sound } from "@/utils/audio";
 import { Currency, Transaction } from "@/types";
 import { personalTransaction } from "@/utils/finance";
 import { ReferenceTools } from "./ReferenceTools";
 import { AccountDetails } from "./AccountDetails";
-
 export type HomeTool = "search" | "analytics" | "details" | "more";
-
 interface HomeToolsSheetProps {
   tool: HomeTool | null;
   onClose: () => void;
@@ -29,19 +17,18 @@ interface HomeToolsSheetProps {
   additionalTransactions?: Transaction[];
   currency?: Currency;
   onNavigatePoints?: () => void;
+  onThemeOpenChange?: (open: boolean) => void;
 }
-
 export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
   tool,
   onClose,
-  onOpenWallet,
   onSelectTool,
   additionalTransactions,
   currency,
   onNavigatePoints,
+  onThemeOpenChange,
 }) => {
   const {
-    accounts,
     activeCurrency: selectedCurrency,
     transactions: storedTransactions,
     contacts,
@@ -49,9 +36,13 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
     setAccountsDrawerOpen,
     setSelectedTransactionDetail,
     setSelectedContactForTransfer,
-    billsBalance,
     setUiPanel,
   } = useRevolutStore();
+  const [themeOpen, setThemeOpen] = useState(false);
+  useEffect(() => {
+    onThemeOpenChange?.(themeOpen);
+    return () => onThemeOpenChange?.(false);
+  }, [themeOpen, onThemeOpenChange]);
   const activeCurrency = currency || selectedCurrency;
   const transactions = useMemo(
     () => [
@@ -60,21 +51,11 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
     ],
     [storedTransactions, additionalTransactions],
   );
-
-  const account = accounts[activeCurrency];
   const openTool = (action: () => void) => {
     sound.playKeypadClick();
     onClose();
     window.setTimeout(action, 120);
   };
-
-  const titles: Record<HomeTool, string> = {
-    search: "Search",
-    analytics: "Analytics",
-    details: "Account details",
-    more: "More",
-  };
-
   if (tool === "details")
     return <AccountDetails currency={activeCurrency} onClose={onClose} />;
   if (tool === "search" || tool === "analytics")
@@ -102,150 +83,177 @@ export const HomeToolsSheet: React.FC<HomeToolsSheetProps> = ({
         }}
       />
     );
-
+  return (
+    <HomeMoreMenu
+      open={tool === "more"}
+      onClose={onClose}
+      onAction={(action) => {
+        openTool(() => {
+          if (action === "salary") onSelectTool("details");
+          if (action === "converter") setExchangeOpen(true);
+          if (action === "theme") setThemeOpen(true);
+          if (action === "accounts") setAccountsDrawerOpen(true);
+          if (action === "statement") {
+            const cell = (value: string | number) =>
+              `"${String(value).replace(/"/g, '""')}"`;
+            const rows = [
+              ["Date", "Time", "Description", "Amount", "Currency"],
+              ...transactions.map((tx) => [
+                tx.date,
+                tx.timestamp,
+                tx.title,
+                tx.amount,
+                tx.currency,
+              ]),
+            ];
+            const url = URL.createObjectURL(
+              new Blob(
+                [
+                  "Sandbox statement — fictional transactions\r\n" +
+                    rows.map((row) => row.map(cell).join(",")).join("\r\n"),
+                ],
+                { type: "text/csv;charset=utf-8" },
+              ),
+            );
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "sandbox-statement.csv";
+            link.click();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }
+        });
+      }}
+      themeOpen={themeOpen}
+      onCloseTheme={() => setThemeOpen(false)}
+    />
+  );
+};
+function HomeMoreMenu({
+  open,
+  onClose,
+  onAction,
+  themeOpen,
+  onCloseTheme,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onAction: (action: string) => void;
+  themeOpen: boolean;
+  onCloseTheme: () => void;
+}) {
+  const [position, setPosition] = useState({ top: 70, right: 16 });
+  const { lightPalette, setLightPalette } = useRevolutStore();
+  useLayoutEffect(() => {
+    if (!open) return;
+    const anchor = document.querySelector(
+      '[data-tab-scene][data-active="true"] [data-home-more]',
+    );
+    const frame = document.querySelector(".app-phone");
+    if (!anchor || !frame) return;
+    const a = anchor.getBoundingClientRect(),
+      f = frame.getBoundingClientRect();
+    setPosition({
+      top: Math.max(16, a.bottom - f.top - f.width * 0.76),
+      right: Math.max(12, f.right - a.right),
+    });
+  }, [open]);
+  useEffect(() => {
+    if (!open && !themeOpen) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        onCloseTheme();
+      }
+    };
+    window.addEventListener("keydown", escape);
+    return () => window.removeEventListener("keydown", escape);
+  }, [open, themeOpen, onClose, onCloseTheme]);
   return (
     <AnimatePresence>
-      {tool && (
-        <div className="absolute inset-0 z-[64] flex flex-col justify-end">
-          <motion.button
-            type="button"
-            aria-label="Close"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+      {open && (
+        <motion.div
+          key="more-menu"
+          className="home-more-layer"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, pointerEvents: "none" }}
+          transition={{ duration: 0.18 }}
+        >
+          <button
+            className="home-more-dismiss"
+            aria-label="Close More menu"
             onClick={onClose}
-            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
           />
-
           <motion.section
+            className="home-more-popover"
+            role="menu"
+            aria-label="More"
+            style={{
+              top: position.top,
+              right: position.right,
+              transformOrigin: "90% 95%",
+            }}
+            initial={{ opacity: 0, scale: 0.88, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 8 }}
+            transition={{ type: "spring", stiffness: 460, damping: 34 }}
+          >
+            {[
+              ["Salary", "credit", "salary"],
+              ["Statement", "document", "statement"],
+              ["Converter", "arrow-right-left", "converter"],
+              ["Theme", "palette", "theme"],
+              ["Add products & accounts", "plus", "accounts"],
+            ].map(([label, icon, action]) => (
+              <button
+                role="menuitem"
+                key={action}
+                onClick={() => onAction(action)}
+              >
+                <OfficialIcon name={icon} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </motion.section>
+        </motion.div>
+      )}
+      {themeOpen && (
+        <motion.div
+          key="theme-chooser"
+          className="asset-swap-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, pointerEvents: "none" }}
+        >
+          <motion.section
+            className="transfer-choice"
+            role="dialog"
+            aria-label="Theme"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            style={{
-              paddingBottom: "max(env(safe-area-inset-bottom, 0px), 22px)",
-            }}
-            className="relative max-h-[88dvh] overflow-y-auto no-scrollbar rounded-t-[34px] border-t border-white/10 bg-[#111317] px-5 pt-3 shadow-2xl"
           >
-            <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl font-bold tracking-tight">
-                {titles[tool]}
-              </h2>
+            <h2>Theme</h2>
+            {(["dynamic", "blue", "teal"] as const).map((palette) => (
               <button
-                type="button"
-                aria-label="Close sheet"
-                onClick={onClose}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10"
+                aria-pressed={lightPalette === palette}
+                key={palette}
+                onClick={() => setLightPalette(palette)}
               >
-                <X className="h-4 w-4" />
+                {palette === "dynamic"
+                  ? "Animated glow"
+                  : palette === "blue"
+                    ? "Blue glow"
+                    : "Teal glow"}
+                <OfficialIcon
+                  name={lightPalette === palette ? "check" : "palette"}
+                />
               </button>
-            </div>
-
-            {tool === "more" && (
-              <div className="home-more-actions">
-                {[
-                  {
-                    label: "Exchange",
-                    detail: "Convert currencies",
-                    Icon: ArrowLeftRight,
-                    action: () => setExchangeOpen(true),
-                  },
-                  {
-                    label: "Cards",
-                    detail: "Manage your cards",
-                    Icon: CreditCard,
-                    action: onOpenWallet,
-                  },
-                  {
-                    label: "Statements",
-                    detail: "Download demo activity",
-                    Icon: FileText,
-                    action: () => {
-                      const cell = (value: string | number) =>
-                        `"${String(value).replace(/"/g, '""')}"`;
-                      const rows = [
-                        ["Date", "Time", "Description", "Amount", "Currency"],
-                        ...transactions.map((tx) => [
-                          tx.date,
-                          tx.timestamp,
-                          tx.title,
-                          tx.amount,
-                          tx.currency,
-                        ]),
-                      ];
-                      const url = URL.createObjectURL(
-                        new Blob(
-                          [
-                            "Sandbox statement — fictional transactions\r\n" +
-                              rows
-                                .map((row) => row.map(cell).join(","))
-                                .join("\r\n"),
-                          ],
-                          { type: "text/csv;charset=utf-8" },
-                        ),
-                      );
-                      const link = document.createElement("a");
-                      link.href = url;
-                      link.download = "sandbox-statement.csv";
-                      link.click();
-                      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-                    },
-                  },
-                  {
-                    label: "Add account",
-                    detail: "Currencies & pockets",
-                    Icon: Plus,
-                    action: () => setAccountsDrawerOpen(true),
-                  },
-                  {
-                    label: "Analytics",
-                    detail: "Spending overview",
-                    Icon: BarChart3,
-                    action: () => onSelectTool("analytics"),
-                  },
-                  {
-                    label: "Details",
-                    detail: "Account information",
-                    Icon: Landmark,
-                    action: () => onSelectTool("details"),
-                  },
-                ].map(({ label, detail, Icon, action }) => (
-                  <button
-                    type="button"
-                    key={label}
-                    onClick={() => {
-                      if (label === "Analytics" || label === "Details") {
-                        sound.playKeypadClick();
-                        action();
-                        return;
-                      }
-                      openTool(action);
-                    }}
-                    className="rounded-2xl border border-white/[0.06] bg-white/[0.06] p-4 text-left active:scale-[0.98]"
-                  >
-                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="text-sm font-semibold">{label}</div>
-                    <div className="mt-0.5 text-xs text-white/40">{detail}</div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {tool !== "more" && account && (
-              <div className="mt-5 text-center text-[11px] text-white/30">
-                Available balance{" "}
-                {formatCurrencyAmount(
-                  additionalTransactions ? billsBalance : account.balance,
-                  activeCurrency,
-                )}
-              </div>
-            )}
+            ))}
+            <button onClick={onCloseTheme}>Done</button>
           </motion.section>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
-};
+}

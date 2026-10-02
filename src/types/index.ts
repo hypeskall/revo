@@ -46,6 +46,7 @@ export interface Transaction {
   linkedId?: string;
   cardId?: string;
   pointsEarned?: number;
+  pointsPurchased?: number;
   id: string;
   title: string;
   subtitle: string;
@@ -109,6 +110,7 @@ export type CardTheme =
   | "cyan_glow";
 
 export interface BankCard {
+  archived?: boolean;
   onlineEnabled?: boolean;
   contactlessEnabled?: boolean;
   id: string;

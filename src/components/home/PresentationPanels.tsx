@@ -19,7 +19,7 @@ import { formatCurrencyAmount } from "@/utils/formatters";
 import { TradePanel } from "@/components/invest/TradePanel";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
 import { ReferenceProfile } from "./ReferenceProfile";
-
+import { PlanScreen } from "./PlanScreen";
 export function PresentationPanels({
   panel,
 }: {
@@ -39,6 +39,7 @@ export function PresentationPanels({
   }, [panel]);
   if (panel === "activity") return <ReferenceActivity />;
   if (panel === "profile") return <ReferenceProfile />;
+  if (panel === "plan") return <PlanScreen />;
   if (panel === "invest" || panel === "crypto")
     return <TradePanel kind={panel} />;
   const titles = {
@@ -439,23 +440,6 @@ export function PresentationPanels({
           ))}
         </>
       )}
-      {panel === "plan" && (
-        <div className="space-y-4">
-          {["Standard", "Plus", "Premium", "Metal", "Ultra"].map((plan) => (
-            <button
-              className="presentation-notification"
-              key={plan}
-              onClick={() => state.selectPlan(plan)}
-            >
-              <span>{plan}</span>
-              {state.selectedPlan === plan && <Check />}
-            </button>
-          ))}
-          <p className="text-white/50 text-sm">
-            Plans are simulated. No subscriptions or charges are created.
-          </p>
-        </div>
-      )}
       {panel === "help" && (
         <>
           <input
@@ -507,7 +491,6 @@ export function PresentationPanels({
     </motion.section>
   );
 }
-
 export function NotificationToast() {
   const state = useRevolutStore();
   const latest = state.notifications[0];
@@ -534,10 +517,27 @@ export function NotificationToast() {
     <AnimatePresence>
       {visible && latest && (
         <motion.aside
-          initial={{ y: -100, opacity: 0, scale: 0.96 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 380, damping: 31 }}
+          key={latest.id}
+          initial={{ y: -160, opacity: 1 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{
+            y: -160,
+            opacity: 0,
+            transition: { duration: 0.22, ease: [0.4, 0, 1, 1] },
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 390,
+            damping: 38,
+            mass: 0.85,
+          }}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.5, bottom: 0.03 }}
+          onDragEnd={(_, info) => {
+            if (info.offset.y < -24 || info.velocity.y < -300)
+              setVisible(false);
+          }}
           className="reference-toast"
           role="status"
         >
@@ -550,10 +550,13 @@ export function NotificationToast() {
             }}
           >
             <div className="notification-heading">
-              <strong>{latest.title}</strong>
+              <strong>Revolut</strong>
               <time>now</time>
             </div>
-            <span>{latest.message}</span>
+            <span>
+              <b>{latest.title}</b>
+              {latest.message}
+            </span>
           </button>
           <button
             aria-label="Dismiss notification"

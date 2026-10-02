@@ -10,10 +10,22 @@ export function CardPreview({
   card: BankCard;
   details?: boolean;
 }) {
+  // One reference artwork source for the Wallet, card carousel, and payment sheet.
+  const referenceArt =
+    card.id === "card-blood" && card.last4 === "0177"
+      ? "blood"
+      : card.id === "card-surge" && card.last4 === "0345"
+        ? "surge"
+        : card.id === "card-shirt" && card.isFrozen
+          ? "shirt"
+          : null;
   return (
     <span
       data-card-id={card.id}
-      className={`reference-card-preview card-theme-${card.theme} ${card.isFrozen ? "card-frozen" : ""}`}
+      data-artwork={referenceArt || card.theme}
+      role="img"
+      aria-label={`${card.name}, ${card.scheme}, ending ${card.last4}${card.isFrozen ? ", frozen" : ""}`}
+      className={`reference-card-preview card-theme-${card.theme} ${referenceArt ? `card-source-art source-${referenceArt}` : ""} ${card.isFrozen ? "card-frozen" : ""}`}
     >
       {details && (
         <>

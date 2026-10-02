@@ -8,6 +8,7 @@ import { useRevolutStore } from "@/store/useRevolutStore";
 import { LightRays } from "@/components/ui/LightRays";
 import { BrandIcon } from "@/components/ui/BrandIcon";
 import { transactionDate, exchangeRate } from "@/utils/finance";
+import { PointsMenuScreen } from "./PointsMenuScreen";
 const perks = [
   {
     title: "Shopping",
@@ -273,6 +274,7 @@ export function HubScreen() {
                   <strong>
                     +
                     {(
+                      tx.pointsPurchased ??
                       tx.pointsEarned ??
                       Math.floor(
                         ((Math.abs(tx.amount) *
@@ -416,8 +418,21 @@ export function HubScreen() {
         </div>
       </section>
       <AnimatePresence>
-        {menu && (
+        {(menu === "Earn" || menu === "Redeem") && (
+          <PointsMenuScreen
+            key={menu}
+            menu={menu}
+            onClose={() => setMenu(null)}
+            onReward={(title) => {
+              setMenu(null);
+              setSelected(perks.find((item) => item.title === title)!);
+              setMessage("");
+            }}
+          />
+        )}
+        {menu && menu !== "Earn" && menu !== "Redeem" && (
           <motion.div
+            key="points-menu"
             className="asset-swap-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -478,6 +493,7 @@ export function HubScreen() {
         )}
         {selected && (
           <motion.div
+            key="points-reward"
             className="asset-swap-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -10,6 +10,10 @@ import { exchangeRate, roundMoney } from "@/utils/finance";
 import { Account, BankCard, Contact, Currency, Transaction } from "@/types";
 
 interface RevolutState {
+  lightPalette: "dynamic" | "blue" | "teal";
+  setLightPalette: (palette: RevolutState["lightPalette"]) => void;
+  archiveCard: (id: string) => void;
+  restoreCard: (id: string) => void;
   topUpCardId: string;
   setTopUpCard: (id: string) => void;
   profileName: string;
@@ -98,6 +102,7 @@ interface RevolutState {
   demoHoldings: Record<string, number>;
   tradeDemo: (asset: string, amount: number, sell: boolean) => string | null;
   revPoints: number;
+  buyPoints: (points: number) => string | null;
   redeemPoints: (points: number) => string | null;
   selectedPlan: string;
   selectPlan: (plan: string) => void;
@@ -239,6 +244,8 @@ const DEFAULT_RATES: Record<string, number> = {
 export const useRevolutStore = create<RevolutState>()(
   persist(
     (set, get) => ({
+      lightPalette: "dynamic",
+      setLightPalette: (lightPalette) => set({ lightPalette }),
       topUpCardId: "card-blood",
       setTopUpCard: (id) => {
         if (get().cards.some((c) => c.id === id)) set({ topUpCardId: id });
@@ -811,7 +818,13 @@ export const useRevolutStore = create<RevolutState>()(
         const card = cardId
           ? state.cards.find((c) => c.id === cardId)
           : undefined;
-        if (cardId && (!card || card.isFrozen || card.onlineEnabled === false))
+        if (
+          cardId &&
+          (!card ||
+            card.archived ||
+            card.isFrozen ||
+            card.onlineEnabled === false)
+        )
           return "Choose an active card with online payments enabled.";
         amount = Math.round(amount * 100) / 100;
         if (amount <= 0) return "Minimum amount is 0.01.";
@@ -1034,10 +1047,81 @@ export const useRevolutStore = create<RevolutState>()(
         return { success: true };
       },
 
+      buyPoints: (points) => {
+        if (!Number.isInteger(points) || points < 10 || points > 1000000)
+          return "Enter between 10 and 1,000,000 points.";
+        const state = get();
+        const cost = roundMoney(points / 10);
+        if (cost > state.accounts.RON.balance)
+          return "Insufficient RON balance.";
+        const now = Date.now();
+        set({
+          revPoints: roundMoney(state.revPoints + points),
+          accounts: {
+            ...state.accounts,
+            RON: {
+              ...state.accounts.RON,
+              balance: roundMoney(state.accounts.RON.balance - cost),
+            },
+          },
+          transactions: [
+            {
+              id: "tx-points-" + crypto.randomUUID(),
+              title: "RevPoints top-up",
+              subtitle: `${points} demo points`,
+              amount: -cost,
+              currency: "RON",
+              date: "Today",
+              timestamp: new Date(now).toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              category: "Shopping",
+              kind: "external",
+              brand: "Revolut",
+              isIncoming: false,
+              status: "completed",
+              rawDate: now,
+              pointsEarned: 0,
+              pointsPurchased: points,
+            },
+            ...state.transactions,
+          ],
+        });
+        get().notify(
+          "Points added",
+          `${points} demo points for ${cost.toFixed(2)} lei.`,
+        );
+        return null;
+      },
+      archiveCard: (id) => {
+        const card = get().cards.find((item) => item.id === id);
+        if (!card || card.archived) return;
+        set({
+          cards: get().cards.map((item) =>
+            item.id === id
+              ? { ...item, archived: true, isFrozen: true, status: "frozen" }
+              : item,
+          ),
+        });
+        get().notify(
+          "Card terminated",
+          `${card.name} ··${card.last4} archived in this prototype.`,
+        );
+      },
+      restoreCard: (id) => {
+        set({
+          cards: get().cards.map((item) =>
+            item.id === id
+              ? { ...item, archived: false, isFrozen: false, status: "active" }
+              : item,
+          ),
+        });
+      },
       toggleFreezeCard: (cardId: string) => {
         const state = get();
         const selectedCard = state.cards.find((card) => card.id === cardId);
-        if (!selectedCard) return;
+        if (!selectedCard || selectedCard.archived) return;
         set({
           cards: state.cards.map((card) => {
             if (card.id === cardId) {
@@ -1196,6 +1280,7 @@ export const useRevolutStore = create<RevolutState>()(
           billsBalance: 100.67,
           jointBalance: 1.28,
           homeAccount: "personal",
+          lightPalette: "dynamic",
           accounts: DEFAULT_ACCOUNTS,
           activeCurrency: "RON",
           transactions: presentationTransactions,
@@ -1326,6 +1411,7 @@ export const useRevolutStore = create<RevolutState>()(
       },
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
+        lightPalette: state.lightPalette,
         topUpCardId: state.topUpCardId,
         rates: state.rates,
         profileName: state.profileName,

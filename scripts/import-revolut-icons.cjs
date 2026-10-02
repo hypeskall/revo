@@ -102,6 +102,10 @@ const names = [
   "resort",
   "invest",
   "arrow-rates",
+  "delete",
+  "arrow-repeat",
+  "recurring",
+  "logo-youtube",
 ];
 fs.mkdirSync(output, { recursive: true });
 for (const name of names) {

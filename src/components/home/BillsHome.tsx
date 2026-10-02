@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Plus, ArrowDown, Info, MoreHorizontal, X, ArrowUpRight, TrendingUp, ArrowLeftRight, Bitcoin, Sparkles } from '@/components/ui/OfficialIcons';
 import { useRevolutStore } from '@/store/useRevolutStore';
 import { HomeToolsSheet } from './HomeToolsSheet';
@@ -25,6 +25,8 @@ function GymIcon() {
 export function BillsHome({ onNavigate }: { onNavigate: (tab: TabId) => void }) {
   const state = useRevolutStore();
   const [panel, setPanel] = useState<'add'|'withdraw'|'information'|'cards'|null>(null);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
+  useEffect(() => { state.setScreenOverlayOpen(!!panel || appearanceOpen); return () => useRevolutStore.getState().setScreenOverlayOpen(false); }, [panel, appearanceOpen]);
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -38,7 +40,7 @@ export function BillsHome({ onNavigate }: { onNavigate: (tab: TabId) => void }) 
     {label:'More', Icon:MoreHorizontal, action:()=>state.setHomeTool('more')},
   ];
   return <>
-    <div className="bills-home no-scrollbar">
+    <div className="bills-home no-scrollbar" aria-hidden={!!state.homeTool || !!panel || appearanceOpen} ref={node => { if (node) node.inert = !!state.homeTool || !!panel || appearanceOpen; }}>
       <header className="bills-header">
         <button aria-label="Profile" onClick={()=>state.setUiPanel('profile')} className="bills-avatar"><img src="/profile.png" alt="Profile" /></button>
         <button aria-label="Search" className="bills-search" onClick={()=>state.setHomeTool('search')}><Search /></button>
@@ -50,7 +52,7 @@ export function BillsHome({ onNavigate }: { onNavigate: (tab: TabId) => void }) 
         <div className="bills-amount"><span>{whole}</span><span className="bills-cents">.{cents}</span><span className="bills-symbol">€</span></div>
         <button className="bills-accounts" onClick={()=>state.setAccountsDrawerOpen(true)}>Accounts</button>
       </section>
-      <div className="bills-actions">{actions.map(({label,Icon,action})=><button key={label} aria-label={label} onClick={action}><span className="bills-action-circle"><Icon strokeWidth={label==='Withdraw'?4:2.6}/></span><span>{label==='Add money'?<>Add<br/>money</>:label}</span></button>)}</div>
+      <div className="bills-actions">{actions.map(({label,Icon,action})=><button key={label} aria-label={label} data-home-more={label === 'More' ? '' : undefined} onClick={action}><span className="bills-action-circle"><Icon strokeWidth={label==='Withdraw'?4:2.6}/></span><span>{label==='Add money'?<>Add<br/>money</>:label}</span></button>)}</div>
       <section className="bills-transactions" aria-label="Bills transactions">{activity.map(tx=>{
         const Icon = tx.brand==='Utilities'?UtilityIcon:tx.brand==='Gym'?GymIcon:ArrowUpRight;
         return <button className="bills-transaction" key={tx.id} onClick={()=>state.setSelectedTransactionDetail(tx)}>
@@ -60,7 +62,7 @@ export function BillsHome({ onNavigate }: { onNavigate: (tab: TabId) => void }) 
         </button>;
       })}</section>
     </div>
-    <HomeToolsSheet tool={state.homeTool} additionalTransactions={examples} currency="EUR" onClose={()=>state.setHomeTool(null)} onSelectTool={state.setHomeTool} onOpenWallet={()=>open('cards')}/>
+    <HomeToolsSheet tool={state.homeTool} additionalTransactions={examples} currency="EUR" onClose={()=>state.setHomeTool(null)} onSelectTool={state.setHomeTool} onOpenWallet={()=>open('cards')} onThemeOpenChange={setAppearanceOpen}/>
     {panel === 'cards' && <section role="dialog" aria-modal="true" aria-label="Cards" className="absolute inset-0 z-[70] flex flex-col bg-black">
       <button aria-label="Close cards" onClick={() => setPanel(null)} className="self-start rounded-full bg-white/10 p-2 m-4"><X size={20}/></button>
       <div className="flex-1 min-h-0"><CardsScreen /></div>

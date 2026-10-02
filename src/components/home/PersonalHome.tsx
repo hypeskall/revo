@@ -175,7 +175,12 @@ export function PersonalHome({
       </motion.section>
       <div className="reference-actions">
         {actions.map(({ label, Icon, action }) => (
-          <button aria-label={label} key={label} onClick={action}>
+          <button
+            aria-label={label}
+            key={label}
+            onClick={action}
+            data-home-more={label === "More" ? "true" : undefined}
+          >
             <i>
               <Icon />
             </i>
@@ -270,7 +275,9 @@ export function PersonalHome({
               ["card-surge", "card-orange", "card-lavender"],
               ["card-disposable"],
             ][cardPage]
-              .flatMap((id) => state.cards.filter((card) => card.id === id))
+              .flatMap((id) =>
+                state.cards.filter((card) => card.id === id && !card.archived),
+              )
               .map((card) => (
                 <button
                   key={card.id}
