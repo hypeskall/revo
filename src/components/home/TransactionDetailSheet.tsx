@@ -7,6 +7,8 @@ import { formatCurrencyAmount } from '@/utils/formatters';
 import { X, CheckCircle2, Split, RotateCcw, HelpCircle, Receipt, ArrowUpRight, ArrowDownLeft } from '@/components/ui/OfficialIcons';
 import { sound } from '@/utils/audio';
 import { useClosingScreen } from '@/components/ui/useClosingScreen';
+import { useSheetGesture } from '@/components/ui/useSheetGesture';
+import { sheetSpring } from '@/components/ui/motion';
 
 export const TransactionDetailSheet: React.FC = () => {
   const { selectedTransactionDetail, setSelectedTransactionDetail, setTransferOpen, setSelectedContactForTransfer, setUiPanel, contacts } =
@@ -14,6 +16,7 @@ export const TransactionDetailSheet: React.FC = () => {
   const [showSplit,setShowSplit]=useState(false);
   const [people,setPeople]=useState(2);
   const closing = useClosingScreen(() => setSelectedTransactionDetail(null));
+  const gesture = useSheetGesture(closing.close);
 
   if (!selectedTransactionDetail) return null;
   const tx = selectedTransactionDetail;
@@ -35,7 +38,7 @@ export const TransactionDetailSheet: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div {...closing.props} className="transaction-detail-overlay absolute inset-0 z-[95] flex flex-col justify-end">
+      <div aria-hidden={closing.closing} ref={closing.props.ref} className="transaction-detail-overlay absolute inset-0 z-[95] flex flex-col justify-end">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: closing.closing ? 0 : 1 }}
@@ -48,19 +51,12 @@ export const TransactionDetailSheet: React.FC = () => {
         />
 
         <motion.div
+          {...gesture.props}
           initial={{ y: '100%' }}
           animate={{ y: closing.closing ? '100%' : 0 }}
           onAnimationComplete={closing.finish}
           exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          drag="y"
-          dragConstraints={{ top: 0 }}
-          dragElastic={0.2}
-          onDragEnd={(_, info) => {
-            if (info.offset.y > 120) {
-              closing.close();
-            }
-          }}
+          transition={sheetSpring}
           style={{
             paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)',
           }}
@@ -68,7 +64,7 @@ export const TransactionDetailSheet: React.FC = () => {
           className="relative w-full max-h-[85vh] bg-[#14171A] rounded-t-[32px] border-t border-white/[0.08] p-5 flex flex-col overflow-y-auto"
         >
           {/* Grab handle */}
-          <div className="w-full flex justify-center pb-2">
+          <div {...gesture.handle} className="w-full flex justify-center pb-2">
             <div className="w-10 h-1 bg-white/20 rounded-full" />
           </div>
 

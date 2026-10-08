@@ -8,6 +8,8 @@ import { X, Sparkles, PlusCircle, MinusCircle, RotateCcw, Volume2, VolumeX, Smar
 import { sound } from '@/utils/audio';
 import { useClosingScreen } from '@/components/ui/useClosingScreen';
 import { formatCurrencyAmount } from '@/utils/formatters';
+import { useSheetGesture } from '@/components/ui/useSheetGesture';
+import { sheetSpring } from '@/components/ui/motion';
 
 export const GodModeDrawer: React.FC = () => {
   const {
@@ -26,6 +28,7 @@ export const GodModeDrawer: React.FC = () => {
     activeCurrency,
   } = useRevolutStore();
   const closing = useClosingScreen(() => setGodModeOpen(false));
+  const gesture = useSheetGesture(closing.close);
 
   const [balances, setBalances] = useState<Record<Currency, string>>({
     RON: accounts.RON.balance.toString(),
@@ -119,7 +122,7 @@ export const GodModeDrawer: React.FC = () => {
 
   return (
     <AnimatePresence>
-      <div {...closing.props} role="dialog" aria-modal="true" aria-label="Secret mode" className="secret-editor absolute inset-0 z-[90] flex flex-col justify-end">
+      <div aria-hidden={closing.closing} ref={closing.props.ref} role="dialog" aria-modal="true" aria-label="Secret mode" className="secret-editor absolute inset-0 z-[90] flex flex-col justify-end">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -134,23 +137,16 @@ export const GodModeDrawer: React.FC = () => {
 
         {/* Drawer content */}
         <motion.div
+          {...gesture.props}
           initial={{ y: '100%' }}
           animate={{ y: closing.closing ? '100%' : 0 }}
           onAnimationComplete={closing.finish}
           exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          drag="y"
-          dragConstraints={{ top: 0 }}
-          dragElastic={0.2}
-          onDragEnd={(_, info) => {
-            if (info.offset.y > 150) {
-              closing.close();
-            }
-          }}
+          transition={sheetSpring}
           className="relative w-full max-h-[92vh] bg-[#121417] rounded-t-[36px] border-t border-blue-500/40 p-5 pb-10 flex flex-col shadow-[0_-10px_40px_rgba(0,117,235,0.2)] overflow-hidden"
         >
           {/* Grab handle */}
-          <div className="w-full flex justify-center pb-2">
+          <div {...gesture.handle} className="w-full flex justify-center pb-2">
             <div className="w-12 h-1.5 bg-blue-500/40 rounded-full" />
           </div>
 

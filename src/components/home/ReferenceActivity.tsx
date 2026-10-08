@@ -117,7 +117,7 @@ export function TransactionRow({
 
 export function ReferenceActivity() {
   const state = useRevolutStore();
-  const transition = useClosingScreen(() => state.setUiPanel(null));
+  const transition = useClosingScreen(() => state.setUiPanel(null), true);
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [direction, setDirection] = useState("all");

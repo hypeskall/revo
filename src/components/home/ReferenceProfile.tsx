@@ -6,10 +6,12 @@ import { useClosingScreen } from "@/components/ui/useClosingScreen";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { presentationIban } from "@/data/account-details";
 import { LightRays } from "@/components/ui/LightRays";
+import { useSheetGesture } from "@/components/ui/useSheetGesture";
 
 export function ReferenceProfile() {
   const state = useRevolutStore();
   const transition = useClosingScreen(() => state.setUiPanel(null));
+  const gesture = useSheetGesture(transition.close);
   const [page, setPage] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
@@ -98,6 +100,7 @@ export function ReferenceProfile() {
   return (
     <motion.section
       {...transition.props}
+      {...gesture.props}
       onAnimationComplete={transition.finish}
       className="reference-profile-screen no-scrollbar"
       role="dialog"
@@ -108,6 +111,7 @@ export function ReferenceProfile() {
       transition={{ type: "spring", stiffness: 340, damping: 34 }}
     >
       <LightRays theme="points" />
+      <div {...gesture.handle} className="screen-sheet-grab" aria-hidden="true" />
       <header>
         <button
           className="reference-back"
@@ -126,8 +130,8 @@ export function ReferenceProfile() {
           </button>
         )}
       </header>
-      <AnimatePresence mode="wait" initial={false}>
-      <motion.div key={page || "profile"} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>
+      <AnimatePresence mode="popLayout" initial={false} custom={page ? 1 : -1}>
+      <motion.div className="profile-motion-pane" key={page || "profile"} custom={page ? 1 : -1} initial={{ opacity: 0, x: page ? 32 : -20 }} animate={{ opacity: 1, x: 0 }} variants={{ exit: (direction: number) => ({ opacity: 0, x: direction * -24 }) }} exit="exit" transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
       {!page ? (
         <>
           <div className="reference-profile-identity">

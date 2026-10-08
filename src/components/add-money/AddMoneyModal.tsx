@@ -13,11 +13,13 @@ import { ApplePayLogo } from "@/components/ui/AppleLogo";
 import { ApplePaySheet } from "./ApplePaySheet";
 import { AnimatedAmount } from "@/components/ui/AnimatedAmount";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
+import { useSheetGesture } from "@/components/ui/useSheetGesture";
 import { CardPreview } from "@/components/cards/CardPreview";
 
 export function AddMoneyModal() {
   const state = useRevolutStore();
   const transition = useClosingScreen(() => state.setAddMoneyOpen(false));
+  const gesture = useSheetGesture(transition.close);
   const [input, setInput] = useState("610");
   const [appleOpen, setAppleOpen] = useState(false);
   const [methodsOpen, setMethodsOpen] = useState(false);
@@ -99,6 +101,7 @@ export function AddMoneyModal() {
   return (
     <motion.section
       {...transition.props}
+      {...gesture.props}
       onAnimationComplete={transition.finish}
       initial={{ y: "100%" }}
       animate={{ y: transition.closing ? "100%" : 0 }}
@@ -108,6 +111,7 @@ export function AddMoneyModal() {
       aria-label="Add money"
       className="reference-add-money"
     >
+      {!overlayOpen && <div {...gesture.handle} className="screen-sheet-grab" aria-hidden="true" />}
       <header aria-hidden={overlayOpen} ref={backgroundRef}>
         <button
           className="reference-back"

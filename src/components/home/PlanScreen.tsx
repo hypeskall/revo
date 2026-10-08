@@ -9,7 +9,7 @@ import { formatCurrencyAmount } from "@/utils/formatters";
 
 export function PlanScreen() {
   const state = useRevolutStore();
-  const transition = useClosingScreen(() => state.setUiPanel(null));
+  const transition = useClosingScreen(() => state.setUiPanel(null), true);
   const [upgrade, setUpgrade] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const month = new Date();

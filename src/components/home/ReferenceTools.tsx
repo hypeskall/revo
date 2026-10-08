@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
+import { useSheetGesture } from "@/components/ui/useSheetGesture";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { Currency, Transaction } from "@/types";
@@ -26,6 +27,7 @@ export function ReferenceTools({
 }) {
   const state = useRevolutStore();
   const closing = useClosingScreen(onClose);
+  const gesture = useSheetGesture(closing.close);
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [local, setLocal] = useState<"atms" | null>(null);
@@ -144,6 +146,7 @@ export function ReferenceTools({
   return (
     <motion.section
       {...closing.props}
+      {...gesture.props}
       onAnimationComplete={closing.finish}
       role="dialog"
       aria-modal="true"
@@ -153,6 +156,7 @@ export function ReferenceTools({
       animate={{ y: closing.closing ? "100%" : 0 }}
       transition={{ type: "spring", stiffness: 340, damping: 34 }}
     >
+      <div {...gesture.handle} className="screen-sheet-grab" aria-hidden="true" />
       {tool === "search" ? (
         <>
           <form

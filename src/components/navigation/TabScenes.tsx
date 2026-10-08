@@ -16,6 +16,8 @@ export function TabScenes({
   const [scenes, setScenes] = useState<TabId[]>([active]);
   const [previous, setPrevious] = useState<TabId | null>(null);
   const [current, setCurrent] = useState(active);
+  const order: TabId[] = ["home", "credit", "invest", "transfer", "cards", "hub"];
+  const direction = previous && order.indexOf(current) < order.indexOf(previous) ? -1 : 1;
   // Synchronize before paint so there is never a frame with all scenes hidden.
   if (current !== active) {
     setPrevious(current);
@@ -24,7 +26,7 @@ export function TabScenes({
   }
   useEffect(() => {
     if (!previous) return;
-    const timer = window.setTimeout(() => setPrevious(null), reduced ? 0 : 260);
+    const timer = window.setTimeout(() => setPrevious(null), reduced ? 0 : 340);
     return () => window.clearTimeout(timer);
   }, [current, previous, reduced]);
   return (
@@ -41,10 +43,10 @@ export function TabScenes({
             ref={(node) => {
               if (node) node.inert = !shown;
             }}
-            initial={id === "home" ? false : { opacity: 0 }}
-            animate={{ opacity: shown || outgoing ? 1 : 0 }}
+            initial={id === "home" || reduced ? false : { opacity: 0, x: direction * 16, scale: 0.995 }}
+            animate={{ opacity: shown || outgoing ? 1 : 0, x: reduced ? 0 : shown ? 0 : outgoing ? -direction * 10 : direction * 16, scale: shown || reduced ? 1 : 0.995 }}
             transition={{
-              duration: reduced || outgoing ? 0 : 0.22,
+              duration: reduced ? 0 : 0.3,
               ease: [0.22, 1, 0.36, 1],
             }}
             className="tab-scene"

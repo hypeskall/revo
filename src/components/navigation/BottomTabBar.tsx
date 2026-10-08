@@ -44,7 +44,9 @@ export function BottomTabBar({
       transition={{ type: "spring", stiffness: 400, damping: 35 }}
     >
       {tabs.map(({ id, label, Icon }) => (
-        <button
+        <motion.button
+          whileTap={{ scale: 0.94 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
           aria-label={label}
           aria-current={id === activeTab ? "page" : undefined}
           tabIndex={hidden ? -1 : 0}
@@ -62,7 +64,7 @@ export function BottomTabBar({
             {id === "transfer" && unread && <b />}
           </span>
           <span className="dock-label">{label}</span>
-        </button>
+        </motion.button>
       ))}
     </motion.nav>
   );

@@ -31,7 +31,7 @@ export function ContactChatScreen({
   onBack: () => void;
 }) {
   const state = useRevolutStore();
-  const transition = useClosingScreen(onBack);
+  const transition = useClosingScreen(onBack, true);
   const live = state.contacts.find((item) => item.id === contact.id) || contact;
   const reduced = useReducedMotion();
   const [stage, setStage] = useState<"chat" | "amount" | "review">("chat");

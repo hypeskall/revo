@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { CardPreview } from "./CardPreview";
@@ -39,7 +39,13 @@ export function CardsScreen({
     return () => observer.disconnect();
   }, []);
   const reduced = useReducedMotion();
+  const trackControls = useAnimationControls();
   const card = cards.find((item) => item.id === selectedId) || cards[0];
+  const index = cards.findIndex((item) => item.id === card?.id);
+  const trackSpring = reduced ? { duration: 0 } : { type: "spring" as const, stiffness: 320, damping: 34, mass: 0.8 };
+  useEffect(() => {
+    void trackControls.start({ x: width * (0.0415 - Math.max(0, index) * 0.942), transition: reduced ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 34, mass: 0.8 } });
+  }, [index, width, reduced, trackControls]);
   const subscriptionBrands =
     card?.id === "card-blood"
       ? ["Spotify", "AAPL"]
@@ -55,7 +61,6 @@ export function CardsScreen({
     }
   };
   if (!card) return <p>No cards yet.</p>;
-  const index = cards.findIndex((item) => item.id === card.id);
   const select = (next: number) => {
     const target = cards[Math.max(0, Math.min(cards.length - 1, next))];
     setSelectedId(target.id);
@@ -79,6 +84,7 @@ export function CardsScreen({
         )}
       </header>
       <div
+        data-no-back-swipe
         className="card-carousel"
         ref={carousel}
         role="region"
@@ -94,7 +100,7 @@ export function CardsScreen({
         <motion.div
           className="card-carousel-track"
           initial={false}
-          animate={{ x: width * (0.0415 - index * 0.942) }}
+          animate={trackControls}
           transition={
             reduced
               ? { duration: 0 }
@@ -102,13 +108,17 @@ export function CardsScreen({
           }
           drag="x"
           dragConstraints={{
-            left: width * (0.0415 - index * 0.942),
-            right: width * (0.0415 - index * 0.942),
+            left: width * (0.0415 - (cards.length - 1) * 0.942),
+            right: width * 0.0415,
           }}
-          dragElastic={0.08}
+          dragElastic={0.12}
+          dragMomentum={false}
           onDragEnd={(_, info) => {
-            if (Math.abs(info.offset.x) > 35 || Math.abs(info.velocity.x) > 250)
-              select(index + (info.offset.x < 0 ? 1 : -1));
+            const projected = info.offset.x + info.velocity.x * 0.15;
+            const steps = Math.round(-projected / Math.max(1, width * 0.942));
+            const next = Math.max(0, Math.min(cards.length - 1, index + (steps || (Math.abs(projected) > width * 0.2 ? (projected < 0 ? 1 : -1) : 0))));
+            select(next);
+            void trackControls.start({ x: width * (0.0415 - next * 0.942), transition: trackSpring });
           }}
         >
           {cards.map((item, position) => (

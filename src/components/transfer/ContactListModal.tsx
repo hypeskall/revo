@@ -28,7 +28,7 @@ export function ContactListModal({
   const state = useRevolutStore();
   const [query, setQuery] = useState("");
   const [paymentType, setPaymentType] = useState("Revolut");
-  const closing = useClosingScreen(() => state.setTransferOpen(false));
+  const closing = useClosingScreen(() => state.setTransferOpen(false), !isTabMode);
   if (!isTabMode && !state.isTransferOpen && !state.selectedContactForTransfer)
     return null;
   const contacts = state.contacts.filter((contact) =>
@@ -54,6 +54,8 @@ export function ContactListModal({
   return (
     <motion.section
       {...closing.props}
+      role={isTabMode ? undefined : "dialog"}
+      aria-modal={isTabMode ? undefined : true}
       initial={isTabMode ? false : { x: "100%" }}
       animate={{ x: closing.closing ? "100%" : 0 }}
       onAnimationComplete={closing.finish}

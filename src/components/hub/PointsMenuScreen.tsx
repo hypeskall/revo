@@ -16,7 +16,7 @@ export function PointsMenuScreen({
   onReward: (title: string) => void;
 }) {
   const state = useRevolutStore();
-  const transition = useClosingScreen(onClose);
+  const transition = useClosingScreen(onClose, true);
   const [choice, setChoice] = useState<string | null>(null);
   const [input, setInput] = useState("100");
   const [message, setMessage] = useState("");

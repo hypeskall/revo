@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { AnimatePresence, MotionConfig } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import { screenSpring } from "@/components/ui/motion";
 import { MobileFrame } from "@/components/frame/MobileFrame";
 import { BottomTabBar, TabId } from "@/components/navigation/BottomTabBar";
 import { AuroraBackground } from "@/components/home/AuroraBackground";
@@ -84,12 +85,15 @@ export default function App() {
     );
   }
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="user" transition={screenSpring}>
       <MobileFrame>
         {/* Dynamic Animated Aurora Glow (Active in background) */}
         <AuroraBackground colorVariant="blue" />
         {/* Page content remains mounted to preserve scroll and prevent empty frames. */}
-        <main
+        <motion.main
+          initial={false}
+          animate={{ scale: isGlobalModalActive || (homeTool && homeTool !== "more") ? 0.97 : 1, y: isGlobalModalActive || (homeTool && homeTool !== "more") ? 6 : 0, borderRadius: isGlobalModalActive || (homeTool && homeTool !== "more") ? 24 : 0 }}
+          transition={screenSpring}
           aria-hidden={mainBlocked}
           ref={(node) => {
             if (node) node.inert = mainBlocked;
@@ -119,7 +123,7 @@ export default function App() {
               }
             }}
           />
-        </main>
+        </motion.main>
         {/* 1. PERSISTENT FLOATING LIQUID GLASS DOCK:
           Hides smoothly when in a chat or full-screen modal
       */}

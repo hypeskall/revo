@@ -10,7 +10,7 @@ import { useClosingScreen } from "@/components/ui/useClosingScreen";
 
 export function TradePanel({ kind }: { kind: "invest" | "crypto" }) {
   const state = useRevolutStore();
-  const transition = useClosingScreen(() => state.setUiPanel(null));
+  const transition = useClosingScreen(() => state.setUiPanel(null), true);
   const assets = demoAssets.filter((item) => item.kind === kind);
   const [symbol, setSymbol] = useState(
     assets.find((item) => item.symbol === state.tradeTicket.asset)?.symbol ||

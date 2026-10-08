@@ -18,6 +18,7 @@ import { ReferenceActivity } from "./ReferenceActivity";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { TradePanel } from "@/components/invest/TradePanel";
 import { useClosingScreen } from "@/components/ui/useClosingScreen";
+import { gestureReturn } from "@/components/ui/motion";
 import { ReferenceProfile } from "./ReferenceProfile";
 import { PlanScreen } from "./PlanScreen";
 export function PresentationPanels({
@@ -26,7 +27,7 @@ export function PresentationPanels({
   panel: NonNullable<ReturnType<typeof useRevolutStore.getState>["uiPanel"]>;
 }) {
   const state = useRevolutStore();
-  const transition = useClosingScreen(() => state.setUiPanel(null));
+  const transition = useClosingScreen(() => state.setUiPanel(null), true);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("100");
   const [message, setMessage] = useState("");
@@ -533,8 +534,8 @@ export function NotificationToast() {
           variants={{ exit: (direction: typeof dismissal) => ({
             x: direction === "left" ? -460 : direction === "right" ? 460 : 0,
             y: direction === "up" ? -160 : 0,
-            opacity: 0, scale: 0.96,
-            transition: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+            opacity: [1, 1, 0], scale: 1,
+            transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1], opacity: { times: [0, 0.65, 1] } },
           }) }}
           exit="exit"
           transition={{
@@ -546,8 +547,9 @@ export function NotificationToast() {
           drag
           dragDirectionLock
           dragMomentum={false}
+          dragTransition={gestureReturn}
           dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
-          dragElastic={{ top: 0.7, bottom: 0.06, left: 0.7, right: 0.7 }}
+          dragElastic={{ top: 1, bottom: 0.08, left: 1, right: 1 }}
           onPointerDown={() => { dragged.current = false; }}
           onDragStart={() => {
             dragged.current = true;

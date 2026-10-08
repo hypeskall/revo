@@ -14,7 +14,7 @@ export function AccountDetails({
   onClose: () => void;
 }) {
   const state = useRevolutStore();
-  const closing = useClosingScreen(onClose);
+  const closing = useClosingScreen(onClose, true);
   const [international, setInternational] = useState(false);
   const [copied, setCopied] = useState("");
   const [selected, setSelected] = useState(currency);

@@ -10,7 +10,7 @@ import { useClosingScreen } from "@/components/ui/useClosingScreen";
 const currencies: Currency[] = ["RON", "EUR", "USD", "GBP"];
 export const ExchangeModal = () => {
   const state = useRevolutStore();
-  const closing = useClosingScreen(() => state.setExchangeOpen(false));
+  const closing = useClosingScreen(() => state.setExchangeOpen(false), true);
   const [from, setFrom] = useState<Currency>("EUR");
   const [to, setTo] = useState<Currency>("RON");
   const [amount, setAmount] = useState("0");

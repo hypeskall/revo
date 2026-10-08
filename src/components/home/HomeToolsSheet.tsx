@@ -8,6 +8,8 @@ import { Currency, Transaction } from "@/types";
 import { personalTransaction } from "@/utils/finance";
 import { ReferenceTools } from "./ReferenceTools";
 import { AccountDetails } from "./AccountDetails";
+import { useSheetGesture } from "@/components/ui/useSheetGesture";
+import { sheetSpring } from "@/components/ui/motion";
 export type HomeTool = "search" | "analytics" | "details" | "more";
 interface HomeToolsSheetProps {
   tool: HomeTool | null;
@@ -144,6 +146,7 @@ function HomeMoreMenu({
   const [position, setPosition] = useState({ top: 70, right: 16 });
   const { lightPalette, setLightPalette } = useRevolutStore();
   const themeId = useId();
+  const themeGesture = useSheetGesture(onCloseTheme);
   useLayoutEffect(() => {
     if (!open) return;
     const anchor = document.querySelector(
@@ -229,6 +232,7 @@ function HomeMoreMenu({
         >
           <button className="theme-dismiss" aria-label="Close theme picker" onClick={onCloseTheme} />
           <motion.section
+            {...themeGesture.props}
             className="transfer-choice theme-choice"
             role="dialog"
             aria-label="Theme"
@@ -236,14 +240,9 @@ function HomeMoreMenu({
             initial={{ y: "100%", scale: 0.96 }}
             animate={{ y: 0, scale: 1 }}
             exit={{ y: "100%", scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0.02, bottom: 0.3 }}
-            dragMomentum={false}
-            onDragEnd={(_, info) => { if (info.offset.y > 75 || info.velocity.y > 500) onCloseTheme(); }}
+            transition={sheetSpring}
           >
-            <div className="sheet-handle" />
+            <div {...themeGesture.handle} className="sheet-handle" />
             <h2>Theme</h2>
             <div className="theme-preview" aria-hidden="true">
               <AnimatePresence initial={false}>

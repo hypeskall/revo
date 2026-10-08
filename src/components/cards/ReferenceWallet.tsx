@@ -8,15 +8,18 @@ import { CardPreview } from "./CardPreview";
 import { CardsScreen } from "./CardsScreen";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { LightRays } from "@/components/ui/LightRays";
+import { useSheetGesture } from "@/components/ui/useSheetGesture";
 export function ReferenceWallet() {
   const state = useRevolutStore();
   const transition = useClosingScreen(() => state.setWalletOpen(false));
+  const gesture = useSheetGesture(transition.close);
   const [selected, setSelected] = useState<string | null>(state.walletCardId);
   const [adding, setAdding] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
   return (
     <motion.section
       {...transition.props}
+      {...gesture.props}
       onAnimationComplete={transition.finish}
       initial={{ y: "100%" }}
       animate={{ y: transition.closing ? "100%" : 0 }}
@@ -26,6 +29,7 @@ export function ReferenceWallet() {
       aria-label="Wallet"
       className="reference-wallet-frame"
     >
+      <div {...gesture.handle} className="screen-sheet-grab" aria-hidden="true" />
       <div
         className="reference-wallet no-scrollbar"
         aria-hidden={adding || mapOpen || !!selected}

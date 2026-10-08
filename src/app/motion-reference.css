@@ -1,4 +1,12 @@
 /* Motion and card geometry measured from the October 2 references. */
+[data-swipe-back] { touch-action: pan-y; }
+[data-sheet-grab] { touch-action: none; cursor: grab; }
+[data-sheet-grab]:active { cursor: grabbing; }
+.sheet-handle[data-sheet-grab] { position: relative; }
+.sheet-handle[data-sheet-grab]::before { content: ""; position: absolute; inset: -14px -28px; }
+.profile-motion-pane { width: 100%; }
+.app-phone .screen-sheet-grab { position: absolute; inset: 0 0 auto; height: max(8cqw, env(safe-area-inset-top)); z-index: 5; }
+.app-phone .reference-dock button:active { scale: 1; }
 .tab-scene {
   position: absolute;
   inset: 0;

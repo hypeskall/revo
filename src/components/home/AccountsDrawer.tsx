@@ -5,9 +5,12 @@ import { useRevolutStore } from "@/store/useRevolutStore";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { formatCurrencyAmount } from "@/utils/formatters";
 import { exchangeRate, roundMoney } from "@/utils/finance";
+import { useSheetGesture } from "@/components/ui/useSheetGesture";
+import { sheetSpring } from "@/components/ui/motion";
 export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
   const state = useRevolutStore();
   const close = () => state.setAccountsDrawerOpen(false);
+  const gesture = useSheetGesture(close);
   const choose = (currency: typeof state.activeCurrency) => {
     state.setActiveCurrency(currency);
     state.setHomeAccount("personal");
@@ -36,6 +39,7 @@ export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
             onClick={close}
           />
           <motion.section
+            {...gesture.props}
             className="accounts-sheet no-scrollbar"
             role="dialog"
             aria-modal="true"
@@ -43,15 +47,9 @@ export function AccountsDrawer({ onCredit }: { onCredit?: () => void }) {
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            drag="y"
-            dragConstraints={{ top: 0 }}
-            dragElastic={0.12}
-            onDragEnd={(_, info) => {
-              if (info.offset.y > 120 || info.velocity.y > 700) close();
-            }}
+            transition={sheetSpring}
           >
-            <div className="sheet-handle" />
+            <div {...gesture.handle} className="sheet-handle" />
             <button
               className="reference-back"
               aria-label="Close accounts"
