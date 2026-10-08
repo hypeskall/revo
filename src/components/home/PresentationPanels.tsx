@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -495,6 +495,14 @@ export function NotificationToast() {
   const state = useRevolutStore();
   const latest = state.notifications[0];
   const [visible, setVisible] = useState(false);
+  const [dismissal, setDismissal] = useState<"up" | "left" | "right">("up");
+  const timer = useRef<number | null>(null);
+  const dragged = useRef(false);
+  const dismiss = (direction: typeof dismissal = "up") => {
+    if (timer.current) clearTimeout(timer.current);
+    setDismissal(direction);
+    setVisible(false);
+  };
   useEffect(() => {
     if (
       latest &&
@@ -503,40 +511,53 @@ export function NotificationToast() {
       state.notificationsEnabled
     ) {
       setVisible(true);
-      const timer = window.setTimeout(() => setVisible(false), 4500);
+      setDismissal("up");
+      dragged.current = false;
+      timer.current = window.setTimeout(() => setVisible(false), 4500);
       if ("Notification" in window && Notification.permission === "granted")
         new Notification("Revolut prototype", {
           body: latest.message,
           icon: "/icon-192.png",
         });
-      return () => window.clearTimeout(timer);
+      return () => { if (timer.current) clearTimeout(timer.current); };
     }
     setVisible(false);
   }, [latest?.id, latest?.read, state.notificationsEnabled]);
   return (
-    <AnimatePresence>
+    <AnimatePresence custom={dismissal}>
       {visible && latest && (
         <motion.aside
           key={latest.id}
           initial={{ y: -160, opacity: 1 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{
-            y: -160,
-            opacity: 0,
-            transition: { duration: 0.22, ease: [0.4, 0, 1, 1] },
-          }}
+          animate={{ x: 0, y: 0, opacity: 1 }}
+          variants={{ exit: (direction: typeof dismissal) => ({
+            x: direction === "left" ? -460 : direction === "right" ? 460 : 0,
+            y: direction === "up" ? -160 : 0,
+            opacity: 0, scale: 0.96,
+            transition: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+          }) }}
+          exit="exit"
           transition={{
             type: "spring",
             stiffness: 390,
             damping: 38,
             mass: 0.85,
           }}
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={{ top: 0.5, bottom: 0.03 }}
+          drag
+          dragDirectionLock
+          dragMomentum={false}
+          dragConstraints={{ top: 0, bottom: 0, left: 0, right: 0 }}
+          dragElastic={{ top: 0.7, bottom: 0.06, left: 0.7, right: 0.7 }}
+          onPointerDown={() => { dragged.current = false; }}
+          onDragStart={() => {
+            dragged.current = true;
+            if (timer.current) clearTimeout(timer.current);
+          }}
           onDragEnd={(_, info) => {
-            if (info.offset.y < -24 || info.velocity.y < -300)
-              setVisible(false);
+            if (Math.abs(info.offset.x) > 45 || Math.abs(info.velocity.x) > 400)
+              dismiss(info.offset.x < 0 || (Math.abs(info.offset.x) < 10 && info.velocity.x < 0) ? "left" : "right");
+            else if (info.offset.y < -24 || info.velocity.y < -300) dismiss();
+            else timer.current = window.setTimeout(() => setVisible(false), 4500);
           }}
           className="reference-toast"
           role="status"
@@ -545,7 +566,8 @@ export function NotificationToast() {
           <button
             className="flex-1 text-left"
             onClick={() => {
-              setVisible(false);
+              if (dragged.current) return;
+              dismiss();
               state.setUiPanel("notifications");
             }}
           >
@@ -560,7 +582,7 @@ export function NotificationToast() {
           </button>
           <button
             aria-label="Dismiss notification"
-            onClick={() => setVisible(false)}
+            onClick={() => { if (!dragged.current) dismiss(); }}
           >
             <X size={18} />
           </button>

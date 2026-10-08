@@ -54,7 +54,8 @@ export function FaceIdAnimation({ onComplete }: { onComplete?: () => void }) {
   }, [reduced]);
   return (
     <div className="face-id-animation" aria-hidden="true">
-      {!ready && (
+      {!ready && !reduced && <div className="face-id-loading-island" />}
+      {!ready && reduced && (
         <svg
           className="face-id-fallback"
           viewBox="0 0 100 100"

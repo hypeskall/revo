@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useId, useLayoutEffect, useMemo, useState } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { OfficialIcon } from "@/components/ui/ReferenceIcons";
 import { useRevolutStore } from "@/store/useRevolutStore";
 import { sound } from "@/utils/audio";
@@ -143,6 +143,7 @@ function HomeMoreMenu({
 }) {
   const [position, setPosition] = useState({ top: 70, right: 16 });
   const { lightPalette, setLightPalette } = useRevolutStore();
+  const themeId = useId();
   useLayoutEffect(() => {
     if (!open) return;
     const anchor = document.querySelector(
@@ -224,33 +225,61 @@ function HomeMoreMenu({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, pointerEvents: "none" }}
+          transition={{ duration: 0.28 }}
         >
+          <button className="theme-dismiss" aria-label="Close theme picker" onClick={onCloseTheme} />
           <motion.section
-            className="transfer-choice"
+            className="transfer-choice theme-choice"
             role="dialog"
             aria-label="Theme"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            aria-modal="true"
+            initial={{ y: "100%", scale: 0.96 }}
+            animate={{ y: 0, scale: 1 }}
+            exit={{ y: "100%", scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 320, damping: 32 }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0.02, bottom: 0.3 }}
+            dragMomentum={false}
+            onDragEnd={(_, info) => { if (info.offset.y > 75 || info.velocity.y > 500) onCloseTheme(); }}
           >
+            <div className="sheet-handle" />
             <h2>Theme</h2>
+            <div className="theme-preview" aria-hidden="true">
+              <AnimatePresence initial={false}>
+                <motion.div key={lightPalette} className={`theme-preview-glow preview-${lightPalette}`} initial={{ opacity: 0, scale: 1.12 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.5 }} />
+              </AnimatePresence>
+              <span className="theme-preview-island" />
+              <span className="theme-preview-title">Personal</span>
+              <div className="theme-preview-controls"><i>+</i><i>⇄</i><i>···</i></div>
+            </div>
+            <LayoutGroup id={themeId}>
             {(["dynamic", "blue", "teal"] as const).map((palette) => (
-              <button
+              <motion.button
+                className="theme-option"
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 + ["dynamic", "blue", "teal"].indexOf(palette) * 0.055 }}
+                whileTap={{ scale: 0.97 }}
                 aria-pressed={lightPalette === palette}
                 key={palette}
                 onClick={() => setLightPalette(palette)}
               >
-                {palette === "dynamic"
+                {lightPalette === palette && <motion.span className="theme-selection" layoutId="theme-selection" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                <i className={`theme-swatch swatch-${palette}`} />
+                <span>{palette === "dynamic"
                   ? "Animated glow"
                   : palette === "blue"
                     ? "Blue glow"
-                    : "Teal glow"}
+                    : "Teal glow"}</span>
+                <motion.i key={lightPalette === palette ? "selected" : "plain"} className="theme-check" initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}>
                 <OfficialIcon
                   name={lightPalette === palette ? "check" : "palette"}
                 />
-              </button>
+                </motion.i>
+              </motion.button>
             ))}
-            <button onClick={onCloseTheme}>Done</button>
+            </LayoutGroup>
+            <motion.button className="theme-done" whileTap={{ scale: 0.97 }} onClick={onCloseTheme}>Done</motion.button>
           </motion.section>
         </motion.div>
       )}

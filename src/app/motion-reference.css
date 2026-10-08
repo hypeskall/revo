@@ -811,7 +811,8 @@
 
 .face-island-anchor {
   position: absolute;
-  top: max(2cqw, calc(env(safe-area-inset-top, 0px) - 9cqw));
+  /* The animation canvas includes 40 units above the physical island. */
+  top: max(-3.5cqw, calc(env(safe-area-inset-top, 0px) - 14cqw));
   left: 0;
   width: 100%;
   z-index: 120;
@@ -820,16 +821,42 @@
   pointer-events: none;
 }
 .face-island {
-  display: grid;
-  place-items: center;
+  width: 60cqw;
+  aspect-ratio: 440 / 370;
   flex-shrink: 0;
-  overflow: hidden;
-  color: #87efb5;
-  background: #000;
-  border: 1px solid #ffffff12;
-  box-shadow: 0 8px 28px #0006;
+  overflow: visible;
+  color: #32d74b;
+  background: transparent;
 }
-.face-island .face-id-animation { width: 96px; height: 96px; }
+.face-island .face-id-animation { width: 100%; height: 100%; }
+.face-island .face-id-fallback { color: #32d74b; width: 66%; height: 78.5%; left: 17%; top: 10.8%; background: #000; border-radius: 28%; padding: 18%; }
+.face-id-loading-island { position: absolute; top: 10.5%; left: 11%; width: 78%; height: 20%; background: #000; border-radius: 99px; }
+.face-island .face-id-player { transition: opacity 80ms ease; }
+.reference-toast, .reference-toast button { touch-action: none; }
+
+.theme-dismiss { position: absolute; inset: 0; width: 100%; background: #0004; }
+.theme-choice { position: relative; padding-bottom: max(5cqw, env(safe-area-inset-bottom)); border-radius: 9cqw 9cqw 0 0; }
+.theme-choice > .sheet-handle { margin: -2cqw auto 4cqw; }
+.theme-preview { position: relative; isolation: isolate; height: 36cqw; background: #050509; border-radius: 6cqw; overflow: hidden; margin-bottom: 4cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3cqw; }
+.theme-preview-glow { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 85%, #326fffcc, transparent 65%), linear-gradient(160deg, #1c226e, #060810); }
+.preview-teal { background: radial-gradient(ellipse at 50% 85%, #2df5cfb0, transparent 65%), linear-gradient(160deg, #114e51, #030b10); }
+.preview-dynamic { background: radial-gradient(ellipse at 75% 90%, #20d3efb0, transparent 65%), radial-gradient(ellipse at 25% 20%, #8527df80, transparent 65%); animation: theme-glow-drift 5s ease-in-out infinite alternate; }
+.theme-preview-island { position: absolute; top: 2cqw; width: 18cqw; height: 4cqw; border-radius: 99px; background: #000; }
+.theme-preview-title { font-size: 5cqw; font-weight: 600; margin-top: 4cqw; }
+.theme-preview-controls { display: flex; gap: 4cqw; }
+.theme-preview-controls i { width: 7cqw; height: 7cqw; border-radius: 50%; display: grid; place-items: center; background: #ffffff20; border: 1px solid #ffffff25; font-style: normal; }
+.theme-choice .theme-option { position: relative; isolation: isolate; display: flex; align-items: center; gap: 3cqw; background: transparent; }
+.theme-selection { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #ffffff16; border: 1px solid #ffffff35; box-shadow: inset 0 1px 0 #ffffff20; }
+.theme-swatch { width: 7cqw; height: 7cqw; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, #336eff, #48dcff); box-shadow: inset 0 0 0 1px #ffffff30; }
+.swatch-teal { background: linear-gradient(135deg, #058e94, #63ffe2); }
+.swatch-dynamic { background: conic-gradient(#547dff, #54efe6, #c34dff, #547dff); }
+.theme-check { margin-left: auto; display: flex; }
+.theme-check svg { width: 5cqw; height: 5cqw; }
+.theme-choice .theme-done { text-align: center; background: #fff; color: #000; font-weight: 600; }
+.light-rays > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.app-phone[data-light-palette="teal"] .light-rays { filter: none; }
+@keyframes theme-glow-drift { to { filter: hue-rotate(45deg); transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .preview-dynamic { animation: none; } }
 
 /* Each bubble reserves its own space, including during a payment morph. */
 .chat-feed { gap: 2.6cqw; padding-bottom: 5cqw; }

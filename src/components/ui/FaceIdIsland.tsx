@@ -5,15 +5,12 @@ import { FaceIdAnimation } from "./FaceIdAnimation";
 
 export function FaceIdIsland({ onComplete }: { onComplete: () => void }) {
   const [open, setOpen] = useState(true);
-  const [scanning, setScanning] = useState(false);
   const reduced = useReducedMotion();
   const callback = useRef(onComplete);
   callback.current = onComplete;
   useEffect(() => {
-    const start = window.setTimeout(() => setScanning(true), reduced ? 0 : 280);
     const fallback = window.setTimeout(() => setOpen(false), reduced ? 600 : 4200);
     return () => {
-      window.clearTimeout(start);
       window.clearTimeout(fallback);
     };
   }, [reduced]);
@@ -23,12 +20,12 @@ export function FaceIdIsland({ onComplete }: { onComplete: () => void }) {
         {open && (
           <motion.div
             className="face-island"
-            initial={{ width: 126, height: 36, borderRadius: 24 }}
-            animate={{ width: 164, height: 112, borderRadius: 32 }}
-            exit={{ width: 126, height: 36, borderRadius: 24, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 310, damping: 28 }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduced ? 0 : 0.12 }}
           >
-            {scanning && <FaceIdAnimation onComplete={() => setOpen(false)} />}
+            <FaceIdAnimation onComplete={() => setOpen(false)} />
           </motion.div>
         )}
       </AnimatePresence>

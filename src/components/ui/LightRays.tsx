@@ -1,14 +1,18 @@
 "use client";
 import { useId } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRevolutStore } from "@/store/useRevolutStore";
 export function LightRays({
   theme = "home",
 }: {
   theme?: "home" | "credit" | "invest" | "points" | "crypto";
 }) {
   const id = useId().replace(/:/g, "");
+  const palette = useRevolutStore((state) => state.lightPalette);
   return (
     <div className={`light-rays rays-${theme}`} aria-hidden="true">
-      <svg viewBox="0 0 430 570" preserveAspectRatio="xMidYMin slice">
+      <AnimatePresence initial={false}>
+      <motion.svg key={palette} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.65 }} viewBox="0 0 430 570" preserveAspectRatio="xMidYMin slice">
         <defs>
           <filter
             id={`glow-${id}`}
@@ -28,25 +32,25 @@ export function LightRays({
           >
             <feGaussianBlur stdDeviation="2.6" />
           </filter>
-          <linearGradient id={`color-${id}`}>
+          <linearGradient id={`color-${id}-${palette}`}>
             <stop
               stopColor={
-                theme === "points" || theme === "credit" ? "#d80fff" : "#2874ff"
+                palette === "teal" ? "#0cbfaa" : theme === "points" || theme === "credit" ? "#d80fff" : "#2874ff"
               }
             />
             <stop
               offset=".6"
-              stopColor={theme === "points" ? "#e226ff" : "#29dfeb"}
+              stopColor={palette === "teal" ? "#54ffe2" : theme === "points" ? "#e226ff" : "#29dfeb"}
             />
             <stop
               offset="1"
-              stopColor={theme === "invest" ? "#15e4a2" : "#6266ff"}
+              stopColor={palette === "teal" ? "#078e99" : theme === "invest" ? "#15e4a2" : "#6266ff"}
             />
           </linearGradient>
         </defs>
         <g fill="none">
           <g
-            stroke={`url(#color-${id})`}
+            stroke={`url(#color-${id}-${palette})`}
             strokeWidth="46"
             filter={`url(#glow-${id})`}
           >
@@ -81,7 +85,8 @@ export function LightRays({
             }
           />
         </g>
-      </svg>
+      </motion.svg>
+      </AnimatePresence>
     </div>
   );
 }
