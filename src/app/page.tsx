@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { screenSpring } from "@/components/ui/motion";
+import { useInertRef } from "@/components/ui/useInertRef";
 import { MobileFrame } from "@/components/frame/MobileFrame";
 import { BottomTabBar, TabId } from "@/components/navigation/BottomTabBar";
 import { AuroraBackground } from "@/components/home/AuroraBackground";
@@ -64,6 +65,7 @@ export default function App() {
   const localBillsTool = activeTab === "home" && homeAccount === "bills";
   const mainBlocked =
     isGlobalModalActive || (!!homeTool && !localBillsTool) || welcoming;
+  const mainRef = useInertRef(mainBlocked);
   useEffect(() => {
     setMounted(true);
     useRevolutStore.getState().processScheduledPayments();
@@ -95,9 +97,7 @@ export default function App() {
           animate={{ scale: isGlobalModalActive || (homeTool && homeTool !== "more") ? 0.97 : 1, y: isGlobalModalActive || (homeTool && homeTool !== "more") ? 6 : 0, borderRadius: isGlobalModalActive || (homeTool && homeTool !== "more") ? 24 : 0 }}
           transition={screenSpring}
           aria-hidden={mainBlocked}
-          ref={(node) => {
-            if (node) node.inert = mainBlocked;
-          }}
+          ref={mainRef}
           className="flex-1 flex flex-col w-full h-full relative overflow-hidden z-10"
         >
           <TabScenes

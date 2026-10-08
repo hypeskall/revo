@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import type { TabId } from "./BottomTabBar";
@@ -16,6 +16,7 @@ export function TabScenes({
   const [scenes, setScenes] = useState<TabId[]>([active]);
   const [previous, setPrevious] = useState<TabId | null>(null);
   const [current, setCurrent] = useState(active);
+  const sceneNodes = useRef<Partial<Record<TabId, HTMLDivElement | null>>>({});
   const order: TabId[] = ["home", "credit", "invest", "transfer", "cards", "hub"];
   const direction = previous && order.indexOf(current) < order.indexOf(previous) ? -1 : 1;
   // Synchronize before paint so there is never a frame with all scenes hidden.
@@ -24,6 +25,11 @@ export function TabScenes({
     setCurrent(active);
     setScenes((items) => (items.includes(active) ? items : [...items, active]));
   }
+  useEffect(() => {
+    for (const [id, node] of Object.entries(sceneNodes.current)) {
+      if (node) node.inert = id !== current;
+    }
+  }, [current]);
   useEffect(() => {
     if (!previous) return;
     const timer = window.setTimeout(() => setPrevious(null), reduced ? 0 : 340);
@@ -41,6 +47,7 @@ export function TabScenes({
             data-active={shown}
             aria-hidden={!shown}
             ref={(node) => {
+              sceneNodes.current[id] = node;
               if (node) node.inert = !shown;
             }}
             initial={id === "home" || reduced ? false : { opacity: 0, x: direction * 16, scale: 0.995 }}

@@ -3,9 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { useDragControls, useReducedMotion } from "framer-motion";
 import type { PointerEvent } from "react";
 import { gestureReturn } from "./motion";
+import { useInertRef } from "./useInertRef";
 
 export function useClosingScreen(onClose: () => void, swipeBack = false) {
   const [closing, setClosing] = useState(false);
+  const inertRef = useInertRef(closing);
   const handler = useRef(onClose);
   handler.current = onClose;
   const completed = useRef(false);
@@ -61,9 +63,7 @@ export function useClosingScreen(onClose: () => void, swipeBack = false) {
         },
       } : {}),
       "aria-hidden": closing,
-      ref: (node: HTMLElement | null) => {
-        if (node) node.inert = closing;
-      },
+      ref: inertRef,
     },
   };
 }
